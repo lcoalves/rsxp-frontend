@@ -934,7 +934,11 @@ export default function GroupCreate({ match, className }) {
                                   <Card>
                                     <CardHeader className="text-center">
                                       <img
-                                        src={organization.file.url}
+                                        src={
+                                          !!organization.file
+                                            ? organization.file.url
+                                            : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+                                        }
                                         alt="Brek"
                                         width="150"
                                         height="150"
@@ -1099,7 +1103,11 @@ export default function GroupCreate({ match, className }) {
                                   <Card>
                                     <CardHeader className="text-center">
                                       <img
-                                        src={organizator.file.url}
+                                        src={
+                                          !!organizator.file
+                                            ? organizator.file.url
+                                            : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+                                        }
                                         alt="Brek"
                                         width="150"
                                         height="150"

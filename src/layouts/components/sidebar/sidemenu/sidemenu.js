@@ -41,7 +41,7 @@ export default function SideMenuContent({
         >
           <span className="menu-item-text">Grupos</span>
         </NavLink>
-        <NavLink
+        {/* <NavLink
           to="/eventos/treinamentos"
           exact
           className="item"
@@ -56,7 +56,7 @@ export default function SideMenuContent({
           activeclassname="active"
         >
           <span className="menu-item-text">Seminários</span>
-        </NavLink>
+        </NavLink> */}
       </SideMenu.MenuMultiItems>
 
       <SideMenu.MenuSingleItem>

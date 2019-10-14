@@ -259,7 +259,7 @@ export default function Login() {
                 </NavLink>
               </Row>
               <Row className="justify-content-center">
-                <NavLink to="/recuperar-senha" className="blue text-bold-400">
+                <NavLink to="/acesso-pf" className="blue text-bold-400">
                   <u>Acesso Pessoa Física</u>
                 </NavLink>
               </Row>

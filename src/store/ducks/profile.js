@@ -2,9 +2,13 @@
  * Action Types
  */
 export const Types = {
-  REQUEST: "PROFILE_REQUEST",
-  SUCCESS: "PROFILE_SUCCESS",
-  FAILURE: "PROFILE_FAILURE"
+  REQUEST: 'PROFILE_REQUEST',
+  SUCCESS: 'PROFILE_SUCCESS',
+  FAILURE: 'PROFILE_FAILURE',
+
+  EDIT_REQUEST: 'EDIT_PROFILE_REQUEST',
+  EDIT_SUCCESS: 'EDIT_PROFILE_SUCCESS',
+  EDIT_FAILURE: 'EDIT_PROFILE_FAILURE',
 };
 
 /**
@@ -13,7 +17,7 @@ export const Types = {
 const INITIAL_STATE = {
   loading: false,
   error: false,
-  data: {}
+  data: {},
 };
 
 export default function profile(state = INITIAL_STATE, action) {
@@ -25,13 +29,28 @@ export default function profile(state = INITIAL_STATE, action) {
         ...state,
         error: false,
         loading: false,
-        data: action.payload.data
+        data: action.payload.data,
       };
     case Types.FAILURE:
       return {
         ...state,
         error: true,
-        loading: false
+        loading: false,
+      };
+
+    case Types.EDIT_REQUEST:
+      return { ...state, loading: true };
+    case Types.EDIT_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.EDIT_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
       };
     default:
       return state;
@@ -43,15 +62,28 @@ export default function profile(state = INITIAL_STATE, action) {
  */
 export const Creators = {
   profileRequest: () => ({
-    type: Types.REQUEST
+    type: Types.REQUEST,
   }),
   profileSuccess: data => ({
     type: Types.SUCCESS,
     payload: {
-      data
-    }
+      data,
+    },
   }),
   profileFailure: () => ({
-    type: Types.FAILURE
-  })
+    type: Types.FAILURE,
+  }),
+
+  editProfileRequest: data => ({
+    type: Types.EDIT_REQUEST,
+    payload: {
+      data,
+    },
+  }),
+  editProfileSuccess: () => ({
+    type: Types.EDIT_SUCCESS,
+  }),
+  editProfileFailure: () => ({
+    type: Types.EDIT_FAILURE,
+  }),
 };

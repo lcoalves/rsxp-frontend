@@ -376,7 +376,7 @@ export default function Register() {
                               `}
                             />
                           ) : (
-                            'Entrar'
+                            'Criar conta'
                           )}
                         </Button>
                       </Col>

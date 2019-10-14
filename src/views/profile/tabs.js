@@ -10,6 +10,7 @@ import * as Yup from 'yup';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Creators as AvatarActions } from '~/store/ducks/avatar';
+import { Creators as ProfileActions } from '~/store/ducks/profile';
 
 import {
   TabContent,
@@ -96,7 +97,20 @@ export default function TabsBorderBottom() {
     setEstado(values);
   }
 
-  function handleSubmit(values) {}
+  function handleUpdateProfile(values) {
+    const data = {
+      name: values.name,
+      email: values.email,
+      personal_state_id: values.personalState,
+      cpf: values.cpf,
+      birthday: values.birthday,
+      sex: values.sex,
+      phone: values.phone,
+      alt_phone: values.altPhone,
+    };
+
+    dispatch(ProfileActions.editProfileRequest(data));
+  }
 
   return (
     <div>
@@ -137,7 +151,7 @@ export default function TabsBorderBottom() {
             Redes Sociais
           </NavLink>
         </NavItem>
-        <NavItem>
+        {/* <NavItem>
           <NavLink
             className={classnames({
               active: activeTab === '4',
@@ -148,7 +162,7 @@ export default function TabsBorderBottom() {
           >
             Histórico de atividades
           </NavLink>
-        </NavItem>
+        </NavItem> */}
         {/* <NavItem>
             <NavLink
               className={classnames({
@@ -228,7 +242,6 @@ export default function TabsBorderBottom() {
                       altPhone: !!data.alt_phone ? data.alt_phone : '',
                     }}
                     validationSchema={formSchema}
-                    onSubmit={values => handleSubmit(values)}
                   >
                     {({ errors, touched, handleChange, values }) => (
                       <Form>
@@ -402,8 +415,8 @@ export default function TabsBorderBottom() {
                                 <option value="" disabled="">
                                   Selecione uma opção
                                 </option>
-                                <option value="2">Masculino</option>
-                                <option value="1">Feminino</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
                               </Field>
                               {errors.sex && touched.sex ? (
                                 <div className="invalid-feedback">
@@ -490,10 +503,10 @@ export default function TabsBorderBottom() {
                             </Button>
                           ) : (
                             <Button
-                              type="submit"
                               color="success"
                               block
                               className="btn-default btn-raised"
+                              onClick={() => handleUpdateProfile(values)}
                             >
                               Atualizar perfil
                             </Button>
@@ -852,7 +865,6 @@ export default function TabsBorderBottom() {
                       </Button>
                     ) : (
                       <Button
-                        type="submit"
                         color="success"
                         block
                         className="btn-default btn-raised"
@@ -917,9 +929,31 @@ export default function TabsBorderBottom() {
                     </FormGroup>
                   </div>
                   <div className="form-actions right">
-                    <Button color="primary" className="mr-1" size="lg">
-                      <CheckSquare size={14} color="#FFF" /> Salvar
-                    </Button>
+                    {loading ? (
+                      <Button
+                        disabled
+                        color="success"
+                        block
+                        className="btn-default btn-raised"
+                      >
+                        <BounceLoader
+                          size={23}
+                          color={'#fff'}
+                          css={css`
+                            display: block;
+                            margin: 0 auto;
+                          `}
+                        />
+                      </Button>
+                    ) : (
+                      <Button
+                        color="success"
+                        block
+                        className="btn-default btn-raised"
+                      >
+                        Atualizar redes sociais
+                      </Button>
+                    )}
                   </div>
                 </Form>
               </div>

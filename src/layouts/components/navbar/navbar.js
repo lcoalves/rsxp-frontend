@@ -97,9 +97,9 @@ export default function ThemeNavbar({ toggleSidebarMenu }) {
                   <DropdownItem>
                     <ReactCountryFlag code="br" svg /> Português
                   </DropdownItem>
-                  <DropdownItem>
+                  {/* <DropdownItem>
                     <ReactCountryFlag code="us" svg /> English
-                  </DropdownItem>
+                  </DropdownItem> */}
                 </DropdownMenu>
               </UncontrolledDropdown>
 

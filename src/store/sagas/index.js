@@ -238,6 +238,26 @@ function* profile() {
   }
 }
 
+function* editProfile(action) {
+  try {
+    const { data } = action.payload;
+
+    const user_type = localStorage.getItem('@dashboard/user_type');
+    const user = localStorage.getItem('@dashboard/user');
+
+    yield call(
+      api.put,
+      `${user_type === 'entity' ? `/entity/${user}` : `/organization/${user}`}`,
+      data
+    );
+
+    yield put(ProfileActions.editProfileSuccess());
+    toastr.success('Sucesso!', 'Seu perfil foi atualizado.');
+  } catch (err) {
+    yield put(ProfileActions.editProfileFailure());
+  }
+}
+
 function* event(action) {
   try {
     const { id } = action.payload;
@@ -760,6 +780,7 @@ export default function* rootSaga() {
     takeLatest(ResetPasswordTypes.CONFIRM_REQUEST, confirmResetPassword),
     takeLatest(LoginTypes.LOGOUT_REQUEST, logout),
     takeLatest(ProfileTypes.REQUEST, profile),
+    takeLatest(ProfileTypes.EDIT_REQUEST, editProfile),
 
     takeLatest(EventTypes.REQUEST, event),
     takeLatest(EventTypes.ALL_REQUEST, allEvents),
