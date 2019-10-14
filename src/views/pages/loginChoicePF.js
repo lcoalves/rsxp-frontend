@@ -136,7 +136,7 @@ export default function Login() {
                       <Label className="pl-2">Digite seu usuário</Label>
                       <Col md="12" className="has-icon-left">
                         <Field
-                          type="email"
+                          type="text"
                           placeholder="pode ser email ou CPF"
                           name="email_cpf_cnpj"
                           id="email_cpf_cnpj"
