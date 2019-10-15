@@ -166,19 +166,45 @@ function* login(action) {
       err.response.data.error.title,
       err.response.data.error.message
     );
-    console.tron.log(err);
     yield put(LoginActions.loginFailure());
   }
 }
 
 function* resetPassword(action) {
   try {
-    const { email_cpf_cnpj } = action.payload;
+    const { type, email_cpf_cnpj } = action.payload;
 
-    const response = yield call(api.post, '/forgot_password', {
-      email_cpf_cnpj,
-      redirect_url: 'http://localhost:3000/resetar-senha',
-    });
+    let response;
+
+    if (process.env.NODE_ENV === 'development' && type === 'entity') {
+      response = yield call(api.post, '/forgot_password', {
+        email_cpf_cnpj,
+        redirect_url: 'http://localhost:3000/resetar-senha-pf',
+      });
+    } else if (
+      process.env.NODE_ENV === 'development' &&
+      type === 'organization'
+    ) {
+      response = yield call(api.post, '/forgot_password_pj', {
+        email_cpf_cnpj,
+        redirect_url: 'http://localhost:3000/resetar-senha-pj',
+      });
+    } else if (process.env.NODE_ENV === 'production' && type === 'entity') {
+      response = yield call(api.post, '/forgot_password', {
+        email_cpf_cnpj,
+        redirect_url:
+          'https://dashboard-eventos-frontend.herokuapp.com/resetar-senha-pf',
+      });
+    } else if (
+      process.env.NODE_ENV === 'production' &&
+      type === 'organization'
+    ) {
+      response = yield call(api.post, '/forgot_password_pj', {
+        email_cpf_cnpj,
+        redirect_url:
+          'https://dashboard-eventos-frontend.herokuapp.com/resetar-senha-pj',
+      });
+    }
 
     const { email } = response.data;
 
@@ -187,25 +213,33 @@ function* resetPassword(action) {
     yield put(push('/'));
     toastr.success('Boa!', `Acesse o email ${email}`);
   } catch (err) {
+    toastr.error('Oops!', `Houve um erro ao tentar recuperar a senha`);
     yield put(ResetPasswordActions.resetPasswordFailure());
   }
 }
 
 function* confirmResetPassword(action) {
   try {
-    const { token, password } = action.payload;
+    const { type, token, password } = action.payload;
 
-    yield call(api.put, '/forgot_password', {
-      token,
-      password,
-    });
+    if (type === 'entity') {
+      yield call(api.put, '/forgot_password', {
+        token,
+        password,
+      });
+    } else {
+      yield call(api.put, '/forgot_password_pj', {
+        token,
+        password,
+      });
+    }
 
     yield put(ResetPasswordActions.confirmResetPasswordSuccess());
 
     yield put(push('/'));
     toastr.success('Parabéns!', 'A senha foi alterada com sucesso');
   } catch (err) {
-    toastr.error('Falha!', 'Tente novamente');
+    toastr.error(err.response.data.title, err.response.data.message);
     yield put(ResetPasswordActions.confirmResetPasswordFailure());
   }
 }
@@ -311,8 +345,6 @@ function* addEvent(action) {
 
     delete data.organizator_id;
 
-    console.tron.log(data);
-
     const response = yield call(api.post, '/event', data);
     yield put(EventActions.addEventSuccess());
 
@@ -332,8 +364,6 @@ function* addEvent(action) {
 function* addOrganizator(action) {
   try {
     const { event_id, entity_id } = action.payload;
-
-    console.tron.log('entrei add organizador');
 
     yield call(api.post, '/event_organizator', { event_id, entity_id });
 
@@ -405,7 +435,6 @@ function* searchOrganizator(action) {
       toastr.warning(response.data.error.title, response.data.error.message);
     }
   } catch (err) {
-    console.tron.log(err.response.data);
     toastr.error(
       err.response.data.error.title,
       err.response.data.error.message
@@ -417,8 +446,6 @@ function* searchOrganizator(action) {
 function* addParticipant(action) {
   try {
     const { event_id, entity_id, assistant } = action.payload;
-
-    console.tron.log('entrei add participante');
 
     const response = yield call(api.post, '/event_participant', {
       entity_id,
@@ -478,7 +505,6 @@ function* searchParticipant(action) {
       toastr.warning(response.data.error.title, response.data.error.message);
     }
   } catch (err) {
-    console.tron.log(err.response.data);
     toastr.error(
       err.response.data.error.title,
       err.response.data.error.message

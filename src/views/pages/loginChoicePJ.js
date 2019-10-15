@@ -77,10 +77,10 @@ export default function Login() {
   }
 
   return (
-    <div className="bg-static-pages-image d-flex flex-column flex-1 p-0 flex-lg-row">
+    <div className="bg-static-pages-image-pj d-flex flex-column flex-1 p-0 flex-lg-row">
       <div className="fit min-full-height-vh color-overlay" />
       <div
-        className="d-none d-lg-flex flex-column flex-grow-0 text-white width-75-per p-2 p-lg-5"
+        className="d-none d-lg-flex flex-column flex-grow-0 text-white width-70-per p-2 p-lg-5"
         style={{ zIndex: 1 }}
       >
         <img
@@ -113,7 +113,7 @@ export default function Login() {
               transform: `translateX(${style.x}px)`,
               opacity: style.opacity,
             }}
-            className="fit min-full-height-vh m-2 m-lg-0 min-width-25-per rounded-0"
+            className="fit min-full-height-vh m-2 m-lg-0 min-width-30-per rounded-0"
           >
             <CardBody className="d-flex flex-column justify-content-center">
               <Label className="font-medium-3 text-dark text-bold-400 text-center text-uppercase">
@@ -207,7 +207,7 @@ export default function Login() {
                         <Col sm="12" md="6" lg="6">
                           <div className="text-lg-right text-md-right text-center">
                             <NavLink
-                              to="/recuperar-senha"
+                              to="/recuperar-senha-pj"
                               className="blue text-bold-400"
                             >
                               <u>Esqueceu a senha?</u>
@@ -251,13 +251,13 @@ export default function Login() {
                 )}
               </Formik>
               <Row className="justify-content-center">
-                <Label className="black">Não possui conta?</Label>
+                <Label className="black">É um líder/treinador?</Label>
               </Row>
-              <Row className="justify-content-center">
+              {/* <Row className="justify-content-center">
                 <NavLink to="/cadastro" className="blue text-bold-400">
                   <u>Criar uma conta</u>
                 </NavLink>
-              </Row>
+              </Row> */}
               <Row className="justify-content-center">
                 <NavLink to="/acesso-pf" className="blue text-bold-400">
                   <u>Acesso Pessoa Física</u>

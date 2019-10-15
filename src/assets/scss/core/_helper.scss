@@ -292,6 +292,9 @@
 }
 .min-full-height-vh {
   min-height: 100vh !important;
+  -webkit-box-shadow: -6px 0px 9px 1px rgba(40, 40, 40, 1);
+  -moz-box-shadow: -6px 0px 9px 1px rgba(40, 40, 40, 1);
+  box-shadow: -6px 0px 9px 1px rgba(40, 40, 40, 1);
 }
 
 // Fixed widths
@@ -801,6 +804,14 @@
 
 .bg-static-pages-image {
   background-image: url('https://i.imgur.com/uz8Nezx.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+  overflow-x: hidden;
+}
+
+.bg-static-pages-image-pj {
+  background-image: url('https://i.imgur.com/YsRduUh.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: bottom;

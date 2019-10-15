@@ -110,14 +110,23 @@ export default function GroupCreate({ match, className }) {
     complement: '',
   });
 
+  const user_type = localStorage.getItem('@dashboard/user_type');
+
   const userData = useSelector(state => state.profile.data);
   const cepData = useSelector(state => state.cep.data);
   const defaultData = useSelector(state => state.defaultEvent.data);
   const organization = useSelector(state => state.organization.data);
   const organizator = useSelector(state => state.organizator.data);
+  const profile = useSelector(state => state.profile.data);
   const loading = useSelector(state => state.organization.loading);
 
   const dispatch = useDispatch();
+
+  const DatepickerButton = ({ value, onClick }) => (
+    <Button color="primary" className="width-200 height-40" onClick={onClick}>
+      {value}
+    </Button>
+  );
 
   function validateCPF(cpf) {
     let error;
@@ -224,6 +233,11 @@ export default function GroupCreate({ match, className }) {
     setFieldValue('organizator_name', organizator.name);
 
     setModalOrganizator(false);
+  }
+
+  function handleSelfOrganizator(setFieldValue) {
+    setFieldValue('organizator_id', profile.id);
+    setFieldValue('organizator_name', profile.name);
   }
 
   function handleCep(event, setFieldValue, values) {
@@ -412,55 +426,57 @@ export default function GroupCreate({ match, className }) {
                       </Col>
                       <Col lg="2" md="6" sm="12">
                         <FormGroup>
-                          <Label for="initial_date">Data Inicial</Label>
-                          <div className="position-relative has-icon-left">
-                            <Datepicker
-                              name="initial_date"
-                              id="initial_date"
-                              minDate={subMonths(new Date(), 12)}
-                              className={`
-                                      form-control
-                                      ${errors.initial_date &&
-                                        touched.initial_date &&
-                                        'is-invalid'}
-                                    `}
-                            />
-                            {errors.initial_date && touched.initial_date ? (
-                              <div className="invalid-feedback">
-                                {errors.initial_date}
-                              </div>
-                            ) : null}
-                            <div className="form-control-position">
-                              <Calendar size={14} color="#212529" />
+                          <Label for="initial_date">
+                            Data Inicial (clique abaixo)
+                          </Label>
+                          <Datepicker
+                            name="initial_date"
+                            id="initial_date"
+                            selected={values.initial_date}
+                            onChange={date =>
+                              setFieldValue('initial_date', date)
+                            }
+                            customInput={<DatepickerButton />}
+                            minDate={subMonths(new Date(), 12)}
+                            className={`
+                                  form-control
+                                  ${errors.initial_date &&
+                                    touched.initial_date &&
+                                    'is-invalid'}
+                                `}
+                          />
+                          {errors.initial_date && touched.initial_date ? (
+                            <div className="invalid-feedback">
+                              {errors.initial_date}
                             </div>
-                          </div>
+                          ) : null}
                         </FormGroup>
                       </Col>
                       {!!values.initial_date && (
                         <Col lg="2" md="6" sm="12">
                           <FormGroup>
-                            <Label for="initial_date">Data da formatura</Label>
-                            <div className="position-relative has-icon-left">
-                              <Datepicker
-                                name="end_date"
-                                id="end_date"
-                                minDate={values.initial_date}
-                                className={`
-                                      form-control
-                                      ${errors.end_date &&
-                                        touched.end_date &&
-                                        'is-invalid'}
-                                    `}
-                              />
-                              {errors.end_date && touched.end_date ? (
-                                <div className="invalid-feedback">
-                                  {errors.end_date}
-                                </div>
-                              ) : null}
-                              <div className="form-control-position">
-                                <Calendar size={14} color="#212529" />
+                            <Label for="end_date">
+                              Formatura (clique abaixo)
+                            </Label>
+                            <Datepicker
+                              name="end_date"
+                              id="end_date"
+                              selected={values.end_date}
+                              onChange={date => setFieldValue('end_date', date)}
+                              customInput={<DatepickerButton />}
+                              minDate={values.initial_date}
+                              className={`
+                                  form-control
+                                  ${errors.end_date &&
+                                    touched.end_date &&
+                                    'is-invalid'}
+                                `}
+                            />
+                            {errors.end_date && touched.end_date ? (
+                              <div className="invalid-feedback">
+                                {errors.end_date}
                               </div>
-                            </div>
+                            ) : null}
                           </FormGroup>
                         </Col>
                       )}
@@ -548,6 +564,17 @@ export default function GroupCreate({ match, className }) {
                             </FormGroup>
                           </Col>
                           <Col sm="12" md="12" lg="2">
+                            {user_type === 'entity' && (
+                              <Button
+                                className="mb-0 mr-2"
+                                color="success"
+                                onClick={() =>
+                                  handleSelfOrganizator(setFieldValue)
+                                }
+                              >
+                                Eu serei o líder
+                              </Button>
+                            )}
                             <Button
                               className="mb-0"
                               color="success"
