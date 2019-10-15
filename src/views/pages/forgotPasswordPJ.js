@@ -19,7 +19,7 @@ const formSchema = Yup.object().shape({
   email_cpf_cnpj: Yup.string().required('Esse campo é obrigatório'),
 });
 
-export default function ForgotPassword() {
+export default function ForgotPasswordPJ() {
   const loading = useSelector(state => state.resetPassword.loading);
 
   const dispatch = useDispatch();
@@ -71,7 +71,7 @@ export default function ForgotPassword() {
 
               <Formik
                 initialValues={{
-                  type: 'entity',
+                  type: 'organization',
                   email_cpf_cnpj: '',
                 }}
                 validationSchema={formSchema}
@@ -84,7 +84,7 @@ export default function ForgotPassword() {
                       <Col md="12" className="has-icon-left">
                         <Field
                           type="text"
-                          placeholder="pode ser email ou CPF"
+                          placeholder="pode ser email ou CNPJ"
                           name="email_cpf_cnpj"
                           id="email_cpf_cnpj"
                           className={`

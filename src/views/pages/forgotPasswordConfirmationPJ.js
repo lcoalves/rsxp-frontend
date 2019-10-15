@@ -2,10 +2,9 @@
 import React from 'react';
 import { Formik, Field, Form } from 'formik';
 import * as Yup from 'yup';
-import { NavLink } from 'react-router-dom';
 import { Motion, spring } from 'react-motion';
-import { Card, CardBody, Row, Col, FormGroup, Button, Label } from 'reactstrap';
-import { User } from 'react-feather';
+import { Card, CardBody, Col, FormGroup, Button, Label } from 'reactstrap';
+import { Lock } from 'react-feather';
 
 import { css } from '@emotion/core';
 import { BounceLoader } from 'react-spinners';
@@ -16,18 +15,24 @@ import { Creators as ResetPasswordActions } from '~/store/ducks/resetPassword';
 import logo from '~/assets/img/logo-big.png';
 
 const formSchema = Yup.object().shape({
-  email_cpf_cnpj: Yup.string().required('Esse campo é obrigatório'),
+  password: Yup.string().required('Esse campo é obrigatório'),
 });
 
-export default function ForgotPassword() {
+export default function ForgotPasswordConfirmationPJ({ match }) {
   const loading = useSelector(state => state.resetPassword.loading);
 
   const dispatch = useDispatch();
 
   function handleSubmit(values) {
-    const { type, email_cpf_cnpj } = values;
+    const { type, password } = values;
 
-    dispatch(ResetPasswordActions.resetPasswordRequest(type, email_cpf_cnpj));
+    dispatch(
+      ResetPasswordActions.confirmResetPasswordRequest(
+        type,
+        match.params.token,
+        password
+      )
+    );
   }
 
   return (
@@ -43,12 +48,11 @@ export default function ForgotPassword() {
           alt="Logo UDF"
         />
         <Label className="d-none d-lg-block fit width-800 font-large-3 mb-3 line-height-1">
-          Esqueceu a senha?
+          Confime sua nova senha!
         </Label>
         <Label className="d-none d-lg-block fit width-700 font-medium-1">
-          Para recuperar é bem simples, basta informar o seu email, CPF ou CNPJ.
-          Enviaremos um email com as informações necessárias para a recuperação
-          de sua senha.
+          Para finalizar a recuperação de senha é bem simples, basta informar a
+          sua nova senha. Depois disso basta fazer login novamente.
         </Label>
       </div>
 
@@ -66,13 +70,13 @@ export default function ForgotPassword() {
           >
             <CardBody className="d-flex flex-column justify-content-center">
               <Label className="font-medium-3 text-dark text-bold-400 text-center text-uppercase">
-                Recuperação de senha
+                Confirmação de senha
               </Label>
 
               <Formik
                 initialValues={{
-                  type: 'entity',
-                  email_cpf_cnpj: '',
+                  type: 'organization',
+                  password: '',
                 }}
                 validationSchema={formSchema}
                 onSubmit={values => handleSubmit(values)}
@@ -80,39 +84,39 @@ export default function ForgotPassword() {
                 {({ errors, touched, values }) => (
                   <Form className="pt-2">
                     <FormGroup>
-                      <Label className="pl-2">Digite seu usuário</Label>
+                      <Label className="pl-2">Digite a nova senha</Label>
                       <Col md="12" className="has-icon-left">
                         <Field
-                          type="text"
-                          placeholder="pode ser email ou CPF"
-                          name="email_cpf_cnpj"
-                          id="email_cpf_cnpj"
+                          type="password"
+                          placeholder="digite aqui a nova senha"
+                          name="password"
+                          id="password"
                           className={`
                               form-control
                               new-form-padding
-                              ${errors.email_cpf_cnpj &&
-                                touched.email_cpf_cnpj &&
+                              ${errors.password &&
+                                touched.password &&
                                 'is-invalid'}
                             `}
                         />
-                        {errors.email_cpf_cnpj && touched.email_cpf_cnpj ? (
+                        {errors.password && touched.password ? (
                           <div className="invalid-feedback">
-                            {errors.email_cpf_cnpj}
+                            {errors.password}
                           </div>
                         ) : null}
                         <div className="new-form-control-position">
-                          <User size={14} color="#212529" />
+                          <Lock size={14} color="#212529" />
                         </div>
                       </Col>
                     </FormGroup>
                     <FormGroup>
                       <Col md="12">
                         <Button
-                          disabled={!!values.email_cpf_cnpj ? false : true}
+                          disabled={!!values.password ? false : true}
                           type="submit"
                           block
                           className={
-                            !!values.email_cpf_cnpj
+                            !!values.password
                               ? 'btn-default btn-raised'
                               : 'btn-secondary btn-raised'
                           }
@@ -127,7 +131,7 @@ export default function ForgotPassword() {
                               `}
                             />
                           ) : (
-                            'Recuperar senha'
+                            'Confirmar nova senha'
                           )}
                         </Button>
                       </Col>
@@ -135,24 +139,6 @@ export default function ForgotPassword() {
                   </Form>
                 )}
               </Formik>
-              <Row className="justify-content-center">
-                <Label className="black">Lembrou a senha?</Label>
-              </Row>
-              {/* <Row className="justify-content-center mb-2">
-                <NavLink to="/cadastro" className="blue text-bold-400">
-                  <u>Criar uma conta</u>
-                </NavLink>
-              </Row> */}
-              <Row className="justify-content-center mb-2">
-                <NavLink to="/acesso-pf" className="blue text-bold-400">
-                  <u>Acesso Pessoa Física</u>
-                </NavLink>
-              </Row>
-              <Row className="justify-content-center mb-2">
-                <NavLink to="/acesso-pj" className="blue text-bold-400">
-                  <u>Acesso Pessoa Jurídica</u>
-                </NavLink>
-              </Row>
             </CardBody>
           </Card>
         )}

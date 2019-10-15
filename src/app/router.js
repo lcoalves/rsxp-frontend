@@ -60,10 +60,18 @@ const LazyChangeLogPage = lazy(() => import('../views/pages/changeLogPage'));
 // Full Layout
 const LazySiteEvent = lazy(() => import('../views/pages/siteEvent'));
 const LazyForgotPassword = lazy(() => import('../views/pages/forgotPassword'));
+const LazyForgotPasswordPJ = lazy(() =>
+  import('../views/pages/forgotPasswordPJ')
+);
 const LazyExpiredPassword = lazy(() =>
   import('../views/pages/expiredPassword')
 );
-const LazyResetPassword = lazy(() => import('../views/pages/resetPassword'));
+const LazyResetPassword = lazy(() =>
+  import('../views/pages/forgotPasswordConfirmation')
+);
+const LazyResetPasswordPJ = lazy(() =>
+  import('../views/pages/forgotPasswordConfirmationPJ')
+);
 const LazyLoginChoice = lazy(() => import('../views/pages/loginChoice'));
 const LazyLoginChoicePF = lazy(() => import('../views/pages/loginChoicePF'));
 const LazyLoginChoicePJ = lazy(() => import('../views/pages/loginChoicePJ'));
@@ -211,20 +219,38 @@ class Router extends Component {
 
           <FullPageLayout
             exact
-            path="/recuperar-senha"
+            path="/recuperar-senha-pf"
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyForgotPassword {...matchprops} />
               </Suspense>
             )}
           />
+          <FullPageLayout
+            exact
+            path="/recuperar-senha-pj"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyForgotPasswordPJ {...matchprops} />
+              </Suspense>
+            )}
+          />
 
           <FullPageLayout
             exact
-            path="/resetar-senha/:token"
+            path="/resetar-senha-pf/:token"
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyResetPassword {...matchprops} />
+              </Suspense>
+            )}
+          />
+          <FullPageLayout
+            exact
+            path="/resetar-senha-pj/:token"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyResetPasswordPJ {...matchprops} />
               </Suspense>
             )}
           />

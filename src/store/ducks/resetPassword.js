@@ -2,12 +2,12 @@
  * Action Types
  */
 export const Types = {
-  REQUEST: "RESET_PASSWORD_REQUEST",
-  SUCCESS: "RESET_PASSWORD_SUCCESS",
-  FAILURE: "RESET_PASSWORD_FAILURE",
-  CONFIRM_REQUEST: "CONFIRM_RESET_PASSWORD_REQUEST",
-  CONFIRM_SUCCESS: "CONFIRM_RESET_PASSWORD_SUCCESS",
-  CONFIRM_FAILURE: "CONFIRM_RESET_PASSWORD_FAILURE"
+  REQUEST: 'RESET_PASSWORD_REQUEST',
+  SUCCESS: 'RESET_PASSWORD_SUCCESS',
+  FAILURE: 'RESET_PASSWORD_FAILURE',
+  CONFIRM_REQUEST: 'CONFIRM_RESET_PASSWORD_REQUEST',
+  CONFIRM_SUCCESS: 'CONFIRM_RESET_PASSWORD_SUCCESS',
+  CONFIRM_FAILURE: 'CONFIRM_RESET_PASSWORD_FAILURE',
 };
 
 /**
@@ -15,7 +15,7 @@ export const Types = {
  */
 const INITIAL_STATE = {
   loading: false,
-  error: false
+  error: false,
 };
 
 export default function resetPassword(state = INITIAL_STATE, action) {
@@ -26,13 +26,13 @@ export default function resetPassword(state = INITIAL_STATE, action) {
       return {
         ...state,
         error: false,
-        loading: false
+        loading: false,
       };
     case Types.FAILURE:
       return {
         ...state,
         error: true,
-        loading: false
+        loading: false,
       };
     case Types.CONFIRM_REQUEST:
       return { ...state, loading: true };
@@ -40,13 +40,13 @@ export default function resetPassword(state = INITIAL_STATE, action) {
       return {
         ...state,
         error: false,
-        loading: false
+        loading: false,
       };
     case Types.CONFIRM_FAILURE:
       return {
         ...state,
         error: true,
-        loading: false
+        loading: false,
       };
     default:
       return state;
@@ -57,34 +57,36 @@ export default function resetPassword(state = INITIAL_STATE, action) {
  * Actions Creators
  */
 export const Creators = {
-  resetPasswordRequest: email_cpf_cnpj => ({
+  resetPasswordRequest: (type, email_cpf_cnpj) => ({
     type: Types.REQUEST,
     payload: {
-      email_cpf_cnpj
-    }
+      type,
+      email_cpf_cnpj,
+    },
   }),
 
   resetPasswordSuccess: () => ({
-    type: Types.SUCCESS
+    type: Types.SUCCESS,
   }),
 
   resetPasswordFailure: () => ({
-    type: Types.FAILURE
+    type: Types.FAILURE,
   }),
 
-  confirmResetPasswordRequest: (token, password) => ({
+  confirmResetPasswordRequest: (type, token, password) => ({
     type: Types.CONFIRM_REQUEST,
     payload: {
+      type,
       token,
-      password
-    }
+      password,
+    },
   }),
 
   confirmResetPasswordSuccess: () => ({
-    type: Types.CONFIRM_SUCCESS
+    type: Types.CONFIRM_SUCCESS,
   }),
 
   confirmResetPasswordFailure: () => ({
-    type: Types.FAILURE
-  })
+    type: Types.CONFIRM_FAILURE,
+  }),
 };
