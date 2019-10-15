@@ -414,11 +414,42 @@ function* searchOrganizator(action) {
   }
 }
 
+function* createParticipant(action) {
+  try {
+    const { name, cpf, email, sex, password, event_id } = action.payload;
+
+    const response = yield call(api.post, '/entity', {
+      name,
+      cpf,
+      email,
+      sex,
+      password,
+    });
+
+    const entity_id = response.data.id;
+    yield put(ParticipantActions.createParticipantSuccess());
+
+    yield call(api.post, '/event_participant', {
+      entity_id,
+      event_id,
+      assistant: false,
+    });
+
+    yield put(ParticipantActions.addParticipantSuccess());
+
+    toastr.confirm('Participante cadastrado e adicionado com sucesso.', {
+      onOk: () => window.location.reload(),
+      disableCancel: true,
+    });
+  } catch (err) {
+    toastr.error('Falha!', 'Tente cadastrar novamente.');
+    yield put(ParticipantActions.createParticipantFailure());
+  }
+}
+
 function* addParticipant(action) {
   try {
     const { event_id, entity_id, assistant } = action.payload;
-
-    console.tron.log('entrei add participante');
 
     const response = yield call(api.post, '/event_participant', {
       entity_id,
@@ -795,6 +826,7 @@ export default function* rootSaga() {
     takeLatest(ParticipantTypes.ADD_REQUEST, addParticipant),
     takeLatest(ParticipantTypes.DELETE_REQUEST, deleteParticipant),
     takeLatest(ParticipantTypes.SEARCH_REQUEST, searchParticipant),
+    takeLatest(ParticipantTypes.CREATE_REQUEST, createParticipant),
 
     takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),
 

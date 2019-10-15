@@ -2,6 +2,9 @@
  * Action Types
  */
 export const Types = {
+  CREATE_REQUEST: 'CREATE_PARTICIPANT_REQUEST',
+  CREATE_SUCCESS: 'CREATE_PARTICIPANT_SUCCESS',
+  CREATE_FAILURE: 'CREATE_PARTICIPANT_FAILURE',
   ADD_REQUEST: 'ADD_PARTICIPANT_REQUEST',
   ADD_SUCCESS: 'ADD_PARTICIPANT_SUCCESS',
   ADD_FAILURE: 'ADD_PARTICIPANT_FAILURE',
@@ -25,6 +28,22 @@ const INITIAL_STATE = {
 
 export default function participant(state = INITIAL_STATE, action) {
   switch (action.type) {
+    // CRIAR PARTICIPANTE NOVO
+    case Types.CREATE_REQUEST:
+      return { ...state, loading: true };
+    case Types.CREATE_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.CREATE_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
+      };
+
     // ADICIONAR PARTICIPANTE
     case Types.ADD_REQUEST:
       return { ...state, loading: true };
@@ -83,6 +102,27 @@ export default function participant(state = INITIAL_STATE, action) {
  * Actions Creators
  */
 export const Creators = {
+  //CREATE PARTICIPANT
+  createParticipantRequest: (name, cpf, email, sex, password, event_id) => ({
+    type: Types.CREATE_REQUEST,
+    payload: {
+      name,
+      cpf,
+      email,
+      sex,
+      password,
+      event_id,
+    },
+  }),
+
+  createParticipantSuccess: () => ({
+    type: Types.CREATE_SUCCESS,
+  }),
+
+  createParticipantFailure: () => ({
+    type: Types.CREATE_FAILURE,
+  }),
+
   //ADD PARTICIPANTE
   addParticipantRequest: (entity_id, event_id, assistant) => ({
     type: Types.ADD_REQUEST,
