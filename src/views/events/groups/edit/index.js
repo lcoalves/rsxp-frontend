@@ -11,19 +11,15 @@ import { subHours, parseISO, format } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { toastr } from 'react-redux-toastr';
 import * as Yup from 'yup';
-import Select from 'react-select';
+import randomstring from 'randomstring';
 
 // import { toastr } from "react-redux-toastr";
 import statesCities from '../../../../assets/data/statesCities';
-import layoutCertificado from '../../../../assets/data/layoutCertificado';
-import lessons from '../../data/lesson';
 
 import CustomTabs from '../../../../components/tabs/default';
 
 import TableParticipants from './participantTable';
 import TableInviteds from './invitedTable';
-
-import participantData from '../../data/participants';
 
 import {
   TabContent,
@@ -107,7 +103,16 @@ const formOrganizator = Yup.object().shape({
 });
 
 const formParticipant = Yup.object().shape({
-  cpf: Yup.string().required('CPF obrigatório'),
+  cpf: Yup.string().required('O CPF é obrigatório'),
+});
+
+const formAddParticipant = Yup.object().shape({
+  name: Yup.string().required('O nome é obrigatório'),
+  email: Yup.string()
+    .email('Digite um email válido')
+    .required('O email é obrigatório'),
+  cpf: Yup.string().required('O CPF é obrigatório'),
+  sex: Yup.string().required('O sexo do participante é obrigatório'),
 });
 
 const formParticipantInvite = Yup.object().shape({
@@ -126,6 +131,7 @@ export default function UserProfile({ match, className }) {
   const [modalOrganizator, setModalOrganizator] = useState(false);
   const [modalChangeOrganizator, setModalChangeOrganizator] = useState(false);
   const [modalParticipant, setModalParticipant] = useState(false);
+  const [modalAddParticipant, setModalAddParticipant] = useState(false);
   const [modalInvite, setModalInvite] = useState(false);
   const [modalCertificate, setModalCertificate] = useState(false);
   const [invites, setInvites] = useState([]);
@@ -133,7 +139,8 @@ export default function UserProfile({ match, className }) {
   const [assistants, setAssistants] = useState([]);
   const [organizatorType, setOrganizatorType] = useState(null);
   const [leaderData, setLeaderData] = useState(null);
-  const [participantData, setParticipantData] = useState(null);
+  const [participantData, setParticipantData] = useState(false);
+  const [participantError, setParticipantError] = useState(null);
 
   const loading = useSelector(state => state.organizator.loadingSearch);
   const participant_loading = useSelector(
@@ -144,6 +151,64 @@ export default function UserProfile({ match, className }) {
   const participant_error = useSelector(state => state.participant.error);
   const event_loading = useSelector(state => state.event.loading);
   const event_data = useSelector(state => state.event.data);
+
+  const InputFeedback = ({ error }) =>
+    error ? <div className={classnames('input-feedback')}>{error}</div> : null;
+
+  const RadioButton = ({
+    field: { name, value, onChange, onBlur },
+    id,
+    label,
+    className,
+    ...props
+  }) => {
+    return (
+      <div>
+        <input
+          name={name}
+          id={id}
+          type="radio"
+          value={id} // could be something else for output?
+          checked={id === value}
+          onChange={onChange}
+          onBlur={onBlur}
+          className={`${classnames('radio-button')} mr-1`}
+          {...props}
+        />
+        <label htmlFor={id}>{label}</label>
+      </div>
+    );
+  };
+
+  // Radio group
+  const RadioButtonGroup = ({
+    value,
+    error,
+    touched,
+    id,
+    label,
+    className,
+    children,
+  }) => {
+    const classes = classnames(
+      'input-field',
+      {
+        'is-success': value || (!error && touched), // handle prefilled or user-filled
+        'is-error': !!error && touched,
+      },
+      className
+    );
+
+    return (
+      <div className={classes}>
+        <fieldset>
+          <legend>{label}</legend>
+          {children}
+          {touched && <InputFeedback error={error} />}
+        </fieldset>
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (organizator_data !== null && !!organizator_data.cpf) {
@@ -157,6 +222,10 @@ export default function UserProfile({ match, className }) {
     }
   }, [participant_data]);
 
+  useEffect(() => {
+    setParticipantError(participant_error);
+  }, [participant_error]);
+
   const dispatch = useDispatch();
 
   function toogleModalOrganizator() {
@@ -166,7 +235,13 @@ export default function UserProfile({ match, className }) {
 
   function toogleModalParticipant() {
     setParticipantData(null);
+    setParticipantError(false);
     setModalParticipant(!modalParticipant);
+  }
+
+  function toogleModalAddParticipant() {
+    setModalParticipant(false);
+    setModalAddParticipant(!modalAddParticipant);
   }
 
   function toogleModalChangeOrganizator() {
@@ -175,6 +250,7 @@ export default function UserProfile({ match, className }) {
   }
 
   function toogleModalInvite() {
+    setModalParticipant(false);
     setModalInvite(!modalInvite);
   }
 
@@ -250,6 +326,24 @@ export default function UserProfile({ match, className }) {
     setModalParticipant(false);
   }
 
+  function confirmModalAddParticipant(values) {
+    const { name, cpf, email, sex } = values;
+    const password = randomstring.generate(6);
+
+    dispatch(
+      ParticipantActions.createParticipantRequest(
+        name,
+        cpf,
+        email,
+        sex,
+        password,
+        parseInt(match.params.event_id)
+      )
+    );
+
+    setModalAddParticipant(false);
+  }
+
   // onChange = e => {
   //   this.setState({ [e.target.name]: e.target.value });
   // };
@@ -311,6 +405,7 @@ export default function UserProfile({ match, className }) {
   }
 
   function handleSearchParticipant(values) {
+    setParticipantData(null);
     const { cpf } = values;
     const default_event_id = event_data.default_event_id;
 
@@ -1107,18 +1202,19 @@ export default function UserProfile({ match, className }) {
                           {organizator.ministery_status}
                         </p>
                         <hr className="grey" />
-                        <Row className="grey">
-                          <Col xs="4">
-                            <Link to="/user-profile">
-                              <i className="fa fa-star fa-lg pr-2" />
-                              <span>23 anos</span>
-                            </Link>
+                        <Row>
+                          <Col xs="6">
+                            <i className="fa fa-star fa-lg pr-2" />
+                            <span>{organizator.birthday}</span>
                           </Col>
-                          <Col xs="8">
-                            <Link to="/user-profile">
-                              <i className="fa fa-globe fa-lg pr-2" />
-                              <span>Brasileira</span>
-                            </Link>
+                          <Col xs="6">
+                            <i className="fa fa-globe fa-lg pr-2" />
+                            {organizator.addresses &&
+                            organizator.addresses.length > 0 ? (
+                              <span>{organizator.address[0].country}</span>
+                            ) : (
+                              <span>N/A</span>
+                            )}
                           </Col>
                         </Row>
                       </CardBody>
@@ -1172,18 +1268,19 @@ export default function UserProfile({ match, className }) {
                             {participant.ministery_status}
                           </p>
                           <hr className="grey" />
-                          <Row className="grey">
-                            <Col xs="4">
-                              <Link to="/user-profile">
-                                <i className="fa fa-star fa-lg pr-2" />
-                                <span>23 anos</span>
-                              </Link>
+                          <Row>
+                            <Col xs="6">
+                              <i className="fa fa-star fa-lg pr-2" />
+                              <span>{participant.birthday}</span>
                             </Col>
-                            <Col xs="8">
-                              <Link to="/user-profile">
-                                <i className="fa fa-globe fa-lg pr-2" />
-                                <span>Brasileira</span>
-                              </Link>
+                            <Col xs="6">
+                              <i className="fa fa-globe fa-lg pr-2" />
+                              {participant.addresses &&
+                              participant.addresses.length > 0 ? (
+                                <span>{participant.address[0].country}</span>
+                              ) : (
+                                <span>N/A</span>
+                              )}
                             </Col>
                           </Row>
                         </CardBody>
@@ -1218,7 +1315,7 @@ export default function UserProfile({ match, className }) {
                                   onClick={toogleModalParticipant}
                                 >
                                   <i className="fa fa-user fa-xs" /> Inserir
-                                  manualmente
+                                  participante
                                 </Button>
                                 <Button
                                   color="warning"
@@ -1412,6 +1509,7 @@ export default function UserProfile({ match, className }) {
                         <Button
                           className="rounded-right width-100-per"
                           type="submit"
+                          color="success"
                         >
                           <Search size={22} color="#fff" />
                         </Button>
@@ -1437,26 +1535,26 @@ export default function UserProfile({ match, className }) {
                             />
                           </CardHeader>
                           <CardBody>
-                            <h4 className="card-title">{leaderData.name}</h4>
-                            <p className="category text-gray font-small-4">
+                            <h4 className="card-title text-center">
+                              {leaderData.name}
+                            </h4>
+                            <p className="category text-gray text-center font-small-4">
                               {leaderData.cpf}
                             </p>
-                            <p className="category text-gray font-small-4">
-                              Líder
-                            </p>
                             <hr className="grey" />
-                            <Row className="grey">
-                              <Col xs="4">
-                                <Link to="/user-profile">
-                                  <i className="fa fa-star fa-lg pr-2" />
-                                  <span>3.6</span>
-                                </Link>
+                            <Row>
+                              <Col xs="6">
+                                <i className="fa fa-star fa-lg pr-2" />
+                                <span>{leaderData.birthday}</span>
                               </Col>
-                              <Col xs="8">
-                                <Link to="/user-profile">
-                                  <i className="fa fa-globe fa-lg pr-2" />
-                                  <span>USA</span>
-                                </Link>
+                              <Col xs="6">
+                                <i className="fa fa-globe fa-lg pr-2" />
+                                {leaderData.addresses &&
+                                leaderData.addresses.length > 0 ? (
+                                  <span>{leaderData.address[0].country}</span>
+                                ) : (
+                                  <span>N/A</span>
+                                )}
                               </Col>
                             </Row>
                           </CardBody>
@@ -1546,6 +1644,7 @@ export default function UserProfile({ match, className }) {
                         <Button
                           className="rounded-right width-100-per"
                           type="submit"
+                          color="success"
                         >
                           <Search size={22} color="#fff" />
                         </Button>
@@ -1679,6 +1778,7 @@ export default function UserProfile({ match, className }) {
                         <Button
                           className="rounded-right width-100-per"
                           type="submit"
+                          color="success"
                         >
                           <Search size={22} color="#fff" />
                         </Button>
@@ -1704,28 +1804,28 @@ export default function UserProfile({ match, className }) {
                             />
                           </CardHeader>
                           <CardBody>
-                            <h4 className="card-title">
+                            <h4 className="card-title text-center">
                               {participantData.name}
                             </h4>
-                            <p className="category text-gray font-small-4">
+                            <p className="category text-gray text-center font-small-4">
                               {participantData.cpf}
                             </p>
-                            <p className="category text-gray font-small-4">
-                              Líder
-                            </p>
                             <hr className="grey" />
-                            <Row className="grey">
-                              <Col xs="4">
-                                <Link to="/user-profile">
-                                  <i className="fa fa-star fa-lg pr-2" />
-                                  <span>3.6</span>
-                                </Link>
+                            <Row>
+                              <Col xs="6">
+                                <i className="fa fa-star fa-lg pr-2" />
+                                <span>{participantData.birthday}</span>
                               </Col>
-                              <Col xs="8">
-                                <Link to="/user-profile">
-                                  <i className="fa fa-globe fa-lg pr-2" />
-                                  <span>USA</span>
-                                </Link>
+                              <Col xs="6">
+                                <i className="fa fa-globe fa-lg pr-2" />
+                                {participantData.addresses &&
+                                participantData.addresses.length > 0 ? (
+                                  <span>
+                                    {participantData.address[0].country}
+                                  </span>
+                                ) : (
+                                  <span>N/A</span>
+                                )}
                               </Col>
                             </Row>
                           </CardBody>
@@ -1736,11 +1836,25 @@ export default function UserProfile({ match, className }) {
                 </Form>
               )}
             </Formik>
-            {participant_error && (
-              <p>
-                Nenhum participante encontrado com esse cpf na nossa base de
-                dados
-              </p>
+            {participantError && (
+              <>
+                <p className="text-danger p-3">
+                  Nenhum participante encontrado com esse cpf na nossa base de
+                  dados
+                </p>
+                <Row className="justify-content-between p-3">
+                  <Button color="success" onClick={toogleModalAddParticipant}>
+                    <i className="fa fa-plus" /> Cadastrar novo participante
+                  </Button>
+                  <Button
+                    color="warning"
+                    className="text-white"
+                    onClick={toogleModalInvite}
+                  >
+                    <i className="fa fa-paper-plane fa-xs" /> Convidar por email
+                  </Button>
+                </Row>
+              </>
             )}
           </ModalBody>
           <ModalFooter>
@@ -1776,6 +1890,171 @@ export default function UserProfile({ match, className }) {
               </Button>
             </Form>
           </ModalFooter>
+        </Modal>
+
+        {/* MODAL PARA CADASTRAR PARTICIPANTE MANUALMENTE */}
+        <Modal
+          isOpen={modalAddParticipant}
+          toggle={toogleModalAddParticipant}
+          className={className}
+        >
+          <Formik
+            initialValues={{
+              name: '',
+              email: '',
+              cpf: '',
+              sex: '',
+            }}
+            validationSchema={formAddParticipant}
+            onSubmit={values => confirmModalAddParticipant(values)}
+          >
+            {({ errors, touched, values }) => (
+              <Form>
+                <ModalHeader toggle={toogleModalAddParticipant}>
+                  Cadastrar participante
+                </ModalHeader>
+                <ModalBody>
+                  <div className="form-body">
+                    <Row className="d-flex flex-row">
+                      <Col sm="12" md="12" lg="12" className="mb-2">
+                        <Field
+                          type="text"
+                          placeholder="Digite o nome do participante"
+                          name="name"
+                          id="name"
+                          className={`
+                                    form-control
+                                    ${errors.name &&
+                                      touched.name &&
+                                      'is-invalid'}
+                                  `}
+                        />
+                        {errors.name && touched.name ? (
+                          <div className="invalid-feedback">{errors.name}</div>
+                        ) : null}
+                      </Col>
+                      <Col sm="12" md="12" lg="12" className="mb-2">
+                        <Field
+                          type="text"
+                          placeholder="Digite o cpf do participante"
+                          name="cpf"
+                          id="cpf"
+                          className={`
+                                    form-control
+                                    ${errors.cpf && touched.cpf && 'is-invalid'}
+                                  `}
+                          validate={validateCPF}
+                        />
+                        {errors.cpf && touched.cpf ? (
+                          <div className="invalid-feedback">{errors.cpf}</div>
+                        ) : null}
+                      </Col>
+                      <Col sm="12" md="12" lg="12" className="mb-2">
+                        <Field
+                          type="text"
+                          placeholder="Digite o email"
+                          name="email"
+                          id="email"
+                          className={`
+                                    form-control
+                                    ${errors.email &&
+                                      touched.email &&
+                                      'is-invalid'}
+                                  `}
+                        />
+                        {errors.email && touched.email ? (
+                          <div className="invalid-feedback">{errors.email}</div>
+                        ) : null}
+                      </Col>
+                      <Col sm="12" md="12" lg="12" className="mb-2">
+                        <RadioButtonGroup
+                          id="radioGroup"
+                          value={values.radioGroup}
+                          error={errors.radioGroup}
+                          touched={touched.radioGroup}
+                          className={`
+                                    new-form-padding
+                                    form-control
+                                    border-0
+                                    ${errors.sex && touched.sex && 'is-invalid'}
+                                  `}
+                        >
+                          <Row className="d-flex justify-content-around">
+                            {event_data.defaultEvent.sex_type === 'M' && (
+                              <Field
+                                component={RadioButton}
+                                name="sex"
+                                id="M"
+                                label="Masculino"
+                              />
+                            )}
+                            {event_data.defaultEvent.sex_type === 'F' && (
+                              <Field
+                                component={RadioButton}
+                                name="sex"
+                                id="F"
+                                label="Feminino"
+                              />
+                            )}
+                            {event_data.defaultEvent.sex_type === 'A' && (
+                              <>
+                                <Field
+                                  component={RadioButton}
+                                  name="sex"
+                                  id="M"
+                                  label="Masculino"
+                                />
+                                <Field
+                                  component={RadioButton}
+                                  name="sex"
+                                  id="F"
+                                  label="Feminino"
+                                />
+                              </>
+                            )}
+                          </Row>
+                        </RadioButtonGroup>
+                        {errors.sex && touched.sex ? (
+                          <div className="text-center invalid-feedback">
+                            {errors.sex}
+                          </div>
+                        ) : null}
+                      </Col>
+                    </Row>
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <Form>
+                    <Button
+                      className="ml-1 my-1"
+                      color="danger"
+                      onClick={toogleModalAddParticipant}
+                    >
+                      Cancelar
+                    </Button>{' '}
+                    <Button
+                      className="ml-1 my-1 btn-success"
+                      type="submit"
+                      //onClick={() => confirmModalAddParticipant(values)}
+                    >
+                      {participant_loading ? (
+                        <BounceLoader
+                          size={23}
+                          color={'#fff'}
+                          css={css`
+                            display: block;
+                            margin: 0 auto;
+                          `}
+                        />
+                      ) : (
+                        'Cadastrar participante'
+                      )}
+                    </Button>
+                  </Form>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </Modal>
 
         {/* MODAL PARA CONVIDAR PARTICIPANTE */}
