@@ -119,11 +119,17 @@ export default function GroupCreate({ match, className }) {
   const organizator = useSelector(state => state.organizator.data);
   const profile = useSelector(state => state.profile.data);
   const loading = useSelector(state => state.organization.loading);
+  const event_loading = useSelector(state => state.event.loading);
 
   const dispatch = useDispatch();
 
   const DatepickerButton = ({ value, onClick }) => (
-    <Button color="primary" className="width-200 height-40" onClick={onClick}>
+    <Button
+      outline
+      color="secondary"
+      className="width-200 height-38"
+      onClick={onClick}
+    >
       {value}
     </Button>
   );
@@ -429,27 +435,32 @@ export default function GroupCreate({ match, className }) {
                           <Label for="initial_date">
                             Data Inicial (clique abaixo)
                           </Label>
-                          <Datepicker
-                            name="initial_date"
-                            id="initial_date"
-                            selected={values.initial_date}
-                            onChange={date =>
-                              setFieldValue('initial_date', date)
-                            }
-                            customInput={<DatepickerButton />}
-                            minDate={subMonths(new Date(), 12)}
-                            className={`
+                          <div className="position-relative has-icon-left">
+                            <Datepicker
+                              name="initial_date"
+                              id="initial_date"
+                              selected={values.initial_date}
+                              onChange={date =>
+                                setFieldValue('initial_date', date)
+                              }
+                              customInput={<DatepickerButton />}
+                              minDate={subMonths(new Date(), 12)}
+                              className={`
                                   form-control
                                   ${errors.initial_date &&
                                     touched.initial_date &&
                                     'is-invalid'}
                                 `}
-                          />
-                          {errors.initial_date && touched.initial_date ? (
-                            <div className="invalid-feedback">
-                              {errors.initial_date}
+                            />
+                            {errors.initial_date && touched.initial_date ? (
+                              <div className="invalid-feedback">
+                                {errors.initial_date}
+                              </div>
+                            ) : null}
+                            <div className="form-control-position">
+                              <Calendar size={14} color="#212529" />
                             </div>
-                          ) : null}
+                          </div>
                         </FormGroup>
                       </Col>
                       {!!values.initial_date && (
@@ -458,25 +469,32 @@ export default function GroupCreate({ match, className }) {
                             <Label for="end_date">
                               Formatura (clique abaixo)
                             </Label>
-                            <Datepicker
-                              name="end_date"
-                              id="end_date"
-                              selected={values.end_date}
-                              onChange={date => setFieldValue('end_date', date)}
-                              customInput={<DatepickerButton />}
-                              minDate={values.initial_date}
-                              className={`
+                            <div className="position-relative has-icon-left">
+                              <Datepicker
+                                name="end_date"
+                                id="end_date"
+                                selected={values.end_date}
+                                onChange={date =>
+                                  setFieldValue('end_date', date)
+                                }
+                                customInput={<DatepickerButton />}
+                                minDate={values.initial_date}
+                                className={`
                                   form-control
                                   ${errors.end_date &&
                                     touched.end_date &&
                                     'is-invalid'}
                                 `}
-                            />
-                            {errors.end_date && touched.end_date ? (
-                              <div className="invalid-feedback">
-                                {errors.end_date}
+                              />
+                              {errors.end_date && touched.end_date ? (
+                                <div className="invalid-feedback">
+                                  {errors.end_date}
+                                </div>
+                              ) : null}
+                              <div className="form-control-position">
+                                <Calendar size={14} color="#212529" />
                               </div>
-                            ) : null}
+                            </div>
                           </FormGroup>
                         </Col>
                       )}
@@ -661,8 +679,7 @@ export default function GroupCreate({ match, className }) {
                           <Label for="uf">Estado</Label>
                           <Field
                             disabled
-                            type="select"
-                            component="select"
+                            type="text"
                             id="uf"
                             name="uf"
                             onChange={handleChange}
@@ -670,15 +687,7 @@ export default function GroupCreate({ match, className }) {
                                   form-control
                                   ${errors.uf && touched.uf && 'is-invalid'}
                                 `}
-                          >
-                            <option value="" disabled="">
-                              preencha o CEP
-                            </option>
-
-                            {statesCities.map(state => (
-                              <option value={state.sigla}>{state.nome}</option>
-                            ))}
-                          </Field>
+                          />
                           {errors.uf && touched.uf ? (
                             <div className="invalid-feedback">{errors.uf}</div>
                           ) : null}
@@ -688,31 +697,14 @@ export default function GroupCreate({ match, className }) {
                         <FormGroup>
                           <Label for="city">Cidade</Label>
                           <Field
-                            disabled
-                            type="select"
-                            component="select"
+                            type="text"
                             id="city"
                             name="city"
                             className={`
                                   form-control
                                   ${errors.city && touched.city && 'is-invalid'}
                                 `}
-                          >
-                            <option value="" disabled="">
-                              preencha o CEP
-                            </option>
-
-                            {statesCities.map(element => {
-                              if (values.uf === element.sigla) {
-                                const cidades = element.cidades.map(cidade => {
-                                  return (
-                                    <option value={cidade}>{cidade}</option>
-                                  );
-                                });
-                                return cidades;
-                              }
-                            })}
-                          </Field>
+                          />
                           {errors.city && touched.city ? (
                             <div className="invalid-feedback">
                               {errors.city}
@@ -853,7 +845,7 @@ export default function GroupCreate({ match, className }) {
 
                     <div className="form-actions right">
                       <FormGroup>
-                        {loading ? (
+                        {event_loading ? (
                           <Button
                             disabled
                             color="success"
