@@ -7,11 +7,14 @@ import history from '../../../../app/history';
 import { Link, Redirect, withRouter } from 'react-router-dom';
 import { Formik, Field, Form, FieldArray } from 'formik';
 import { Datepicker } from 'react-formik-ui';
-import { subHours, parseISO, format } from 'date-fns';
+import { subHours, parseISO, format, subMonths } from 'date-fns';
 import { pt } from 'date-fns/locale';
 import { toastr } from 'react-redux-toastr';
 import * as Yup from 'yup';
 import randomstring from 'randomstring';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+
+import Certificate from '~/views/certificate/index';
 
 // import { toastr } from "react-redux-toastr";
 import statesCities from '../../../../assets/data/statesCities';
@@ -141,6 +144,7 @@ export default function UserProfile({ match, className }) {
   const [leaderData, setLeaderData] = useState(null);
   const [participantData, setParticipantData] = useState(false);
   const [participantError, setParticipantError] = useState(null);
+  const [pdfButton, setPdfButton] = useState(null);
 
   const loading = useSelector(state => state.organizator.loadingSearch);
   const participant_loading = useSelector(
@@ -151,6 +155,17 @@ export default function UserProfile({ match, className }) {
   const participant_error = useSelector(state => state.participant.error);
   const event_loading = useSelector(state => state.event.loading);
   const event_data = useSelector(state => state.event.data);
+
+  const DatepickerButton = ({ value, onClick }) => (
+    <Button
+      outline
+      color="secondary"
+      className="width-150 height-38"
+      onClick={onClick}
+    >
+      {value}
+    </Button>
+  );
 
   const InputFeedback = ({ error }) =>
     error ? <div className={classnames('input-feedback')}>{error}</div> : null;
@@ -255,6 +270,7 @@ export default function UserProfile({ match, className }) {
   }
 
   function toogleModalCertificate() {
+    setPdfButton(null);
     setModalCertificate(!modalCertificate);
   }
 
@@ -498,17 +514,18 @@ export default function UserProfile({ match, className }) {
   }
 
   function handleCertificate(values) {
-    let data_certificate = {};
+    setPdfButton(null);
 
     const dateValues = subHours(values.certificateDate, 1);
 
     const toSend = {
       event_id: event_data.id,
       date: format(dateValues, "dd 'de' MMMM 'de' yyyy", { locale: pt }),
-      city: 'Pompeia',
-      uf: 'SP',
-      layout_certificado: event_data.certificateLayout,
+      city: event_data.city,
+      uf: event_data.uf,
+      layout_certificado: event_data.defaultEvent.layoutCertificate,
       checkBackground: values.checkBackground,
+      imgBackground: event_data.defaultEvent.img_certificate_url,
     };
 
     const participants = [];
@@ -523,18 +540,8 @@ export default function UserProfile({ match, className }) {
       toastr.warning('Aviso!', 'Mínimo de um nome para impressão');
     } else {
       toSend.participants = participants;
-      localStorage.setItem(
-        '@dashboard/groupCertificate',
-        JSON.stringify(toSend)
-      );
-      history.push(`/eventos/grupo/${event_data.id}/certificados`);
-    }
-  }
 
-  function handlePrintMobile() {
-    if (window.confirm('Tente imprimir em um computador!')) {
-    } else {
-      // They clicked no
+      setPdfButton(toSend);
     }
   }
 
@@ -581,7 +588,9 @@ export default function UserProfile({ match, className }) {
             <Card className="profile-with-cover">
               <div
                 className="d-flex flex-column flex-sm-row flex-md-column flex-lg-row justify-content-between card-img-top img-fluid bg-cover height-300"
-                style={{ background: `url("${photo14}") 50%` }}
+                style={{
+                  background: `url("${event_data.defaultEvent.img_banner_dash_url}") 50%`,
+                }}
               >
                 <div className="mt-2 mr-2 align-self-end">
                   <UncontrolledDropdown className="pr-1 d-lg-none">
@@ -597,7 +606,7 @@ export default function UserProfile({ match, className }) {
                           <i className="fa fa-plus mr-2" /> Enviar material
                         </DropdownItem>
                       </Link>
-                      {/* <DropdownItem onClick={handlePrintMobile}>
+                      {/* <DropdownItem>
                         <i className="fa fa-address-card mr-2" /> Emitir crachás
                       </DropdownItem>
                       <Link to="/evento?id=1" className="p-0">
@@ -605,10 +614,10 @@ export default function UserProfile({ match, className }) {
                           <i className="fa fa-globe mr-2" /> Site do evento
                         </DropdownItem>
                       </Link> */}
-                      {/* <DropdownItem onClick={handlePrintMobile}>
+                      {/* <DropdownItem>
                         <i className="fa fa-user mr-2" /> Cartão de nomes
                       </DropdownItem> */}
-                      <DropdownItem onClick={handlePrintMobile}>
+                      <DropdownItem onClick={toogleModalCertificate}>
                         <i className="fa fa-graduation-cap mr-2" /> Emitir
                         certificados
                       </DropdownItem>
@@ -770,13 +779,19 @@ export default function UserProfile({ match, className }) {
                       initialDate: !!event_data.start_date
                         ? event_data.start_date
                         : '',
-                      endDate: '',
+                      endDate: !!event_data.end_date ? event_data.end_date : '',
                     }}
                     validationSchema={formDetails}
                     // CRIAR FUNÇÃO PARA SALVAR DADOS DA EDIÇÃO DO GRUPO
                     onSubmit={() => {}}
                   >
-                    {({ errors, touched, handleChange, values }) => (
+                    {({
+                      errors,
+                      touched,
+                      handleChange,
+                      values,
+                      setFieldValue,
+                    }) => (
                       <Form>
                         <div className="form-body">
                           <Row>
@@ -1013,12 +1028,18 @@ export default function UserProfile({ match, className }) {
                                   <Datepicker
                                     name="initialDate"
                                     id="initialDate"
+                                    selected={event_data.start_date}
+                                    onChange={date =>
+                                      setFieldValue('initialDate', date)
+                                    }
+                                    customInput={<DatepickerButton />}
+                                    minDate={subMonths(new Date(), 12)}
                                     className={`
-                                      form-control
-                                      ${errors.initialDate &&
-                                        touched.initialDate &&
-                                        'is-invalid'}
-                                    `}
+                                  form-control
+                                  ${errors.initialDate &&
+                                    touched.initialDate &&
+                                    'is-invalid'}
+                                `}
                                   />
                                   {errors.initialDate && touched.initialDate ? (
                                     <div className="invalid-feedback">
@@ -1033,23 +1054,19 @@ export default function UserProfile({ match, className }) {
                             </Col>
                             <Col sm="2">
                               <FormGroup>
-                                <Label for="endDate">Data Formatura</Label>
+                                <Label for="endDate">Formatura</Label>
                                 <div className="position-relative has-icon-left">
                                   <Datepicker
-                                    name="birthday"
-                                    id="birthday"
-                                    className={`
-                                      form-control
-                                      ${errors.birthday &&
-                                        touched.birthday &&
-                                        'is-invalid'}
-                                    `}
+                                    name="endDate"
+                                    id="endDate"
+                                    selected={values.endDate}
+                                    onChange={date =>
+                                      setFieldValue('endDate', date)
+                                    }
+                                    minDate={values.initialDate}
+                                    customInput={<DatepickerButton />}
+                                    className="form-control"
                                   />
-                                  {errors.birthday && touched.birthday ? (
-                                    <div className="invalid-feedback">
-                                      {errors.birthday}
-                                    </div>
-                                  ) : null}
                                   <div className="form-control-position">
                                     <Calendar size={14} color="#212529" />
                                   </div>
@@ -2175,22 +2192,23 @@ export default function UserProfile({ match, className }) {
           className={className}
           size="md"
         >
-          <ModalHeader toggle={toogleModalCertificate}>
-            Emitir certificados
-          </ModalHeader>
-          <ModalBody>
-            <Formik
-              enableReinitialize
-              initialValues={{
-                checkBackground: false,
-                selected: certificateParticipants,
-                certificateDate: new Date(),
-                // DATA FICTICIA DO FINAL DO EVENTO !!MUDAR QUANDO OS EVENTOS ESTIVEREM CRIADOS
-              }}
-              onSubmit={values => handleCertificate(values)}
-            >
-              {({ errors, touched, handleChange, values, setFieldValue }) => (
-                <Form>
+          <Formik
+            initialValues={{
+              checkBackground: false,
+              selected: certificateParticipants,
+              certificateDate: new Date(),
+              // DATA FICTICIA DO FINAL DO EVENTO !!MUDAR QUANDO OS EVENTOS ESTIVEREM CRIADOS
+            }}
+            onSubmit={values => handleCertificate(values)}
+          >
+            {({ errors, touched, handleChange, values, setFieldValue }) => (
+              <Form>
+                <ModalHeader toggle={toogleModalCertificate}>
+                  Emitir certificados
+                  <Certificate />
+                </ModalHeader>
+
+                <ModalBody>
                   <Row className="mb-2">
                     <Col className="align-self-center">
                       <Label className="mb-0">Data da formatura</Label>
@@ -2278,17 +2296,35 @@ export default function UserProfile({ match, className }) {
                       />
                     </tbody>
                   </Table>
-                  {loading ? (
-                    <Button color="primary">carregando</Button>
-                  ) : (
-                    <Button type="submit" color="primary">
+                </ModalBody>
+                <ModalFooter>
+                  <Row>
+                    {pdfButton !== null && (
+                      <Button onClick={toogleModalCertificate} color="success">
+                        <PDFDownloadLink
+                          className="text-white"
+                          document={
+                            <Certificate
+                              certificates={pdfButton}
+                              fileName="certificado.pdf"
+                            />
+                          }
+                        >
+                          {({ blob, url, loading, error }) =>
+                            loading ? 'Carregando documento' : 'Baixe agora!'
+                          }
+                        </PDFDownloadLink>
+                      </Button>
+                    )}
+
+                    <Button type="submit" color="primary" className="mr-2">
                       Gerar certificados
                     </Button>
-                  )}
-                </Form>
-              )}
-            </Formik>
-          </ModalBody>
+                  </Row>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
         </Modal>
       </Fragment>
     )
