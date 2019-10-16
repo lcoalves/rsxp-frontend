@@ -432,9 +432,7 @@ export default function GroupCreate({ match, className }) {
                       </Col>
                       <Col lg="2" md="6" sm="12">
                         <FormGroup>
-                          <Label for="initial_date">
-                            Data Inicial (clique abaixo)
-                          </Label>
+                          <Label for="initial_date">Data Inicial</Label>
                           <div className="position-relative has-icon-left">
                             <Datepicker
                               name="initial_date"
@@ -466,9 +464,7 @@ export default function GroupCreate({ match, className }) {
                       {!!values.initial_date && (
                         <Col lg="2" md="6" sm="12">
                           <FormGroup>
-                            <Label for="end_date">
-                              Formatura (clique abaixo)
-                            </Label>
+                            <Label for="end_date">Formatura</Label>
                             <div className="position-relative has-icon-left">
                               <Datepicker
                                 name="end_date"

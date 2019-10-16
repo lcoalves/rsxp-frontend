@@ -12,7 +12,7 @@ Font.register({
 });
 
 export const ContentView = styled.View`
-  flex: ${props => props.flex};
+  flex: 1;
   justify-content: ${props => props.justify};
   align-items: ${props => props.align};
 `;
