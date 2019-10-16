@@ -138,7 +138,7 @@ function* login(action) {
 
     const { token, user } = response.data;
 
-    if (!response.data.error) {
+    if (!response.data.expired) {
       yield put(LoginActions.loginSuccess(response.data));
 
       localStorage.setItem('@dashboard/token', token.token);
@@ -159,13 +159,13 @@ function* login(action) {
       yield put(LoginActions.loginFailure());
 
       yield put(push('/senha-expirada'));
-      toastr.warning(response.data.error.title, response.data.error.message);
+      toastr.warning(
+        response.data.expired.title,
+        response.data.expired.message
+      );
     }
   } catch (err) {
-    toastr.error(
-      err.response.data.error.title,
-      err.response.data.error.message
-    );
+    toastr.error(err.response.data.title, err.response.data.message);
     yield put(LoginActions.loginFailure());
   }
 }
@@ -213,7 +213,7 @@ function* resetPassword(action) {
     yield put(push('/'));
     toastr.success('Boa!', `Acesse o email ${email}`);
   } catch (err) {
-    toastr.error('Oops!', `Houve um erro ao tentar recuperar a senha`);
+    toastr.error(err.response.data.title, err.response.data.message);
     yield put(ResetPasswordActions.resetPasswordFailure());
   }
 }
