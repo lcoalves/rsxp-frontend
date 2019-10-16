@@ -470,6 +470,7 @@ export default function UserProfile({ match, className }) {
     setInvites([...invites, invite]);
 
     setModalParticipant(false);
+    setModalInvite(false);
   }
 
   function handleCheck(setFieldValue) {
@@ -596,14 +597,14 @@ export default function UserProfile({ match, className }) {
                           <i className="fa fa-plus mr-2" /> Enviar material
                         </DropdownItem>
                       </Link>
-                      <DropdownItem onClick={handlePrintMobile}>
+                      {/* <DropdownItem onClick={handlePrintMobile}>
                         <i className="fa fa-address-card mr-2" /> Emitir crachás
                       </DropdownItem>
                       <Link to="/evento?id=1" className="p-0">
                         <DropdownItem>
                           <i className="fa fa-globe mr-2" /> Site do evento
                         </DropdownItem>
-                      </Link>
+                      </Link> */}
                       {/* <DropdownItem onClick={handlePrintMobile}>
                         <i className="fa fa-user mr-2" /> Cartão de nomes
                       </DropdownItem> */}
@@ -632,7 +633,7 @@ export default function UserProfile({ match, className }) {
                             <Button color="success" className="btn-raised mr-3">
                               <i className="fa fa-plus" /> Enviar material
                             </Button>
-                            <Button
+                            {/* <Button
                               href={`/eventos/grupo/${match.params.event_id}/crachas`}
                               color="info"
                               className="btn-raised mr-3"
@@ -647,7 +648,7 @@ export default function UserProfile({ match, className }) {
                               className="btn-raised mr-3"
                             >
                               <i className="fa fa-globe" /> Site do evento
-                            </Button>
+                            </Button> */}
                             {/* Esse botão aparece somente para eventos do FFI */}
                             {/* <Button
                               href={`/eventos/grupo/${match.params.event_id}/cartoes`}
@@ -1712,7 +1713,7 @@ export default function UserProfile({ match, className }) {
               </Button>{' '}
               <Button
                 className={`${
-                  !!leaderData !== null
+                  leaderData !== null
                     ? 'ml-1 my-1 btn-success'
                     : 'btn-secundary ml-1 my-1'
                 }`}
@@ -1730,7 +1731,7 @@ export default function UserProfile({ match, className }) {
                     `}
                   />
                 ) : (
-                  'Trocar Organizador'
+                  'Trocar organizador'
                 )}
               </Button>
             </Form>
@@ -1885,7 +1886,7 @@ export default function UserProfile({ match, className }) {
                     `}
                   />
                 ) : (
-                  'Adicionar Participante'
+                  'Adicionar participante'
                 )}
               </Button>
             </Form>
@@ -2069,7 +2070,7 @@ export default function UserProfile({ match, className }) {
             resetForm();
           }}
         >
-          {({ errors, touched }) => (
+          {({ errors, touched, values }) => (
             <Modal
               isOpen={modalInvite}
               toggle={toogleModalInvite}
@@ -2140,7 +2141,14 @@ export default function UserProfile({ match, className }) {
                   >
                     Cancelar
                   </Button>{' '}
-                  <Button className="ml-1 my-1" color="success" type="submit">
+                  <Button
+                    className={`${
+                      values.invite_name !== '' && values.invite_email !== ''
+                        ? 'ml-1 my-1 btn-success'
+                        : 'btn-secundary ml-1 my-1'
+                    }`}
+                    type="submit"
+                  >
                     {loading ? (
                       <BounceLoader
                         size={23}
@@ -2151,7 +2159,7 @@ export default function UserProfile({ match, className }) {
                         `}
                       />
                     ) : (
-                      'Convidar participante'
+                      'Enviar convite'
                     )}
                   </Button>
                 </Form>
