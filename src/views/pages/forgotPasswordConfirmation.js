@@ -15,7 +15,9 @@ import { Creators as ResetPasswordActions } from '~/store/ducks/resetPassword';
 import logo from '~/assets/img/logo-big.png';
 
 const formSchema = Yup.object().shape({
-  password: Yup.string().required('Esse campo é obrigatório'),
+  password: Yup.string()
+    .min(6, '6 dígitos no mínimo')
+    .required('Esse campo é obrigatório'),
 });
 
 export default function ForgotPasswordConfirmation({ match }) {
