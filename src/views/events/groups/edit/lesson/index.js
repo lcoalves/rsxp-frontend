@@ -4,6 +4,9 @@ import Plyr from 'plyr';
 import NumberFormat from 'react-number-format';
 import history from '~/app/history';
 
+import { toastr } from 'react-redux-toastr';
+import { differenceInCalendarYears } from 'date-fns';
+
 import { Formik, Field, Form, FieldArray } from 'formik';
 
 import {
@@ -50,7 +53,7 @@ class CurrencyFormat extends Component {
 }
 
 export default function Lesson({ match, className }) {
-  const [modalBackLesson, setModalBackLesson] = useState(false);
+  const [presenceList, setPresenceList] = useState(null);
 
   const dispatch = useDispatch();
   const data = useSelector(state => state.lesson.data);
@@ -61,41 +64,76 @@ export default function Lesson({ match, className }) {
     if (document.getElementById('checkAll').checked === true) {
       for (let index = 0; index < participants; index++) {
         document.getElementsByClassName('childCheck')[index].checked = true;
-        setFieldValue(`selected.${index}.is_present`, true);
+        setFieldValue(`selecteds.${index}.is_present`, true);
       }
     } else {
       for (let index = 0; index < participants; index++) {
         document.getElementsByClassName('childCheck')[index].checked = false;
-        setFieldValue(`selected.${index}.is_present`, false);
+        setFieldValue(`selecteds.${index}.is_present`, false);
       }
     }
   }
 
   function handleCheckChild(e, setFieldValue, id) {
-    setFieldValue(`selected.${id}.is_present`, e.target.checked);
+    setFieldValue(`selecteds.${id}.is_present`, e.target.checked);
   }
 
   function handleSubmit(values) {
+    let participants = [];
+
     !!!values.offer && (values.offer = 0);
+
+    values.selecteds.map(selected => {
+      participants.push({
+        id: selected.id,
+        is_present: selected.is_present,
+      });
+    });
+
+    const payload = {
+      lesson_report_id: data.id,
+      date: new Date(),
+      participants,
+      offer: values.offer,
+      testimony: values.testimony,
+      doubts: values.doubts,
+    };
+
+    console.tron.log(payload);
+
+    dispatch(LessonActions.editLessonRequest(payload));
   }
 
   function handleBackLessons() {
-    setModalBackLesson(true);
-  }
-
-  function confirmBackLessons() {
-    history.push(`/eventos/grupo/${match.params.event_id}/editar`);
-  }
-
-  function cancelBackLessons() {
-    setModalBackLesson(false);
+    toastr.confirm('As informações não serão salvas ao voltar.', {
+      onOk: () =>
+        history.push(`/eventos/grupo/${match.params.event_id}/editar`),
+      onCancel: () => {},
+    });
   }
 
   useEffect(() => {
-    dispatch(LessonActions.lessonRequest(match.params.lesson_id));
+    if (!!data.event && data.event.participants.length > 0) {
+      let participants = [];
 
+      data.event.participants.map(participant => {
+        participants.push({
+          id: participant.pivot.id,
+          name: participant.name,
+          birthday: participant.birthday,
+          is_present: false,
+        });
+      });
+
+      setPresenceList(participants);
+    }
+  }, [data]);
+
+  useEffect(() => {
     const options = {};
     const player = new Plyr('#plyr-player', options);
+
+    dispatch(LessonActions.lessonRequest(match.params.lesson_id));
 
     return () => {
       if (player.length > 0) {
@@ -108,28 +146,29 @@ export default function Lesson({ match, className }) {
 
   return (
     <>
-      {!!data && (
+      {!!data.lesson && (
         <Row>
           <Col xs="12">
             <Card className="white text-center p-4">
               <CardHeader className="p-0">
-                <h1 className="black">{data.name}</h1>
+                <h1 className="black">{data.lesson.title}</h1>
                 <p className="black">
-                  <em>{data.description}</em>
+                  <em>{data.lesson.description}</em>
                 </p>
               </CardHeader>
               <CardBody className="d-flex flex-column justify-content-center align-items-center p-0">
                 <Col xl="8" lg="7" md="12" xs="12" className="form-group">
+                  {console.tron.log(data.lesson.video_id)}
                   <div
                     id="plyr-player"
                     data-plyr-provider="vimeo"
-                    data-plyr-embed-id="127186403"
+                    data-plyr-embed-id={data.lesson.video_id}
                   />
                 </Col>
                 <Formik
                   enableReinitialize
                   initialValues={{
-                    selected: !!data.participants ? data.participants : [],
+                    selecteds: presenceList !== null ? presenceList : [],
                     offer: !!data.offer ? data.offer : '',
                     testimony: !!data.testimony ? data.testimony : '',
                     doubts: data.doubts,
@@ -137,13 +176,7 @@ export default function Lesson({ match, className }) {
                   }}
                   onSubmit={values => handleSubmit(values)}
                 >
-                  {({
-                    errors,
-                    touched,
-                    handleChange,
-                    values,
-                    setFieldValue,
-                  }) => (
+                  {({ values, setFieldValue }) => (
                     <Form className="w-100 d-flex flex-column justify-content-center align-items-center">
                       <Col lg="8" md="12" xs="12">
                         <h2 className="black mt-4">Presença</h2>
@@ -167,26 +200,27 @@ export default function Lesson({ match, className }) {
                                 </Label>
                               </th>
                               <th>Participantes</th>
+                              <th>Idade</th>
                             </tr>
                           </thead>
                           <tbody>
                             <FieldArray
-                              name="selected"
+                              name="selecteds"
                               render={arrayHelpers => (
                                 <>
-                                  {values.selected.map((selected, index) => (
+                                  {values.selecteds.map((selecteds, index) => (
                                     <tr
-                                      className={`${!selected.is_present &&
+                                      className={`${!selecteds.is_present &&
                                         'table-danger'}`}
                                     >
                                       <td>
                                         <Field
                                           disabled={data.is_finished}
                                           type="checkbox"
-                                          checked={selected.is_present}
+                                          checked={selecteds.is_present}
                                           className="ml-0 childCheck"
-                                          id={`selected.${index}.checked`}
-                                          name={`selected.${index}.checked`}
+                                          id={`selecteds.${index}.checked`}
+                                          name={`selecteds.${index}.checked`}
                                           onClick={e =>
                                             handleCheckChild(
                                               e,
@@ -197,7 +231,16 @@ export default function Lesson({ match, className }) {
                                         />
                                       </td>
                                       <td>
-                                        <Label>{selected.name}</Label>
+                                        <Label>{selecteds.name}</Label>
+                                      </td>
+                                      <td>
+                                        <Label>
+                                          {differenceInCalendarYears(
+                                            new Date(),
+                                            new Date(selecteds.birthday)
+                                          )}{' '}
+                                          anos
+                                        </Label>
                                       </td>
                                     </tr>
                                   ))}
@@ -274,41 +317,6 @@ export default function Lesson({ match, className }) {
                           Confirmar relatório
                         </Button>
                       </Col>
-
-                      <Modal
-                        isOpen={modalBackLesson}
-                        toggle={cancelBackLessons}
-                        className={className}
-                      >
-                        <ModalHeader toggle={cancelBackLessons}>
-                          Voltar para as aulas
-                        </ModalHeader>
-                        <ModalBody>
-                          <div>
-                            As informações desta páginas não serão salvas ao
-                            voltar
-                          </div>
-                        </ModalBody>
-                        <ModalFooter>
-                          <Form>
-                            <Button
-                              className="ml-1 my-1"
-                              outline
-                              color="warning"
-                              onClick={cancelBackLessons}
-                            >
-                              Cancelar
-                            </Button>{' '}
-                            <Button
-                              className="ml-1 my-1"
-                              color="success"
-                              onClick={confirmBackLessons}
-                            >
-                              Confirmar
-                            </Button>{' '}
-                          </Form>
-                        </ModalFooter>
-                      </Modal>
                     </Form>
                   )}
                 </Formik>

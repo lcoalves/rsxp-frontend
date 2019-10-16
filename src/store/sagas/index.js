@@ -685,12 +685,33 @@ function* lesson(action) {
   try {
     const { id } = action.payload;
 
-    const response = yield call(api.get, `/lesson/${id}`);
+    const response = yield call(api.get, `/lesson_report/${id}`);
 
     yield put(LessonActions.lessonSuccess(response.data));
   } catch (err) {
     toastr.error('Falha!', 'Tente novamente');
     yield put(LessonActions.lessonFailure());
+  }
+}
+
+function* lessonEdit(action) {
+  try {
+    const { data } = action.payload;
+
+    const { lesson_report_id } = data;
+
+    delete data.lesson_report_id;
+
+    const response = yield call(
+      api.put,
+      `/lesson_report/${lesson_report_id}`,
+      data
+    );
+
+    yield put(LessonActions.editLessonSuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(LessonActions.editLessonFailure());
   }
 }
 
@@ -879,6 +900,7 @@ export default function* rootSaga() {
     takeLatest(CheckoutTypes.CHECKOUT_SIGNUP_REQUEST, checkoutSignup),
     takeLatest(CheckoutTypes.CHECKOUT_REQUEST, checkoutPayment),
     takeLatest(LessonTypes.REQUEST, lesson),
+    takeLatest(LessonTypes.EDIT_REQUEST, lessonEdit),
     takeLatest(SiteEventTypes.REQUEST, siteEvent),
     takeLatest(AvatarTypes.REQUEST, avatar),
   ]);

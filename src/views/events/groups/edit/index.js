@@ -1416,7 +1416,7 @@ export default function UserProfile({ match, className }) {
                                     </p>
                                   </div>
                                   <Link
-                                    to={`/eventos/grupo/1/editar/aula/${lessonReport.lesson.id}`}
+                                    to={`/eventos/grupo/1/editar/aula/${lessonReport.id}`}
                                   />
                                 </figcaption>
                               </figure>
