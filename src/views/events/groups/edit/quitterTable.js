@@ -17,7 +17,7 @@ import 'react-table/react-table.css';
 
 import { Creators as ParticipantActions } from '~/store/ducks/participant';
 
-export default function ParticipantTable({ data }) {
+export default function QuitterTable({ data }) {
   const dispatch = useDispatch();
 
   function deleteParticipant(instance) {
@@ -33,17 +33,17 @@ export default function ParticipantTable({ data }) {
     );
   }
 
-  function setQuitter(instance) {
+  function setInscription(instance) {
     const participant_id = instance.original.pivot.id;
 
     toastr.confirm(
-      `Tem certeza de que quer tornar ${instance.original.name} em desistente?`,
+      `Tem certeza de que quer tornar ${instance.original.name} em inscrito?`,
       {
         onOk: () =>
           dispatch(
             ParticipantActions.setQuitterParticipantRequest(
               participant_id,
-              true
+              false
             )
           ),
         onCancel: () => {},
@@ -146,8 +146,8 @@ export default function ParticipantTable({ data }) {
                   <DropdownItem onClick={() => deleteParticipant(instance)}>
                     Remover
                   </DropdownItem>
-                  <DropdownItem onClick={() => setQuitter(instance)}>
-                    Tornar desistente
+                  <DropdownItem onClick={() => setInscription(instance)}>
+                    Tornar inscrito
                   </DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>

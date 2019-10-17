@@ -14,6 +14,9 @@ export const Types = {
   SEARCH_REQUEST: 'SEARCH_PARTICIPANT_REQUEST',
   SEARCH_SUCCESS: 'SEARCH_PARTICIPANT_SUCCESS',
   SEARCH_FAILURE: 'SEARCH_PARTICIPANT_FAILURE',
+  SET_QUITTER_REQUEST: 'SET_QUITTER_REQUEST',
+  SET_QUITTER_SUCCESS: 'SET_QUITTER_SUCCESS',
+  SET_QUITTER_FAILURE: 'SET_QUITTER_FAILURE',
 };
 
 /**
@@ -93,6 +96,22 @@ export default function participant(state = INITIAL_STATE, action) {
         loadingSearch: false,
       };
 
+    // MUDAR PARTICIPANTE DESISTENTE / NAO DESISTENTE
+    case Types.SET_QUITTER_REQUEST:
+      return { ...state, loading: true };
+    case Types.SET_QUITTER_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.SET_QUITTER_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
+      };
+
     default:
       return state;
   }
@@ -142,11 +161,10 @@ export const Creators = {
   }),
 
   //DELETE PARTICIPANTE
-  deleteParticipantRequest: (event_id, entity_id) => ({
+  deleteParticipantRequest: participant_id => ({
     type: Types.DELETE_REQUEST,
     payload: {
-      event_id,
-      entity_id,
+      participant_id,
     },
   }),
 
@@ -176,5 +194,22 @@ export const Creators = {
 
   searchParticipantFailure: () => ({
     type: Types.SEARCH_FAILURE,
+  }),
+
+  // SET PARTICIPANTE DESISTENTE/NAO DESISTENTE
+  setQuitterParticipantRequest: (participant_id, is_quitter) => ({
+    type: Types.SET_QUITTER_REQUEST,
+    payload: {
+      participant_id,
+      is_quitter,
+    },
+  }),
+
+  setQuitterParticipantSuccess: () => ({
+    type: Types.SET_QUITTER_SUCCESS,
+  }),
+
+  setQuitterParticipantFailure: () => ({
+    type: Types.SET_QUITTER_FAILURE,
   }),
 };

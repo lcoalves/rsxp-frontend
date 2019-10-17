@@ -17,6 +17,7 @@ import login from './login';
 import profile from './profile';
 import resetPassword from './resetPassword';
 import event from './event';
+import invite from './invite';
 import groupEdit from './groupEdit';
 import searchChurch from './searchChurch';
 import cep from './cep';
@@ -46,6 +47,7 @@ export default combineReducers({
   profile,
   resetPassword,
   event,
+  invite,
   groupEdit,
   searchChurch,
   cep,
