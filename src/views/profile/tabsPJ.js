@@ -46,6 +46,7 @@ import { css } from '@emotion/core';
 import { BounceLoader } from 'react-spinners';
 
 import { Creators as AvatarActions } from '~/store/ducks/avatar';
+import { Creators as ProfileActions } from '~/store/ducks/profile';
 
 import CustomTabs from '../../components/tabs/default';
 
@@ -65,7 +66,7 @@ const formSchema = Yup.object().shape({
   phone: Yup.string().required('O celular é obrigatório'),
 });
 
-export default function TabsBorderBottom({ className }) {
+export default function TabsBorderBottom() {
   const [activeTab, setActiveTab] = useState('1');
   const [estado, setEstado] = useState('');
   const [src, setSrc] = useState(null);
@@ -74,6 +75,17 @@ export default function TabsBorderBottom({ className }) {
 
   const loading = useSelector(state => state.profile.loading);
   const data = useSelector(state => state.profile.data);
+
+  const DatepickerButton = ({ value, onClick }) => (
+    <Button
+      outline
+      color="secondary"
+      className="width-250 height-38"
+      onClick={onClick}
+    >
+      {value}
+    </Button>
+  );
 
   function toggle(tab) {
     if (activeTab !== tab) {
@@ -93,7 +105,19 @@ export default function TabsBorderBottom({ className }) {
     setEstado(value);
   }
 
-  function handleSubmit(values) {}
+  function handleUpdateProfile(values) {
+    const data = {
+      corporate_name: values.corporate_name,
+      fantasy_name: values.fantasy_name,
+      email: values.email,
+      cnpj: values.cnpj,
+      foundation: values.foundation,
+      phone: values.phone,
+      alt_phone: values.altPhone,
+    };
+
+    dispatch(ProfileActions.editProfileRequest(data));
+  }
 
   return (
     <div>
@@ -122,7 +146,7 @@ export default function TabsBorderBottom({ className }) {
             Endereços
           </NavLink>
         </NavItem>
-        <NavItem>
+        {/* <NavItem>
           <NavLink
             className={classnames({
               active: activeTab === '3',
@@ -133,7 +157,7 @@ export default function TabsBorderBottom({ className }) {
           >
             Membros
           </NavLink>
-        </NavItem>
+        </NavItem> */}
         <NavItem>
           <NavLink
             className={classnames({
@@ -146,7 +170,7 @@ export default function TabsBorderBottom({ className }) {
             Redes Sociais
           </NavLink>
         </NavItem>
-        <NavItem>
+        {/* <NavItem>
           <NavLink
             className={classnames({
               active: activeTab === '5',
@@ -157,12 +181,12 @@ export default function TabsBorderBottom({ className }) {
           >
             Histórico de atividades
           </NavLink>
-        </NavItem>
+        </NavItem> */}
       </Nav>
       <TabContent activeTab={activeTab}>
         <TabPane tabId="1">
           <Row>
-            <Col sm="4">
+            <Col sm="3">
               <CardBody>
                 <Row className="py-2">
                   {!!data.file ? (
@@ -172,8 +196,8 @@ export default function TabsBorderBottom({ className }) {
                           src !== null ? src : data.file.url
                         }')`,
                         backgroundSize: 'cover',
-                        width: '255px',
-                        height: '255px',
+                        width: '100%',
+                        height: '350px',
                         margin: 'auto',
                       }}
                     >
@@ -189,11 +213,11 @@ export default function TabsBorderBottom({ className }) {
                         backgroundImage: `url('${
                           src !== null
                             ? src
-                            : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+                            : 'https://i.imgur.com/KQZkd2um.png'
                         }')`,
                         backgroundSize: 'cover',
-                        width: '255px',
-                        height: '255px',
+                        width: '100%',
+                        height: '350px',
                         margin: 'auto',
                       }}
                     >
@@ -207,7 +231,7 @@ export default function TabsBorderBottom({ className }) {
                 </Row>
               </CardBody>
             </Col>
-            <Col sm="8">
+            <Col sm="9">
               <Card>
                 <CardBody>
                   <Formik
@@ -228,9 +252,15 @@ export default function TabsBorderBottom({ className }) {
                       altPhone: !!data.alt_phone ? data.alt_phone : '',
                     }}
                     validationSchema={formSchema}
-                    onSubmit={values => handleSubmit(values)}
+                    onSubmit={values => handleUpdateProfile(values)}
                   >
-                    {({ errors, touched, handleChange, values }) => (
+                    {({
+                      errors,
+                      touched,
+                      handleChange,
+                      values,
+                      setFieldValue,
+                    }) => (
                       <Form>
                         <FormGroup>
                           {/* Nome e sobrenome */}
@@ -365,27 +395,34 @@ export default function TabsBorderBottom({ className }) {
                               </div>
                             </Col>
                             <Col sm="12" md="12" lg="4">
-                              <Label>Fundação</Label>
-                              <div className="position-relative has-icon-left">
-                                <Datepicker
-                                  name="foundation"
-                                  id="foundation"
-                                  className={`
-                                      form-control
-                                      ${errors.foundation &&
-                                        touched.foundation &&
-                                        'is-invalid'}
-                                    `}
-                                />
-                                {errors.foundation && touched.foundation ? (
-                                  <div className="invalid-feedback">
-                                    {errors.foundation}
+                              <FormGroup className="mb-0">
+                                <Label for="foundation">Fundação</Label>
+                                <div className="position-relative has-icon-left">
+                                  <Datepicker
+                                    name="foundation"
+                                    id="foundation"
+                                    selected={values.foundation}
+                                    onChange={date =>
+                                      setFieldValue('foundation', date)
+                                    }
+                                    customInput={<DatepickerButton />}
+                                    className={`
+                                  form-control
+                                  ${errors.foundation &&
+                                    touched.foundation &&
+                                    'is-invalid'}
+                                `}
+                                  />
+                                  {errors.foundation && touched.foundation ? (
+                                    <div className="invalid-feedback">
+                                      {errors.foundation}
+                                    </div>
+                                  ) : null}
+                                  <div className="form-control-position">
+                                    <Calendar size={14} color="#212529" />
                                   </div>
-                                ) : null}
-                                <div className="form-control-position">
-                                  <Calendar size={14} color="#212529" />
                                 </div>
-                              </div>
+                              </FormGroup>
                             </Col>
                           </Row>
                         </FormGroup>

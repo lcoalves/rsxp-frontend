@@ -265,7 +265,11 @@ export default function ThemeNavbar({ toggleSidebarMenu }) {
                     />
                   ) : (
                     <img
-                      src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+                      src={`${
+                        user_type === 'entity'
+                          ? 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+                          : 'https://i.imgur.com/KQZkd2um.png'
+                      }`}
                       alt="logged-in-user"
                       className="rounded-circle width-35 height-35"
                     />

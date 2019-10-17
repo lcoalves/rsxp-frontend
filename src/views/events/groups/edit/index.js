@@ -160,7 +160,7 @@ export default function UserProfile({ match, className }) {
     <Button
       outline
       color="secondary"
-      className="width-150 height-38"
+      className="width-200 height-38"
       onClick={onClick}
     >
       {value}
@@ -2209,24 +2209,39 @@ export default function UserProfile({ match, className }) {
                 </ModalHeader>
 
                 <ModalBody>
-                  <Row className="mb-2">
-                    <Col className="align-self-center">
+                  <Row>
+                    <Col>
                       <Label className="mb-0">Data da formatura</Label>
                     </Col>
                     <Col>
-                      <Datepicker
-                        name="certificateDate"
-                        id="certificateDate"
-                        dateFormat="dd/MM/yyyy"
-                        showMonthDropdown
-                        showYearDropdown
-                        className={`
-                      form-control
-                      ${errors.certificateDate &&
-                        touched.certificateDate &&
-                        'is-invalid'}
-                    `}
-                      />
+                      <FormGroup>
+                        <div className="position-relative has-icon-left">
+                          <Datepicker
+                            name="certificateDate"
+                            id="certificateDate"
+                            selected={values.certificateDate}
+                            onChange={date =>
+                              setFieldValue('certificateDate', date)
+                            }
+                            customInput={<DatepickerButton />}
+                            minDate={subMonths(new Date(), 12)}
+                            className={`
+                                  form-control
+                                  ${errors.certificateDate &&
+                                    touched.certificateDate &&
+                                    'is-invalid'}
+                                `}
+                          />
+                          {errors.certificateDate && touched.certificateDate ? (
+                            <div className="invalid-feedback">
+                              {errors.certificateDate}
+                            </div>
+                          ) : null}
+                          <div className="form-control-position">
+                            <Calendar size={14} color="#212529" />
+                          </div>
+                        </div>
+                      </FormGroup>
                     </Col>
                   </Row>
                   <Row>

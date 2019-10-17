@@ -79,6 +79,17 @@ export default function TabsBorderBottom() {
   const loading = useSelector(state => state.profile.loading);
   const data = useSelector(state => state.profile.data);
 
+  const DatepickerButton = ({ value, onClick }) => (
+    <Button
+      outline
+      color="secondary"
+      className="width-250 height-38"
+      onClick={onClick}
+    >
+      {value}
+    </Button>
+  );
+
   function toggle(tab) {
     if (activeTab !== tab) {
       setActiveTab(tab);
@@ -243,7 +254,7 @@ export default function TabsBorderBottom() {
                     }}
                     validationSchema={formSchema}
                   >
-                    {({ errors, touched, handleChange, values }) => (
+                    {({ errors, touched, setFieldValue, values }) => (
                       <Form>
                         <FormGroup>
                           {/* Nome e sobrenome */}
@@ -376,27 +387,34 @@ export default function TabsBorderBottom() {
                               </div>
                             </Col>
                             <Col sm="12" md="12" lg="3">
-                              <Label>Nascimento</Label>
-                              <div className="position-relative has-icon-left">
-                                <Datepicker
-                                  name="birthday"
-                                  id="birthday"
-                                  className={`
-                                      form-control
-                                      ${errors.birthday &&
-                                        touched.birthday &&
-                                        'is-invalid'}
-                                    `}
-                                />
-                                {errors.birthday && touched.birthday ? (
-                                  <div className="invalid-feedback">
-                                    {errors.birthday}
+                              <FormGroup>
+                                <Label for="birthday">Nascimento</Label>
+                                <div className="position-relative has-icon-left">
+                                  <Datepicker
+                                    name="birthday"
+                                    id="birthday"
+                                    selected={values.birthday}
+                                    onChange={date =>
+                                      setFieldValue('birthday', date)
+                                    }
+                                    customInput={<DatepickerButton />}
+                                    className={`
+                                  form-control
+                                  ${errors.birthday &&
+                                    touched.birthday &&
+                                    'is-invalid'}
+                                `}
+                                  />
+                                  {errors.birthday && touched.birthday ? (
+                                    <div className="invalid-feedback">
+                                      {errors.birthday}
+                                    </div>
+                                  ) : null}
+                                  <div className="form-control-position">
+                                    <Calendar size={14} color="#212529" />
                                   </div>
-                                ) : null}
-                                <div className="form-control-position">
-                                  <Calendar size={14} color="#212529" />
                                 </div>
-                              </div>
+                              </FormGroup>
                             </Col>
                             <Col sm="12" md="12" lg="4">
                               <Label>Sexo</Label>
