@@ -99,8 +99,6 @@ export default function Lesson({ match, className }) {
       doubts: values.doubts,
     };
 
-    console.tron.log(payload);
-
     dispatch(LessonActions.editLessonRequest(payload));
   }
 
@@ -158,7 +156,6 @@ export default function Lesson({ match, className }) {
               </CardHeader>
               <CardBody className="d-flex flex-column justify-content-center align-items-center p-0">
                 <Col xl="8" lg="7" md="12" xs="12" className="form-group">
-                  {console.tron.log(data.lesson.video_id)}
                   <div
                     id="plyr-player"
                     data-plyr-provider="vimeo"
