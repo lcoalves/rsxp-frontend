@@ -16,12 +16,12 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 
 import Certificate from '~/views/certificate/index';
 
-// import { toastr } from "react-redux-toastr";
 import statesCities from '../../../../assets/data/statesCities';
 
 import CustomTabs from '../../../../components/tabs/default';
 
 import TableParticipants from './participantTable';
+import TableQuitters from './quitterTable';
 import TableInviteds from './invitedTable';
 
 import {
@@ -71,9 +71,11 @@ import classnames from 'classnames';
 
 //import { Creators as OrganizatorActions } from '~/store/ducks/organizatorSearch';
 import { Creators as EventActions } from '~/store/ducks/event';
+import { Creators as InviteActions } from '~/store/ducks/invite';
 import { Creators as CertificateActions } from '~/store/ducks/certificate';
 import { Creators as OrganizatorActions } from '~/store/ducks/organizator';
 import { Creators as ParticipantActions } from '~/store/ducks/participant';
+
 // import { Creators as EventParticipantActions } from '~/store/ducks/'
 
 import photo14 from '../../../../assets/img/photos/18.jpg';
@@ -145,6 +147,7 @@ export default function UserProfile({ match, className }) {
   const [participantData, setParticipantData] = useState(false);
   const [participantError, setParticipantError] = useState(null);
   const [pdfButton, setPdfButton] = useState(null);
+  const [downloadDisable, setDownloadDisable] = useState(true);
 
   const loading = useSelector(state => state.organizator.loadingSearch);
   const participant_loading = useSelector(
@@ -446,12 +449,7 @@ export default function UserProfile({ match, className }) {
   function handleDeleteParticipant(entity_id) {
     toastr.confirm('Deseja deletar o líder em treinamento?', {
       onOk: () =>
-        dispatch(
-          ParticipantActions.deleteParticipantRequest(
-            parseInt(match.params.event_id),
-            entity_id
-          )
-        ),
+        dispatch(ParticipantActions.deleteParticipantRequest(entity_id)),
       onCancel: () => {},
     });
   }
@@ -476,7 +474,7 @@ export default function UserProfile({ match, className }) {
     };
 
     dispatch(
-      EventActions.confirmInviteRequest(
+      InviteActions.confirmInviteRequest(
         match.params.event_id,
         invite_name,
         invite_email
@@ -1222,8 +1220,8 @@ export default function UserProfile({ match, className }) {
                         <hr className="grey" />
                         <Row>
                           <Col xs="6">
-                            <i className="fa fa-star fa-lg pr-2" />
-                            <span>{organizator.birthday}</span>
+                            <i className="fa fa-birthday-cake fa-lg pr-2" />
+                            <span>{organizator.age} anos</span>
                           </Col>
                           <Col xs="6">
                             <i className="fa fa-globe fa-lg pr-2" />
@@ -1266,7 +1264,7 @@ export default function UserProfile({ match, className }) {
                             }}
                             className="fonticon-container"
                             onClick={() =>
-                              handleDeleteParticipant(participant.id)
+                              handleDeleteParticipant(participant.pivot.id)
                             }
                           >
                             <X
@@ -1288,8 +1286,8 @@ export default function UserProfile({ match, className }) {
                           <hr className="grey" />
                           <Row>
                             <Col xs="6">
-                              <i className="fa fa-star fa-lg pr-2" />
-                              <span>{participant.birthday}</span>
+                              <i className="fa fa-birthday-cake fa-lg pr-2" />
+                              <span>{participant.age} anos</span>
                             </Col>
                             <Col xs="6">
                               <i className="fa fa-globe fa-lg pr-2" />
@@ -1371,7 +1369,33 @@ export default function UserProfile({ match, className }) {
                           <TableParticipants
                             data={event_data.participants.filter(
                               participant => {
-                                return participant.pivot.assistant === false;
+                                return (
+                                  participant.pivot.assistant === false &&
+                                  participant.pivot.is_quitter === false
+                                );
+                              }
+                            )}
+                          />
+                        }
+                      />
+                    </CardBody>
+                  </Card>
+                  <Card>
+                    <CardBody>
+                      <div className="d-flex justify-content-between">
+                        <Badge color="danger" className="align-self-center">
+                          Participantes desistentes
+                        </Badge>
+                      </div>
+                      <CustomTabs
+                        TabContent={
+                          <TableQuitters
+                            data={event_data.participants.filter(
+                              participant => {
+                                return (
+                                  participant.pivot.assistant === false &&
+                                  participant.pivot.is_quitter === true
+                                );
                               }
                             )}
                           />
@@ -1562,8 +1586,8 @@ export default function UserProfile({ match, className }) {
                             <hr className="grey" />
                             <Row>
                               <Col xs="6">
-                                <i className="fa fa-star fa-lg pr-2" />
-                                <span>{leaderData.birthday}</span>
+                                <i className="fa fa-birthday-cake fa-lg pr-2" />
+                                <span>{leaderData.age} anos</span>
                               </Col>
                               <Col xs="6">
                                 <i className="fa fa-globe fa-lg pr-2" />
@@ -1831,8 +1855,8 @@ export default function UserProfile({ match, className }) {
                             <hr className="grey" />
                             <Row>
                               <Col xs="6">
-                                <i className="fa fa-star fa-lg pr-2" />
-                                <span>{participantData.birthday}</span>
+                                <i className="fa fa-birthday-cake fa-lg pr-2" />
+                                <span>{participantData.age} anos</span>
                               </Col>
                               <Col xs="6">
                                 <i className="fa fa-globe fa-lg pr-2" />
@@ -2300,7 +2324,13 @@ export default function UserProfile({ match, className }) {
                 <ModalFooter>
                   <Row>
                     {pdfButton !== null && (
-                      <Button onClick={toogleModalCertificate} color="success">
+                      <Button
+                        onClick={
+                          downloadDisable ? toogleModalCertificate : () => {}
+                        }
+                        color="success"
+                        disabled={downloadDisable}
+                      >
                         <PDFDownloadLink
                           className="text-white"
                           document={
@@ -2310,9 +2340,18 @@ export default function UserProfile({ match, className }) {
                             />
                           }
                         >
-                          {({ blob, url, loading, error }) =>
-                            loading ? 'Carregando documento' : 'Baixe agora!'
-                          }
+                          {({ blob, url, loading, error }) => {
+                            if (loading) {
+                              setDownloadDisable(true);
+                              return 'Carregando documento';
+                            } else {
+                              setDownloadDisable(false);
+                              return 'Baixe agora!';
+                            }
+                            // loading ?
+                            //   (setDownloadDisable(true) 'Carregando documento')
+                            // : (setDownloadDisable(false) 'Baixe agora!')
+                          }}
                         </PDFDownloadLink>
                       </Button>
                     )}

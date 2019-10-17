@@ -38,6 +38,11 @@ import {
 } from '~/store/ducks/event';
 
 import {
+  Creators as InviteActions,
+  Types as InviteTypes,
+} from '~/store/ducks/invite';
+
+import {
   Creators as OrganizatorActions,
   Types as OrganizatorTypes,
 } from '~/store/ducks/organizator';
@@ -338,6 +343,19 @@ function* addInvite(action) {
   }
 }
 
+function* deleteInvite(action) {
+  try {
+    const { invite_id } = action.payload;
+
+    yield call(api.delete, `/invite/${invite_id}`);
+
+    yield put(InviteActions.deleteInviteSuccess());
+    window.location.reload();
+  } catch (err) {
+    yield put(InviteActions.deleteInviteFailure());
+  }
+}
+
 function* addEvent(action) {
   try {
     const { data } = action.payload;
@@ -476,6 +494,21 @@ function* createParticipant(action) {
   }
 }
 
+function* setQuitterParticipant(action) {
+  try {
+    const { participant_id, is_quitter } = action.payload;
+
+    yield call(api.put, `/event_participant/${participant_id}`, {
+      is_quitter,
+    });
+
+    yield put(ParticipantActions.setQuitterParticipantSuccess());
+    window.location.reload();
+  } catch (err) {
+    yield put(ParticipantActions.setQuitterParticipantFailure());
+  }
+}
+
 function* addParticipant(action) {
   try {
     const { event_id, entity_id, assistant } = action.payload;
@@ -511,9 +544,9 @@ function* addParticipant(action) {
 
 function* deleteParticipant(action) {
   try {
-    const { event_id, entity_id } = action.payload;
+    const { participant_id } = action.payload;
 
-    yield call(api.delete, `/event_participant/${entity_id}/event/${event_id}`);
+    yield call(api.delete, `/event_participant/${participant_id}`);
 
     yield put(ParticipantActions.deleteParticipantSuccess());
     window.location.reload();
@@ -864,8 +897,10 @@ export default function* rootSaga() {
 
     takeLatest(EventTypes.REQUEST, event),
     takeLatest(EventTypes.ALL_REQUEST, allEvents),
-    takeLatest(EventTypes.ADD_INVITE_REQUEST, addInvite),
     takeLatest(EventTypes.ADD_REQUEST, addEvent),
+
+    takeLatest(InviteTypes.ADD_REQUEST, addInvite),
+    takeLatest(InviteTypes.DELETE_REQUEST, deleteInvite),
 
     takeLatest(OrganizatorTypes.ADD_REQUEST, addOrganizator),
     takeLatest(OrganizatorTypes.DELETE_REQUEST, deleteOrganizator),
@@ -876,6 +911,7 @@ export default function* rootSaga() {
     takeLatest(ParticipantTypes.DELETE_REQUEST, deleteParticipant),
     takeLatest(ParticipantTypes.SEARCH_REQUEST, searchParticipant),
     takeLatest(ParticipantTypes.CREATE_REQUEST, createParticipant),
+    takeLatest(ParticipantTypes.SET_QUITTER_REQUEST, setQuitterParticipant),
 
     takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),
 

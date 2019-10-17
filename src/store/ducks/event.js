@@ -23,14 +23,6 @@ export const Types = {
   EDIT_REQUEST: 'EVENT_EDIT_REQUEST',
   EDIT_SUCCESS: 'EVENT_EDIT_SUCCESS',
   EDIT_FAILURE: 'EVENT_EDIT_FAILURE',
-
-  ADD_INVITE_REQUEST: 'EVENT_ADD_INVITE_REQUEST',
-  ADD_INVITE_SUCCESS: 'EVENT_ADD_INVITE_SUCCESS',
-  ADD_INVITE_FAILURE: 'EVENT_ADD_INVITE_FAILURE',
-
-  INVITE_REQUEST: 'INVITE_REQUEST',
-  INVITE_SUCCESS: 'INVITE_SUCCESS',
-  INVITE_FAILURE: 'INVITE_FAILURE',
 };
 
 /**
@@ -98,38 +90,6 @@ export default function groupEdit(state = INITIAL_STATE, action) {
         loading: false,
       };
     case Types.EDIT_FAILURE:
-      return {
-        ...state,
-        error: true,
-        loading: false,
-      };
-
-    // CASE ADICIONAR EVENTO
-    case Types.EVENT_ADD_INVITE_REQUEST:
-      return { ...state, loading: true };
-    case Types.EVENT_ADD_INVITE_SUCCESS:
-      return {
-        ...state,
-        error: false,
-        loading: false,
-      };
-    case Types.EVENT_ADD_INVITE_FAILURE:
-      return {
-        ...state,
-        error: true,
-        loading: false,
-      };
-
-    // CASE CONFIRMAR CONVITE
-    case Types.INVITE_REQUEST:
-      return { ...state, loading: true };
-    case Types.INVITE_SUCCESS:
-      return {
-        ...state,
-        error: false,
-        loading: false,
-      };
-    case Types.INVITE_FAILURE:
       return {
         ...state,
         error: true,
@@ -204,24 +164,6 @@ export const Creators = {
   }),
   eventEditFailure: () => ({
     type: Types.EDIT_FAILURE,
-  }),
-
-  // CREATORS PARA ADICIONAR UM EVENTO eventAddRequest
-  confirmInviteRequest: (event_id, name, email) => ({
-    type: Types.ADD_INVITE_REQUEST,
-    payload: {
-      event_id,
-      name,
-      email,
-    },
-  }),
-  // confirmInviteSuccess
-  confirmInviteSuccess: () => ({
-    type: Types.ADD_INVITE_SUCCESS,
-  }),
-  //confirmInviteFailure
-  confirmInviteFailure: () => ({
-    type: Types.ADD_INVITE_FAILURE,
   }),
 
   addEventRequest: data => ({
