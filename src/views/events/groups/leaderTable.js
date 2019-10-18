@@ -8,8 +8,8 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
 export default function LeaderTableGroups({ data }) {
-  async function handleEdit(e, column) {
-    if (column === 'Ações' || e === undefined) {
+  async function handleEdit(e) {
+    if (e === undefined) {
       return;
     }
 
@@ -97,7 +97,7 @@ export default function LeaderTableGroups({ data }) {
             overflow: column.id === 'actions' ? 'visible' : 'hidden',
           },
 
-          onClick: () => handleEdit(rowInfo, column.Header),
+          onClick: () => handleEdit(rowInfo),
         };
       }}
       className="-striped -highlight"

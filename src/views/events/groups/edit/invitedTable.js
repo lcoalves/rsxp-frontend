@@ -85,6 +85,7 @@ export default function InvitedTable({ data }) {
         },
       ]}
       defaultPageSize={5}
+      showPageSizeOptions={false}
       getTdProps={(state, rowInfo, column, instance) => {
         return {
           style: {
