@@ -731,13 +731,11 @@ function* lessonEdit(action) {
   try {
     const { data } = action.payload;
 
-    const { lesson_report_id } = data;
-
-    delete data.lesson_report_id;
+    console.tron.log(data.lesson_report_id);
 
     const response = yield call(
       api.put,
-      `/lesson_report/${lesson_report_id}`,
+      `/lesson_report/${data.lesson_report_id}`,
       data
     );
 
