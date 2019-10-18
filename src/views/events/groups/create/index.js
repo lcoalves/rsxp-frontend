@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { Formik, Field, Form } from 'formik';
+
 import { Datepicker } from 'react-formik-ui';
+
 import * as Yup from 'yup';
 import 'react-table/react-table.css';
 
@@ -63,7 +65,9 @@ const formDetails = Yup.object().shape({
     .max(14, 'O CPF deve conter 14 dígitos')
     .required('Campo obrigatório'),
   organization_name: Yup.string().required('Campo obrigatório'),
+  organization_id: Yup.string().required('Campo obrigatório'),
   organizator_name: Yup.string().required('Campo obrigatório'),
+  organizator_id: Yup.string().required('Campo obrigatório'),
   publicEvent: Yup.string().required('Esse campo é obrigatório'),
   is_public: Yup.string().required('Esse campo é obrigatório'),
   is_online_payment: Yup.string().required(
@@ -126,8 +130,9 @@ export default function GroupCreate({ match, className }) {
   const DatepickerButton = ({ value, onClick }) => (
     <Button
       outline
+      block
       color="secondary"
-      className="width-200 height-38"
+      className="width-225 height-38"
       onClick={onClick}
     >
       {value}
@@ -243,7 +248,7 @@ export default function GroupCreate({ match, className }) {
 
   function handleSelfOrganizator(setFieldValue) {
     setFieldValue('organizator_id', profile.id);
-    setFieldValue('organizator_name', profile.name);
+    setFieldValue('organizator_name', `${profile.name} (você)`);
   }
 
   function handleCep(event, setFieldValue, values) {
@@ -328,8 +333,8 @@ export default function GroupCreate({ match, className }) {
                     <h4 className="form-section">
                       <User size={20} color="#212529" /> Dados do Grupo
                     </h4>
-                    <Row>
-                      <Col lg="3" md="6" sm="12">
+                    {/* <Row>
+                      <Col lg="4" md="6" sm="12">
                         <FormGroup>
                           <Label for="is_public">É público?</Label>
                           <HelpCircle
@@ -379,10 +384,10 @@ export default function GroupCreate({ match, className }) {
                           ) : null}
                         </FormGroup>
                       </Col>
-                      <Col lg="3" md="6" sm="12">
+                      <Col lg="5" md="6" sm="12">
                         <FormGroup>
                           <Label for="is_online_payment">
-                            Permite pagamento online
+                            Pagamento online
                           </Label>
                           <HelpCircle
                             id="is_online_payment"
@@ -430,7 +435,9 @@ export default function GroupCreate({ match, className }) {
                           ) : null}
                         </FormGroup>
                       </Col>
-                      <Col lg="2" md="6" sm="12">
+                    </Row> */}
+                    <Row>
+                      <Col xl="3" lg="4" md="4" sm="12">
                         <FormGroup>
                           <Label for="initial_date">Data Inicial</Label>
                           <div className="position-relative has-icon-left">
@@ -443,8 +450,16 @@ export default function GroupCreate({ match, className }) {
                               }
                               customInput={<DatepickerButton />}
                               minDate={subMonths(new Date(), 12)}
+                              calendarClassName="width-350"
+                              dateFormat="dd/MM/yyyy hh:mm aa"
+                              showMonthDropdown
+                              showYearDropdown
+                              dropdownMode="select"
+                              showTimeSelect
+                              timeFormat="HH:mm"
+                              timeIntervals={5}
+                              timeCaption="Horário"
                               className={`
-                                  form-control
                                   ${errors.initial_date &&
                                     touched.initial_date &&
                                     'is-invalid'}
@@ -475,6 +490,15 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 customInput={<DatepickerButton />}
                                 minDate={values.initial_date}
+                                calendarClassName="width-350"
+                                dateFormat="dd/MM/yyyy hh:mm aa"
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode="select"
+                                showTimeSelect
+                                timeFormat="HH:mm"
+                                timeIntervals={5}
+                                timeCaption="Horário"
                                 className={`
                                   form-control
                                   ${errors.end_date &&
@@ -577,10 +601,11 @@ export default function GroupCreate({ match, className }) {
                               />
                             </FormGroup>
                           </Col>
-                          <Col sm="12" md="12" lg="2">
+                          <Col sm="6" md="6" lg="3">
                             {user_type === 'entity' && (
                               <Button
-                                className="mb-0 mr-2"
+                                className="mb-2 mr-2"
+                                block
                                 color="success"
                                 onClick={() =>
                                   handleSelfOrganizator(setFieldValue)
@@ -589,12 +614,15 @@ export default function GroupCreate({ match, className }) {
                                 Eu serei o líder
                               </Button>
                             )}
+                          </Col>
+                          <Col sm="6" md="6" lg="3">
                             <Button
-                              className="mb-0"
+                              className="mb-2"
+                              block
                               color="success"
                               onClick={toggleModalOrganizator}
                             >
-                              <Search size={22} color="#fff" />
+                              Pesquisar líder
                             </Button>
                           </Col>
                         </Row>
@@ -606,7 +634,7 @@ export default function GroupCreate({ match, className }) {
                       Dados da Igreja responsável
                     </h4>
                     <Row className="align-items-center">
-                      <Col sm="12" md="12" lg="6" className="mb-2">
+                      <Col sm="12" md="6" lg="6" className="mb-2">
                         <FormGroup>
                           <Label className="ml-2" for="church">
                             Nome da Igreja
@@ -625,15 +653,22 @@ export default function GroupCreate({ match, className }) {
                                 'is-invalid'}
                             `}
                           />
+                          {errors.organization_name &&
+                          touched.organization_name ? (
+                            <div className="invalid-feedback">
+                              {errors.organization_name}
+                            </div>
+                          ) : null}
                         </FormGroup>
                       </Col>
-                      <Col sm="12" md="12" lg="1">
+                      <Col sm="12" md="6" lg="4">
                         <Button
-                          className="mb-0"
+                          className="mb-2"
+                          block
                           color="success"
                           onClick={toggleModalChurch}
                         >
-                          <Search size={22} color="#fff" />
+                          Pesquisar igreja
                         </Button>
                       </Col>
                     </Row>
@@ -844,7 +879,7 @@ export default function GroupCreate({ match, className }) {
                         {event_loading ? (
                           <Button
                             disabled
-                            color="success"
+                            color="secondary"
                             // block
                             // className="btn-default btn-raised"
                           >
@@ -861,8 +896,8 @@ export default function GroupCreate({ match, className }) {
                           <Button
                             type="submit"
                             color="success"
-                            onClick={() => handleSubmit(values)}
-                            // block
+                            // onClick={() => handleSubmit(values)}
+                            block
                             // className="btn-default btn-raised"
                           >
                             Criar grupo

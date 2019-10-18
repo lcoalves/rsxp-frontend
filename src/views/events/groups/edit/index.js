@@ -1032,6 +1032,9 @@ export default function UserProfile({ match, className }) {
                                     }
                                     customInput={<DatepickerButton />}
                                     minDate={subMonths(new Date(), 12)}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
                                     className={`
                                   form-control
                                   ${errors.initialDate &&
@@ -1061,8 +1064,11 @@ export default function UserProfile({ match, className }) {
                                     onChange={date =>
                                       setFieldValue('endDate', date)
                                     }
-                                    minDate={values.initialDate}
                                     customInput={<DatepickerButton />}
+                                    minDate={values.initialDate}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
                                     className="form-control"
                                   />
                                   <div className="form-control-position">
@@ -2249,6 +2255,9 @@ export default function UserProfile({ match, className }) {
                             }
                             customInput={<DatepickerButton />}
                             minDate={subMonths(new Date(), 12)}
+                            showMonthDropdown
+                            showYearDropdown
+                            dropdownMode="select"
                             className={`
                                   form-control
                                   ${errors.certificateDate &&

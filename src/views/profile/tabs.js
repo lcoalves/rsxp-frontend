@@ -398,6 +398,9 @@ export default function TabsBorderBottom() {
                                       setFieldValue('birthday', date)
                                     }
                                     customInput={<DatepickerButton />}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
                                     className={`
                                   form-control
                                   ${errors.birthday &&

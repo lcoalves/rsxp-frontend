@@ -406,6 +406,9 @@ export default function TabsBorderBottom() {
                                       setFieldValue('foundation', date)
                                     }
                                     customInput={<DatepickerButton />}
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
                                     className={`
                                   form-control
                                   ${errors.foundation &&
