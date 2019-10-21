@@ -133,6 +133,7 @@ const formCertificate = Yup.object().shape({
 
 export default function UserProfile({ match, className }) {
   const [activeTab, setActiveTab] = useState('1');
+  const [modalSendMaterial, setModalSendMaterial] = useState(false);
   const [modalOrganizator, setModalOrganizator] = useState(false);
   const [modalChangeOrganizator, setModalChangeOrganizator] = useState(false);
   const [modalParticipant, setModalParticipant] = useState(false);
@@ -245,6 +246,10 @@ export default function UserProfile({ match, className }) {
   }, [participant_error]);
 
   const dispatch = useDispatch();
+
+  function toogleModalSendMaterial() {
+    setModalSendMaterial(!modalSendMaterial);
+  }
 
   function toogleModalOrganizator() {
     setLeaderData(null);
@@ -556,8 +561,10 @@ export default function UserProfile({ match, className }) {
   useEffect(() => {
     const participants = [];
     const assistantsData = [];
+    // const products = [];
 
     if (!!event_data) {
+      // CRIAR LISTA DE PARTICIPANTES PARA MOSTRAR NO MODAL DO CERTIFICADO
       if (event_data.participants && event_data.participants.length > 0) {
         event_data.participants.map(participant => {
           participants.push({
@@ -574,6 +581,18 @@ export default function UserProfile({ match, className }) {
         setAssistants(assistantsData);
       } else {
       }
+
+      // CRIAR LISTA DE PRODUTO PARA MOSTRAR NO MODAL DO ENVIAR MATERIAL
+      // if (event_data.defaultEvent.kit.products && event_data.defaultEvent.kit.products > 0) {
+      //   event_data.defaultEvent.kit.products.map(product => {
+      //     products.push({
+      //       id: product.netsuite_id,
+      //       name: product.name ,
+      //       quantity: 0
+      //     })
+      //   })
+      // }
+
       setInvites(event_data.invites);
     }
   }, [event_data]);
@@ -596,14 +615,15 @@ export default function UserProfile({ match, className }) {
                       <ChevronDown size={24} />
                     </DropdownToggle>
                     <DropdownMenu right>
-                      <Link
-                        to="/eventos/grupo/editar/enviar?id=1"
-                        className="p-0"
+                      <DropdownItem
+                        disabled={
+                          event_data.status !== 'Finalizado' ? true : false
+                        }
+                        onClick={toogleModalSendMaterial}
                       >
-                        <DropdownItem>
-                          <i className="fa fa-plus mr-2" /> Enviar material
-                        </DropdownItem>
-                      </Link>
+                        <i className="fa fa-plus mr-2" /> Enviar material
+                      </DropdownItem>
+                      )
                       {/* <DropdownItem>
                         <i className="fa fa-address-card mr-2" /> Emitir crachás
                       </DropdownItem>
@@ -637,7 +657,16 @@ export default function UserProfile({ match, className }) {
                               tem pedido = sim, relatorios semanais = sim, então emitir certificado;
                               tem pedido = nao, entao enviar material
                             */}
-                            <Button color="success" className="btn-raised mr-3">
+                            <Button
+                              color="success"
+                              className="btn-raised mr-3"
+                              disabled={
+                                event_data.status !== 'Finalizado'
+                                  ? false
+                                  : true
+                              }
+                              onClick={toogleModalSendMaterial}
+                            >
                               <i className="fa fa-plus" /> Enviar material
                             </Button>
                             {/* <Button
@@ -707,7 +736,7 @@ export default function UserProfile({ match, className }) {
                           )}
                           onClick={() => toggle('2')}
                         >
-                          Organizadores
+                          Líderes
                         </NavLink>
                       </li>
                     </ul>
@@ -2380,6 +2409,37 @@ export default function UserProfile({ match, className }) {
             )}
           </Formik>
         </Modal>
+
+        {/* <Modal
+          isOpen={modalSendMaterial}
+          toggle={toogleModalSendMaterial}
+          className={className}
+        >
+          <Formik
+            initialValues={{
+              checkBackground: false,
+              selected: certificateParticipants,
+              certificateDate: new Date(),
+            }}
+            onSubmit={() => {}}
+          >
+            {({ errors, touched, handleChange, values, setFieldValue }) => (
+              <Form>
+                <ModalHeader toggle={toogleModalSendMaterial}>
+                  Enviar material
+                </ModalHeader>
+                <ModalBody>
+                  {event_data.defaultEvent.kit.products.map(product => (
+                    <>
+                      <Label>{product.name}</Label>
+                    </>
+                  ))}
+                </ModalBody>
+                <ModalFooter></ModalFooter>
+              </Form>
+            )}
+          </Formik>
+        </Modal> */}
       </Fragment>
     )
   );
