@@ -85,15 +85,15 @@ export const Creators = {
   }),
 
   editLessonRequest: data => ({
-    type: Types.REQUEST,
+    type: Types.EDIT_REQUEST,
     payload: {
       data,
     },
   }),
   editLessonSuccess: () => ({
-    type: Types.SUCCESS,
+    type: Types.EDIT_SUCCESS,
   }),
   editLessonFailure: () => ({
-    type: Types.FAILURE,
+    type: Types.EDIT_FAILURE,
   }),
 };

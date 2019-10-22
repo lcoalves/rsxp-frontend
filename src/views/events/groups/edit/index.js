@@ -133,6 +133,7 @@ const formCertificate = Yup.object().shape({
 
 export default function UserProfile({ match, className }) {
   const [activeTab, setActiveTab] = useState('1');
+  const [modalSendMaterial, setModalSendMaterial] = useState(false);
   const [modalOrganizator, setModalOrganizator] = useState(false);
   const [modalChangeOrganizator, setModalChangeOrganizator] = useState(false);
   const [modalParticipant, setModalParticipant] = useState(false);
@@ -141,6 +142,7 @@ export default function UserProfile({ match, className }) {
   const [modalCertificate, setModalCertificate] = useState(false);
   const [invites, setInvites] = useState([]);
   const [certificateParticipants, setCertificateParticipants] = useState([]);
+  const [productsKit, setProductsKit] = useState([]);
   const [assistants, setAssistants] = useState([]);
   const [organizatorType, setOrganizatorType] = useState(null);
   const [leaderData, setLeaderData] = useState(null);
@@ -163,7 +165,7 @@ export default function UserProfile({ match, className }) {
     <Button
       outline
       color="secondary"
-      className="width-200 height-38"
+      className="width-225 height-38"
       onClick={onClick}
     >
       {value}
@@ -245,6 +247,10 @@ export default function UserProfile({ match, className }) {
   }, [participant_error]);
 
   const dispatch = useDispatch();
+
+  function toogleModalSendMaterial() {
+    setModalSendMaterial(!modalSendMaterial);
+  }
 
   function toogleModalOrganizator() {
     setLeaderData(null);
@@ -556,8 +562,10 @@ export default function UserProfile({ match, className }) {
   useEffect(() => {
     const participants = [];
     const assistantsData = [];
+    const products = [];
 
     if (!!event_data) {
+      // CRIAR LISTA DE PARTICIPANTES PARA MOSTRAR NO MODAL DO CERTIFICADO
       if (event_data.participants && event_data.participants.length > 0) {
         event_data.participants.map(participant => {
           participants.push({
@@ -572,8 +580,25 @@ export default function UserProfile({ match, className }) {
 
         setCertificateParticipants(participants);
         setAssistants(assistantsData);
-      } else {
       }
+
+      // CRIAR LISTA DE PRODUTO PARA MOSTRAR NO MODAL DO ENVIAR MATERIAL
+      if (
+        event_data.defaultEvent.kit.products &&
+        event_data.defaultEvent.kit.products.length > 0
+      ) {
+        event_data.defaultEvent.kit.products.map(product => {
+          products.push({
+            id: product.netsuite_id,
+            name: product.name,
+            unit_price: product.unit_price,
+            quantity: 0,
+          });
+        });
+
+        setProductsKit(products);
+      }
+
       setInvites(event_data.invites);
     }
   }, [event_data]);
@@ -596,14 +621,15 @@ export default function UserProfile({ match, className }) {
                       <ChevronDown size={24} />
                     </DropdownToggle>
                     <DropdownMenu right>
-                      <Link
-                        to="/eventos/grupo/editar/enviar?id=1"
-                        className="p-0"
+                      <DropdownItem
+                        disabled={
+                          event_data.status !== 'Finalizado' ? true : false
+                        }
+                        onClick={toogleModalSendMaterial}
                       >
-                        <DropdownItem>
-                          <i className="fa fa-plus mr-2" /> Enviar material
-                        </DropdownItem>
-                      </Link>
+                        <i className="fa fa-plus mr-2" /> Enviar material
+                      </DropdownItem>
+                      )
                       {/* <DropdownItem>
                         <i className="fa fa-address-card mr-2" /> Emitir crachás
                       </DropdownItem>
@@ -637,7 +663,16 @@ export default function UserProfile({ match, className }) {
                               tem pedido = sim, relatorios semanais = sim, então emitir certificado;
                               tem pedido = nao, entao enviar material
                             */}
-                            <Button color="success" className="btn-raised mr-3">
+                            <Button
+                              color="success"
+                              className="btn-raised mr-3"
+                              disabled={
+                                event_data.status !== 'Finalizado'
+                                  ? false
+                                  : true
+                              }
+                              onClick={toogleModalSendMaterial}
+                            >
                               <i className="fa fa-plus" /> Enviar material
                             </Button>
                             {/* <Button
@@ -707,7 +742,7 @@ export default function UserProfile({ match, className }) {
                           )}
                           onClick={() => toggle('2')}
                         >
-                          Organizadores
+                          Líderes
                         </NavLink>
                       </li>
                     </ul>
@@ -748,7 +783,7 @@ export default function UserProfile({ match, className }) {
           </Col>
         </Row>
 
-        <TabContent activeTab={activeTab}>
+        <TabContent className="px-0" activeTab={activeTab}>
           {/* Dados do Grupo */}
           <TabPane tabId="1">
             <Card>
@@ -791,9 +826,10 @@ export default function UserProfile({ match, className }) {
                       setFieldValue,
                     }) => (
                       <Form>
+                        {/* <input type="hidden" value="something" /> */}
                         <div className="form-body">
                           <Row>
-                            <Col sm="2">
+                            <Col sm="12" md="4" lg="4" xl="2">
                               <FormGroup>
                                 <Label for="id">Id do evento</Label>
                                 <div className="position-relative">
@@ -807,7 +843,7 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                            <Col sm="10">
+                            <Col sm="12" md="8" lg="8" xl="10">
                               <FormGroup>
                                 <Label for="church">Igreja</Label>
                                 <div className="position-relative has-icon-left">
@@ -833,6 +869,7 @@ export default function UserProfile({ match, className }) {
                                   <Field
                                     type="text"
                                     placeholder="CEP"
+                                    autoComplete="cep"
                                     name="cep"
                                     id="cep"
                                     className={`
@@ -855,8 +892,8 @@ export default function UserProfile({ match, className }) {
                               <FormGroup>
                                 <Label for="uf">Estado</Label>
                                 <Field
-                                  type="select"
-                                  component="select"
+                                  type="text"
+                                  readOnly
                                   id="uf"
                                   name="uf"
                                   onChange={handleChange}
@@ -864,17 +901,7 @@ export default function UserProfile({ match, className }) {
                                   form-control
                                   ${errors.uf && touched.uf && 'is-invalid'}
                                 `}
-                                >
-                                  <option value="" disabled="">
-                                    Selecione uma opção
-                                  </option>
-
-                                  {statesCities.map(state => (
-                                    <option value={state.sigla}>
-                                      {state.nome}
-                                    </option>
-                                  ))}
-                                </Field>
+                                ></Field>
                                 {errors.uf && touched.uf ? (
                                   <div className="invalid-feedback">
                                     {errors.uf}
@@ -886,45 +913,27 @@ export default function UserProfile({ match, className }) {
                               <FormGroup>
                                 <Label for="city">Cidade</Label>
                                 <Field
-                                  type="select"
-                                  component="select"
+                                  type="text"
+                                  autoComplete="city"
                                   id="city"
                                   name="city"
                                   className={`
                                   form-control
                                   ${errors.city && touched.city && 'is-invalid'}
                                 `}
-                                >
-                                  <option value="" disabled="">
-                                    Selecione uma opção
-                                  </option>
-
-                                  {statesCities.map(element => {
-                                    if (values.uf === element.sigla) {
-                                      const cidades = element.cidades.map(
-                                        cidade => {
-                                          return (
-                                            <option value={cidade}>
-                                              {cidade}
-                                            </option>
-                                          );
-                                        }
-                                      );
-                                      return cidades;
-                                    }
-                                  })}
-                                </Field>
+                                ></Field>
                               </FormGroup>
                             </Col>
                           </Row>
                           <Row>
-                            <Col sm="6">
+                            <Col sm="12" md="8" lg="8">
                               <FormGroup>
                                 <Label for="street">Rua</Label>
                                 <div className="position-relative has-icon-left">
                                   <Field
                                     type="text"
                                     placeholder="Rua"
+                                    autoComplete="street"
                                     name="street"
                                     id="street"
                                     className={`
@@ -945,13 +954,14 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                            <Col sm="2">
+                            <Col sm="12" md="4" lg="4">
                               <FormGroup>
                                 <Label for="streetNumber">Número</Label>
                                 <div className="position-relative has-icon-left">
                                   <Field
                                     type="text"
                                     placeholder="Número"
+                                    autoComplete="number"
                                     name="number"
                                     id="number"
                                     className={`
@@ -972,13 +982,16 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                            <Col sm="4">
+                          </Row>
+                          <Row>
+                            <Col sm="12" md="6" lg="4">
                               <FormGroup>
                                 <Label for="neighborhood">Bairro</Label>
                                 <div className="position-relative has-icon-left">
                                   <Field
                                     type="text"
                                     placeholder="Bairro"
+                                    autoComplete="neighborhood"
                                     name="neighborhood"
                                     id="neighborhood"
                                     className={`
@@ -1000,14 +1013,13 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                          </Row>
-                          <Row>
-                            <Col sm="8">
+                            <Col sm="12" md="6" lg="8">
                               <FormGroup>
                                 <Label for="complement">Complemento</Label>
                                 <div className="position-relative has-icon-left">
                                   <Field
                                     type="text"
+                                    autoComplete="complement"
                                     id="complement"
                                     name="complement"
                                     placeholder="Ex: Apartamento 1"
@@ -1019,9 +1031,11 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                            <Col sm="2">
+                          </Row>
+                          <Row>
+                            <Col xl="3" lg="4" md="5" sm="12">
                               <FormGroup>
-                                <Label for="initialDate">Data Inicial</Label>
+                                <Label for="initialDate">Inicio</Label>
                                 <div className="position-relative has-icon-left">
                                   <Datepicker
                                     name="initialDate"
@@ -1032,15 +1046,21 @@ export default function UserProfile({ match, className }) {
                                     }
                                     customInput={<DatepickerButton />}
                                     minDate={subMonths(new Date(), 12)}
+                                    calendarClassName="width-350"
+                                    dateFormat="dd/MM/yyyy hh:mm aa"
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode="select"
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={5}
+                                    timeCaption="Horário"
                                     className={`
-                                  form-control
-                                  ${errors.initialDate &&
-                                    touched.initialDate &&
-                                    'is-invalid'}
-                                `}
+                                      form-control
+                                      ${errors.initialDate &&
+                                        touched.initialDate &&
+                                        'is-invalid'}
+                                    `}
                                   />
                                   {errors.initialDate && touched.initialDate ? (
                                     <div className="invalid-feedback">
@@ -1053,7 +1073,7 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                            <Col sm="2">
+                            <Col xl="3" lg="3" md="5" sm="12">
                               <FormGroup>
                                 <Label for="endDate">Formatura</Label>
                                 <div className="position-relative has-icon-left">
@@ -1066,9 +1086,15 @@ export default function UserProfile({ match, className }) {
                                     }
                                     customInput={<DatepickerButton />}
                                     minDate={values.initialDate}
+                                    calendarClassName="width-350"
+                                    dateFormat="dd/MM/yyyy hh:mm aa"
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode="select"
+                                    showTimeSelect
+                                    timeFormat="HH:mm"
+                                    timeIntervals={5}
+                                    timeCaption="Horário"
                                     className="form-control"
                                   />
                                   <div className="form-control-position">
@@ -1119,11 +1145,6 @@ export default function UserProfile({ match, className }) {
 
           {/* Organizadores */}
           <TabPane tabId="2">
-            <Row>
-              <Col xs="12">
-                <div className="content-header" />
-              </Col>
-            </Row>
             <Row>
               {/* BOTAO PARA ADICIONAR ORGANIZADOR */}
               {event_data.defaultEvent.max_organizators >
@@ -1615,38 +1636,36 @@ export default function UserProfile({ match, className }) {
             </Formik>
           </ModalBody>
           <ModalFooter>
-            <Form>
-              <Button
-                className="ml-1 my-1"
-                color="danger"
-                onClick={toogleModalOrganizator}
-              >
-                Cancelar
-              </Button>{' '}
-              <Button
-                className={`${
-                  leaderData !== null
-                    ? 'ml-1 my-1 btn-success'
-                    : 'btn-secundary ml-1 my-1'
-                }`}
-                // color="success"
-                onClick={confirmModalOrganizator}
-                disabled={leaderData !== null ? false : true}
-              >
-                {loading ? (
-                  <BounceLoader
-                    size={23}
-                    color={'#fff'}
-                    css={css`
-                      display: block;
-                      margin: 0 auto;
-                    `}
-                  />
-                ) : (
-                  'Adicionar Organizador'
-                )}
-              </Button>
-            </Form>
+            <Button
+              className="ml-1 my-1"
+              color="danger"
+              onClick={toogleModalOrganizator}
+            >
+              Cancelar
+            </Button>{' '}
+            <Button
+              className={`${
+                leaderData !== null
+                  ? 'ml-1 my-1 btn-success'
+                  : 'btn-secundary ml-1 my-1'
+              }`}
+              // color="success"
+              onClick={confirmModalOrganizator}
+              disabled={leaderData !== null ? false : true}
+            >
+              {loading ? (
+                <BounceLoader
+                  size={23}
+                  color={'#fff'}
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
+              ) : (
+                'Adicionar Organizador'
+              )}
+            </Button>
           </ModalFooter>
         </Modal>
 
@@ -2384,6 +2403,83 @@ export default function UserProfile({ match, className }) {
                       Gerar certificados
                     </Button>
                   </Row>
+                </ModalFooter>
+              </Form>
+            )}
+          </Formik>
+        </Modal>
+
+        {/* MODAL SEND MATERIAL */}
+        <Modal
+          isOpen={modalSendMaterial}
+          toggle={toogleModalSendMaterial}
+          className={className}
+          size="lg"
+        >
+          <Formik
+            initialValues={{
+              products: productsKit,
+            }}
+            onSubmit={() => {}}
+          >
+            {({ errors, touched, handleChange, values, setFieldValue }) => (
+              <Form>
+                <ModalHeader toggle={toogleModalSendMaterial}>
+                  Enviar material
+                </ModalHeader>
+                <ModalBody>
+                  {console.tron.log(values.products)}
+                  {values.products.map((product, index) => (
+                    <Row className="align-items-center">
+                      <Col sm="12" md="8" lg="8">
+                        <FormGroup>
+                          <Label for="id">{product.name}</Label>
+                        </FormGroup>
+                      </Col>
+                      <Col sm="6" md="2" lg="2">
+                        <FormGroup>
+                          <Label for="id">R${product.unit_price}</Label>
+                        </FormGroup>
+                      </Col>
+                      <Col sm="6" md="2" lg="2">
+                        <FormGroup>
+                          <div className="position-relative">
+                            <Field
+                              type="number"
+                              id={`products.${index}.quantity`}
+                              name={`products.${index}.quantity`}
+                              className="form-control"
+                            />
+                          </div>
+                        </FormGroup>
+                      </Col>
+                    </Row>
+                  ))}
+                </ModalBody>
+                <ModalFooter>
+                  <Form>
+                    <Button
+                      className="ml-1 my-1"
+                      color="danger"
+                      onClick={toogleModalSendMaterial}
+                    >
+                      Cancelar
+                    </Button>{' '}
+                    <Button className="ml-1 my-1 btn-success" type="submit">
+                      {loading ? (
+                        <BounceLoader
+                          size={23}
+                          color={'#fff'}
+                          css={css`
+                            display: block;
+                            margin: 0 auto;
+                          `}
+                        />
+                      ) : (
+                        'Enviar material'
+                      )}
+                    </Button>
+                  </Form>
                 </ModalFooter>
               </Form>
             )}

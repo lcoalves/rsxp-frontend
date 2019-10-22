@@ -30,8 +30,7 @@ export default function Groups() {
     <>
       <ContentHeader>Grupos</ContentHeader>
       <ContentSubHeader>
-        Aqui você visualiza os grupos que lidera, participa e líderes que
-        treinou (caso você seja um treinador)
+        Aqui você visualiza os grupos que lidera.
       </ContentSubHeader>
       <Row className="row-eq-height">
         <Col sm="12">
@@ -79,11 +78,11 @@ export default function Groups() {
               />
             </CardBody>
           </Card>
-          <Card>
+          {/* <Card>
             <CardBody>
               <div className="d-flex justify-content-between">
                 <Badge color="info" className="align-self-center">
-                  {user_type === 'entity'
+                  {user_type === 'entitys'
                     ? 'Grupos que participo'
                     : 'Grupos com membros inscritos'}
                 </Badge>
@@ -92,7 +91,7 @@ export default function Groups() {
                 TabContent={<ParticipantTable data={allData.participants} />}
               />
             </CardBody>
-          </Card>
+          </Card> */}
           {/* <Card>
             <CardBody>
               <div className="d-flex justify-content-between">

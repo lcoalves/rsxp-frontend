@@ -1,16 +1,38 @@
 import React from 'react';
+import { useDispatch } from 'react-redux';
 
 import history from '../../../app/history';
 import moment from 'moment';
+
+import { toastr } from 'react-redux-toastr';
+import { UncontrolledTooltip } from 'reactstrap';
+
+import { Creators as EventActions } from '~/store/ducks/event';
 
 // Import React Table
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
+import { Trash2 } from 'react-feather';
+
 export default function LeaderTableGroups({ data }) {
-  async function handleEdit(e, column) {
-    if (column === 'Ações' || e === undefined) {
+  const dispatch = useDispatch();
+
+  function handleEdit(e, column) {
+    if (e === undefined) {
       return;
+    }
+
+    if (column === 'Ações') {
+      if (e.original.participants_count === 0) {
+        toastr.confirm(`Tem certeza de que quer deletar o grupo?`, {
+          onOk: () => dispatch(EventActions.deleteEventRequest(e.original.id)),
+          onCancel: () => {},
+        });
+        return;
+      } else {
+        return;
+      }
     }
 
     const id = e.original.id;
@@ -87,6 +109,44 @@ export default function LeaderTableGroups({ data }) {
           accessor: 'status',
           id: 'status',
           width: 150,
+        },
+        {
+          Header: 'Ações',
+          accessor: 'delete',
+          id: 'delete',
+          width: 90,
+          filterable: false,
+          Cell: instance => {
+            if (instance.original.participants_count === 0) {
+              return (
+                <div className="d-flex align-content-center justify-content-center p-1 line-height-1">
+                  <Trash2
+                    size={14}
+                    color={'#f00'}
+                    className="m-auto"
+                    id={`delete`}
+                  />
+                  <UncontrolledTooltip placement="left" target="delete">
+                    Deletar evento
+                  </UncontrolledTooltip>
+                </div>
+              );
+            } else {
+              return (
+                <div className="d-flex align-content-center justify-content-center p-1 line-height-1">
+                  <Trash2
+                    size={14}
+                    color={'#D3D3D3'}
+                    className="m-auto"
+                    id={`delete`}
+                  />
+                  <UncontrolledTooltip placement="left" target="delete">
+                    Evento não pode ser deletado pois possui participantes
+                  </UncontrolledTooltip>
+                </div>
+              );
+            }
+          },
         },
       ]}
       defaultPageSize={5}
