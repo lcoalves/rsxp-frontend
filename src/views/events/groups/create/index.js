@@ -41,6 +41,8 @@ import {
   Flag,
   Compass,
   RefreshCw,
+  Mail,
+  Phone,
 } from 'react-feather';
 
 import { css } from '@emotion/core';
@@ -1062,7 +1064,7 @@ export default function GroupCreate({ match, className }) {
                                         src={
                                           !!organization.file
                                             ? organization.file.url
-                                            : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+                                            : 'https://i.imgur.com/KQZkd2u.png'
                                         }
                                         alt="Brek"
                                         width="150"
@@ -1081,23 +1083,35 @@ export default function GroupCreate({ match, className }) {
                                         Igreja
                                       </p>
                                       <hr className="grey" />
-                                      <Row className="grey">
-                                        <Col xs="4">
-                                          <i className="fa fa-star fa-lg pr-2" />
-                                          <span>3.6</span>
-                                        </Col>
-                                        <Col xs="8">
-                                          <i className="fa fa-globe fa-lg pr-2" />
-                                          {organization.addresses &&
-                                          organization.addresses.length > 0 ? (
-                                            <span>
-                                              {
-                                                organization.addresses[0]
-                                                  .country
-                                              }
+                                      <Row className="mb-1">
+                                        <Col
+                                          xs="6"
+                                          className="text-center text-truncate"
+                                        >
+                                          <Phone size={18} color="#212529" />
+                                          {!!organization.phone ? (
+                                            <span className="ml-2">
+                                              {organization.phone}
                                             </span>
                                           ) : (
-                                            <span>N/A</span>
+                                            <span className="ml-2">
+                                              Sem telefone
+                                            </span>
+                                          )}
+                                        </Col>
+                                        <Col
+                                          xs="6"
+                                          className="text-center text-truncate"
+                                        >
+                                          <Mail size={18} color="#212529" />
+                                          {!!organization.email ? (
+                                            <span className="ml-2">
+                                              {organization.email}
+                                            </span>
+                                          ) : (
+                                            <span className="ml-2">
+                                              Sem email
+                                            </span>
                                           )}
                                         </Col>
                                       </Row>
@@ -1159,7 +1173,9 @@ export default function GroupCreate({ match, className }) {
                           <Row>
                             <Col lg="12" md="12" sm="12">
                               <FormGroup>
-                                <Label for="cpf">Digite o CPF do líder</Label>
+                                <Label for="cpf">
+                                  Digite o CPF do líder auxiliar
+                                </Label>
                                 <div className="position-relative has-icon-right">
                                   <Field
                                     name="cpf"
@@ -1234,20 +1250,35 @@ export default function GroupCreate({ match, className }) {
                                         {organizator.cpf}
                                       </p>
                                       <hr className="grey" />
-                                      <Row className="grey">
-                                        <Col xs="4">
-                                          <i className="fa fa-star fa-lg pr-2" />
-                                          <span>3.6</span>
-                                        </Col>
-                                        <Col xs="8">
-                                          <i className="fa fa-globe fa-lg pr-2" />
-                                          {organizator.addresses &&
-                                          organizator.addresses.length > 0 ? (
-                                            <span>
-                                              {organizator.addresses[0].country}
+                                      <Row className="mb-1">
+                                        <Col
+                                          xs="6"
+                                          className="text-center text-truncate"
+                                        >
+                                          <Phone size={18} color="#212529" />
+                                          {!!organizator.phone ? (
+                                            <span className="ml-2">
+                                              {organizator.phone}
                                             </span>
                                           ) : (
-                                            <span>N/A</span>
+                                            <span className="ml-2">
+                                              Sem telefone
+                                            </span>
+                                          )}
+                                        </Col>
+                                        <Col
+                                          xs="6"
+                                          className="text-center text-truncate"
+                                        >
+                                          <Mail size={18} color="#212529" />
+                                          {!!organizator.email ? (
+                                            <span className="ml-2">
+                                              {organizator.email}
+                                            </span>
+                                          ) : (
+                                            <span className="ml-2">
+                                              Sem email
+                                            </span>
                                           )}
                                         </Col>
                                       </Row>

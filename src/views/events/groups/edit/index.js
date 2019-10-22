@@ -1,8 +1,8 @@
 // --> TUDO DOS ASSISTENTES VAO SER MAIOR OU IGUAL...
 
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { useState, useEffect, Fragment, Component } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import history from '../../../../app/history';
+import NumberFormat from 'react-number-format';
 
 import { Link, Redirect, withRouter } from 'react-router-dom';
 import { Formik, Field, Form, FieldArray } from 'formik';
@@ -13,6 +13,8 @@ import { toastr } from 'react-redux-toastr';
 import * as Yup from 'yup';
 import randomstring from 'randomstring';
 import { PDFDownloadLink } from '@react-pdf/renderer';
+
+import { validateCPF } from '~/services/validateCPF';
 
 import Certificate from '~/views/certificate/index';
 
@@ -62,6 +64,8 @@ import {
   Search,
   X,
   RefreshCw,
+  Mail,
+  Phone,
 } from 'react-feather';
 
 import { css } from '@emotion/core';
@@ -79,6 +83,28 @@ import { Creators as ParticipantActions } from '~/store/ducks/participant';
 // import { Creators as EventParticipantActions } from '~/store/ducks/'
 
 import photo14 from '../../../../assets/img/photos/18.jpg';
+
+class CpfFormat extends Component {
+  state = {
+    value: '',
+  };
+
+  render() {
+    return (
+      <NumberFormat
+        inputMode="decimal"
+        displayType="input"
+        format="###.###.###-##"
+        allowNegative={false}
+        value={this.state.value}
+        onValueChange={vals => {
+          this.setState({ value: vals.value });
+        }}
+        {...this.props}
+      />
+    );
+  }
+}
 
 const options = [
   {
@@ -104,7 +130,7 @@ const formDetails = Yup.object().shape({
 
 const formOrganizator = Yup.object().shape({
   organizator_type: Yup.string().required('Tipo do organizador obrigatório'),
-  cpf: Yup.string().required('CPF obrigatório'),
+  cpf: Yup.string().required('O CPF é obrigatório'),
 });
 
 const formParticipant = Yup.object().shape({
@@ -156,6 +182,9 @@ export default function UserProfile({ match, className }) {
     state => state.participant.loadingSearch
   );
   const organizator_data = useSelector(state => state.organizator.data);
+  const loadingOrganizator = useSelector(
+    state => state.organizator.loadingSearch
+  );
   const participant_data = useSelector(state => state.participant.data);
   const participant_error = useSelector(state => state.participant.error);
   const event_loading = useSelector(state => state.event.loading);
@@ -373,69 +402,46 @@ export default function UserProfile({ match, className }) {
   //   this.setState({ [e.target.name]: e.target.value });
   // };
 
-  function validateCPF(cpf) {
-    let error;
-    let sum = 0;
-    let rest = 0;
-
-    if (
-      cpf.toString() === '00000000000' ||
-      cpf.toString() === '11111111111' ||
-      cpf.toString() === '99999999999'
-    )
-      error = 'O CPF é inválido';
-
-    for (let index = 1; index <= 9; index++) {
-      sum =
-        sum +
-        parseInt(cpf.toString().substring(index - 1, index)) * (11 - index);
-    }
-
-    rest = (sum * 10) % 11;
-
-    if (rest === 10 || rest === 11) rest = 0;
-    if (rest !== parseInt(cpf.toString().substring(9, 10)))
-      error = 'O CPF é inválido';
-
-    sum = 0;
-
-    for (let index = 1; index <= 10; index++) {
-      sum =
-        sum +
-        parseInt(cpf.toString().substring(index - 1, index)) * (12 - index);
-    }
-
-    rest = (sum * 10) % 11;
-
-    if (rest === 10 || rest === 11) rest = 0;
-    if (rest !== parseInt(cpf.toString().substring(10, 11)))
-      error = 'O CPF é inválido';
-
-    return error;
-  }
-
-  function handleSearchOrganizator(values) {
-    const { organizator_type, cpf } = values;
+  function handleSearchOrganizator(cpf, setFieldValue, values) {
+    const { organizator_type } = values;
     const default_event_id = event_data.default_event_id;
+    const formattedCpf = cpf
+      .replace('.', '')
+      .replace('.', '')
+      .replace('-', '');
 
-    dispatch(
-      OrganizatorActions.searchOrganizatorRequest(
-        organizator_type,
-        cpf,
-        default_event_id
-      )
-    );
+    setFieldValue('cpf', formattedCpf);
 
-    setOrganizatorType(organizator_type);
+    if (formattedCpf.length === 11) {
+      dispatch(
+        OrganizatorActions.searchOrganizatorRequest(
+          organizator_type,
+          cpf,
+          default_event_id
+        )
+      );
+    }
   }
 
-  function handleSearchParticipant(values) {
+  function handleOrganizatorType(event, setFieldValue) {
+    setFieldValue('organizator_type', event.target.value);
+    setFieldValue('cpf', '');
+
+    setOrganizatorType(event.target.value);
+    setLeaderData(null);
+  }
+
+  function handleSearchParticipant(cpf, setFieldValue, values) {
     setParticipantData(null);
-    const { cpf } = values;
+    const formattedCpf = cpf
+      .replace('.', '')
+      .replace('.', '')
+      .replace('-', '');
+
     const default_event_id = event_data.default_event_id;
 
     dispatch(
-      ParticipantActions.searchParticipantRequest(cpf, default_event_id)
+      ParticipantActions.searchParticipantRequest(formattedCpf, default_event_id)
     );
   }
 
@@ -861,7 +867,7 @@ export default function UserProfile({ match, className }) {
                               </FormGroup>
                             </Col>
                           </Row>
-                          <Row>
+                          {/* <Row>
                             <Col sm="4">
                               <FormGroup>
                                 <Label for="cep">CEP</Label>
@@ -1103,9 +1109,9 @@ export default function UserProfile({ match, className }) {
                                 </div>
                               </FormGroup>
                             </Col>
-                          </Row>
+                          </Row> */}
                         </div>
-                        <div className="form-actions right">
+                        {/* <div className="form-actions right">
                           <FormGroup>
                             {loading ? (
                               <Button
@@ -1134,7 +1140,7 @@ export default function UserProfile({ match, className }) {
                               </Button>
                             )}
                           </FormGroup>
-                        </div>
+                        </div> */}
                       </Form>
                     )}
                   </Formik>
@@ -1151,8 +1157,8 @@ export default function UserProfile({ match, className }) {
                 event_data.organizators.length ||
               event_data.defaultEvent.max_assistants > assistants.length ? (
                 <Col xs="12" md="6" lg="4">
-                  <Card className="min-vh-50">
-                    <div className="d-flex justify-content-center align-items-center height-425">
+                  <Card className="height-350 justify-content-center">
+                    <div className="d-flex justify-content-center align-items-center">
                       <Button
                         className="rounded-circle width-150 height-150"
                         outline
@@ -1166,8 +1172,8 @@ export default function UserProfile({ match, className }) {
                 </Col>
               ) : (
                 <Col xs="12" md="6" lg="4">
-                  <Card className="min-vh-50">
-                    <div className="d-flex flex-column justify-content-center align-items-center height-400">
+                  <Card className="height-350 justify-content-center">
+                    <div className="d-flex flex-column justify-content-center align-items-center">
                       <Button
                         className="rounded-circle width-150 height-150"
                         outline
@@ -1190,7 +1196,7 @@ export default function UserProfile({ match, className }) {
               {event_data.organizators.map(organizator => {
                 return (
                   <Col xs="12" md="6" lg="4">
-                    <Card className="min-vh-50">
+                    <Card className="height-350 justify-content-center">
                       <CardHeader className="text-center">
                         <img
                           src={
@@ -1245,18 +1251,21 @@ export default function UserProfile({ match, className }) {
                           {organizator.ministery_status}
                         </p>
                         <hr className="grey" />
-                        <Row>
-                          <Col xs="6">
-                            <i className="fa fa-birthday-cake fa-lg pr-2" />
-                            <span>{organizator.age} anos</span>
-                          </Col>
-                          <Col xs="6">
-                            <i className="fa fa-globe fa-lg pr-2" />
-                            {organizator.addresses &&
-                            organizator.addresses.length > 0 ? (
-                              <span>{organizator.address[0].country}</span>
+                        <Row className="mb-1">
+                          <Col xs="6" className="text-center text-truncate">
+                            <Phone size={18} color="#212529" />
+                            {!!organizator.phone ? (
+                              <span className="ml-2">{organizator.phone}</span>
                             ) : (
-                              <span>N/A</span>
+                              <span className="ml-2">Sem telefone</span>
+                            )}
+                          </Col>
+                          <Col xs="6" className="text-center text-truncate">
+                            <Mail size={18} color="#212529" />
+                            {!!organizator.email ? (
+                              <span className="ml-2">{organizator.email}</span>
+                            ) : (
+                              <span className="ml-2">Sem email</span>
                             )}
                           </Col>
                         </Row>
@@ -1271,7 +1280,7 @@ export default function UserProfile({ match, className }) {
                 if (participant.pivot.assistant) {
                   return (
                     <Col xs="12" md="6" lg="4">
-                      <Card className="min-vh-50">
+                      <Card className="height-350 justify-content-center">
                         <CardHeader className="text-center">
                           <img
                             src={
@@ -1311,18 +1320,25 @@ export default function UserProfile({ match, className }) {
                             {participant.ministery_status}
                           </p>
                           <hr className="grey" />
-                          <Row>
-                            <Col xs="6">
-                              <i className="fa fa-birthday-cake fa-lg pr-2" />
-                              <span>{participant.age} anos</span>
-                            </Col>
-                            <Col xs="6">
-                              <i className="fa fa-globe fa-lg pr-2" />
-                              {participant.addresses &&
-                              participant.addresses.length > 0 ? (
-                                <span>{participant.address[0].country}</span>
+                          <Row className="mb-1">
+                            <Col xs="6" className="text-center text-truncate">
+                              <Phone size={18} color="#212529" />
+                              {!!participant.phone ? (
+                                <span className="ml-2">
+                                  {participant.phone}
+                                </span>
                               ) : (
-                                <span>N/A</span>
+                                <span className="ml-2">Sem telefone</span>
+                              )}
+                            </Col>
+                            <Col xs="6" className="text-center text-truncate">
+                              <Mail size={18} color="#212529" />
+                              {!!participant.email ? (
+                                <span className="ml-2">
+                                  {participant.email}
+                                </span>
+                              ) : (
+                                <span className="ml-2">Sem email</span>
                               )}
                             </Col>
                           </Row>
@@ -1518,22 +1534,25 @@ export default function UserProfile({ match, className }) {
               validationSchema={formOrganizator}
               onSubmit={values => handleSearchOrganizator(values)}
             >
-              {({ errors, touched }) => (
+              {({ errors, touched, values, setFieldValue }) => (
                 <Form>
                   <div className="form-body">
                     <Row className="d-flex flex-row f">
-                      <Col sm="12" md="12" lg="4" className="mb-2">
+                      <Col sm="12" md="12" lg="5" className="mb-2">
                         <Field
                           type="select"
                           component="select"
                           id="organizator_type"
                           name="organizator_type"
                           className={`
-                                    form-control
-                                    ${errors.organizator_type &&
-                                      touched.organizator_type &&
-                                      'is-invalid'}
-                                  `}
+                            form-control
+                            ${errors.organizator_type &&
+                              touched.organizator_type &&
+                              'is-invalid'}
+                          `}
+                          onChange={event =>
+                            handleOrganizatorType(event, setFieldValue)
+                          }
                         >
                           <option value="" disabled="">
                             Selecione uma opção
@@ -1558,31 +1577,55 @@ export default function UserProfile({ match, className }) {
                           </div>
                         ) : null}
                       </Col>
-                      <Col sm="12" md="12" lg="6" className="mb-2">
-                        <Field
-                          type="text"
-                          placeholder="Digite o CPF do líder"
-                          name="cpf"
-                          id="cpf"
-                          className={`
-                                    form-control
-                                    ${errors.cpf && touched.cpf && 'is-invalid'}
-                                  `}
-                          validate={validateCPF}
-                        />
-                        {errors.cpf && touched.cpf ? (
-                          <div className="invalid-feedback">{errors.cpf}</div>
-                        ) : null}
-                      </Col>
-                      <Col sm="12" md="12" lg="2">
-                        <Button
-                          className="rounded-right width-100-per"
-                          type="submit"
-                          color="success"
-                        >
-                          <Search size={22} color="#fff" />
-                        </Button>
-                      </Col>
+                      {!!values.organizator_type && (
+                        <Col lg="7" md="12" sm="12">
+                          <FormGroup>
+                            <div className="position-relative has-icon-right">
+                              <Field
+                                name="cpf"
+                                id="cpf"
+                                className={`
+                                form-control
+                                ${errors.cpf && touched.cpf && 'is-invalid'}
+                              `}
+                                validate={validateCPF}
+                                render={({ field }) => (
+                                  <CpfFormat
+                                    {...field}
+                                    id="cpf"
+                                    name="cpf"
+                                    placeholder="digite aqui o CPF"
+                                    className={`
+                                      form-control
+                                      ${errors.cpf &&
+                                        touched.cpf &&
+                                        'is-invalid'}
+                                    `}
+                                    value={values.cpf}
+                                    onValueChange={val =>
+                                      handleSearchOrganizator(
+                                        val.value,
+                                        setFieldValue,
+                                        values
+                                      )
+                                    }
+                                  />
+                                )}
+                              />
+                              {errors.cpf && touched.cpf ? (
+                                <div className="invalid-feedback">
+                                  {errors.cpf}
+                                </div>
+                              ) : null}
+                              {loadingOrganizator && (
+                                <div className="form-control-position">
+                                  <RefreshCw size={16} className="spinner" />
+                                </div>
+                              )}
+                            </div>
+                          </FormGroup>
+                        </Col>
+                      )}
                     </Row>
                   </div>
 
@@ -1611,18 +1654,25 @@ export default function UserProfile({ match, className }) {
                               {leaderData.cpf}
                             </p>
                             <hr className="grey" />
-                            <Row>
-                              <Col xs="6">
-                                <i className="fa fa-birthday-cake fa-lg pr-2" />
-                                <span>{leaderData.age} anos</span>
-                              </Col>
-                              <Col xs="6">
-                                <i className="fa fa-globe fa-lg pr-2" />
-                                {leaderData.addresses &&
-                                leaderData.addresses.length > 0 ? (
-                                  <span>{leaderData.address[0].country}</span>
+                            <Row className="mb-1">
+                              <Col xs="6" className="text-center text-truncate">
+                                <Phone size={18} color="#212529" />
+                                {!!leaderData.phone ? (
+                                  <span className="ml-2">
+                                    {leaderData.phone}
+                                  </span>
                                 ) : (
-                                  <span>N/A</span>
+                                  <span className="ml-2">Sem telefone</span>
+                                )}
+                              </Col>
+                              <Col xs="6" className="text-center text-truncate">
+                                <Mail size={18} color="#212529" />
+                                {!!leaderData.email ? (
+                                  <span className="ml-2">
+                                    {leaderData.email}
+                                  </span>
+                                ) : (
+                                  <span className="ml-2">Sem email</span>
                                 )}
                               </Col>
                             </Row>
@@ -1647,7 +1697,7 @@ export default function UserProfile({ match, className }) {
               className={`${
                 leaderData !== null
                   ? 'ml-1 my-1 btn-success'
-                  : 'btn-secundary ml-1 my-1'
+                  : 'ml-1 my-1 btn-secondary'
               }`}
               // color="success"
               onClick={confirmModalOrganizator}
@@ -1663,7 +1713,7 @@ export default function UserProfile({ match, className }) {
                   `}
                 />
               ) : (
-                'Adicionar Organizador'
+                'Adicionar organizador'
               )}
             </Button>
           </ModalFooter>
@@ -1821,34 +1871,56 @@ export default function UserProfile({ match, className }) {
               validationSchema={formParticipant}
               onSubmit={values => handleSearchParticipant(values)}
             >
-              {({ errors, touched }) => (
+              {({ errors, touched, values, setFieldValue }) => (
                 <Form>
                   <div className="form-body">
                     <Row className="d-flex flex-row">
-                      <Col sm="12" md="12" lg="8" className="mb-2">
-                        <Field
-                          type="text"
-                          placeholder="Digite o CPF do participante"
-                          name="cpf"
-                          id="cpf"
-                          className={`
-                                    form-control
-                                    ${errors.cpf && touched.cpf && 'is-invalid'}
-                                  `}
-                          validate={validateCPF}
-                        />
-                        {errors.cpf && touched.cpf ? (
-                          <div className="invalid-feedback">{errors.cpf}</div>
-                        ) : null}
-                      </Col>
-                      <Col sm="12" md="12" lg="4">
-                        <Button
-                          className="rounded-right width-100-per"
-                          type="submit"
-                          color="success"
-                        >
-                          <Search size={22} color="#fff" />
-                        </Button>
+                      <Col lg="12" md="12" sm="12">
+                        <FormGroup>
+                          <div className="position-relative has-icon-right">
+                            <Field
+                              name="cpf"
+                              id="cpf"
+                              className={`
+                                form-control
+                                ${errors.cpf && touched.cpf && 'is-invalid'}
+                              `}
+                              validate={validateCPF}
+                              render={({ field }) => (
+                                <CpfFormat
+                                  {...field}
+                                  id="cpf"
+                                  name="cpf"
+                                  placeholder="digite aqui o CPF"
+                                  className={`
+                                      form-control
+                                      ${errors.cpf &&
+                                        touched.cpf &&
+                                        'is-invalid'}
+                                    `}
+                                  value={values.cpf}
+                                  onValueChange={val =>
+                                    handleSearchParticipant(
+                                      val.value,
+                                      setFieldValue,
+                                      values
+                                    )
+                                  }
+                                />
+                              )}
+                            />
+                            {errors.cpf && touched.cpf ? (
+                              <div className="invalid-feedback">
+                                {errors.cpf}
+                              </div>
+                            ) : null}
+                            {loadingOrganizator && (
+                              <div className="form-control-position">
+                                <RefreshCw size={16} className="spinner" />
+                              </div>
+                            )}
+                          </div>
+                        </FormGroup>
                       </Col>
                     </Row>
                   </div>
@@ -1878,20 +1950,25 @@ export default function UserProfile({ match, className }) {
                               {participantData.cpf}
                             </p>
                             <hr className="grey" />
-                            <Row>
-                              <Col xs="6">
-                                <i className="fa fa-birthday-cake fa-lg pr-2" />
-                                <span>{participantData.age} anos</span>
-                              </Col>
-                              <Col xs="6">
-                                <i className="fa fa-globe fa-lg pr-2" />
-                                {participantData.addresses &&
-                                participantData.addresses.length > 0 ? (
-                                  <span>
-                                    {participantData.address[0].country}
+                            <Row className="mb-1">
+                              <Col xs="6" className="text-center text-truncate">
+                                <Phone size={18} color="#212529" />
+                                {!!participantData.phone ? (
+                                  <span className="ml-2">
+                                    {participantData.phone}
                                   </span>
                                 ) : (
-                                  <span>N/A</span>
+                                  <span className="ml-2">Sem telefone</span>
+                                )}
+                              </Col>
+                              <Col xs="6" className="text-center text-truncate">
+                                <Mail size={18} color="#212529" />
+                                {!!participantData.email ? (
+                                  <span className="ml-2">
+                                    {participantData.email}
+                                  </span>
+                                ) : (
+                                  <span className="ml-2">Sem email</span>
                                 )}
                               </Col>
                             </Row>

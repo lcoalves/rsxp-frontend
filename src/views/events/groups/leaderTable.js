@@ -100,9 +100,10 @@ export default function LeaderTableGroups({ data }) {
           width: 170,
         },
         {
-          Header: 'Local',
-          accessor: 'address_name',
-          id: 'address_name',
+          Header: 'Igreja',
+          id: 'organization.fantasy_name',
+          accessor: 'organization.fantasy_name',
+          width: 220,
         },
         {
           Header: 'Status',
@@ -124,9 +125,12 @@ export default function LeaderTableGroups({ data }) {
                     size={14}
                     color={'#f00'}
                     className="m-auto"
-                    id={`delete`}
+                    id={`delete-${instance.original.id}`}
                   />
-                  <UncontrolledTooltip placement="left" target="delete">
+                  <UncontrolledTooltip
+                    placement="left"
+                    target={`delete-${instance.original.id}`}
+                  >
                     Deletar evento
                   </UncontrolledTooltip>
                 </div>
@@ -138,10 +142,14 @@ export default function LeaderTableGroups({ data }) {
                     size={14}
                     color={'#D3D3D3'}
                     className="m-auto"
-                    id={`delete`}
+                    id={`delete-${instance.original.id}`}
                   />
-                  <UncontrolledTooltip placement="left" target="delete">
-                    Evento não pode ser deletado pois possui participantes
+                  <UncontrolledTooltip
+                    placement="left"
+                    target={`delete-${instance.original.id}`}
+                  >
+                    O evento não pode ser deletado pois possui participantes
+                    inscritos
                   </UncontrolledTooltip>
                 </div>
               );
