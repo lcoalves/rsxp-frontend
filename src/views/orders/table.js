@@ -289,7 +289,7 @@ class TableExtended extends Component {
             overflow: column.id === 'actions' ? 'visible' : 'hidden',
           },
 
-          onClick: () => console.log(column),
+          onClick: () => {},
         })}
         className="-striped -highlight"
       />

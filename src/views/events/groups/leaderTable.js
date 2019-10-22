@@ -120,13 +120,11 @@ export default function LeaderTableGroups({ data }) {
           Cell: instance => {
             if (instance.original.participants_count === 0) {
               return (
-                <div className="d-flex align-content-center justify-content-center p-1 line-height-1">
-                  <Trash2
-                    size={14}
-                    color={'#f00'}
-                    className="m-auto"
-                    id={`delete-${instance.original.id}`}
-                  />
+                <div
+                  className="d-flex align-content-center justify-content-center p-1 line-height-1"
+                  id={`delete-${instance.original.id}`}
+                >
+                  <Trash2 size={14} color={'#f00'} className="m-auto" />
                   <UncontrolledTooltip
                     placement="left"
                     target={`delete-${instance.original.id}`}
@@ -137,13 +135,11 @@ export default function LeaderTableGroups({ data }) {
               );
             } else {
               return (
-                <div className="d-flex align-content-center justify-content-center p-1 line-height-1">
-                  <Trash2
-                    size={14}
-                    color={'#D3D3D3'}
-                    className="m-auto"
-                    id={`delete-${instance.original.id}`}
-                  />
+                <div
+                  className="d-flex align-content-center justify-content-center p-1 line-height-1"
+                  id={`delete-${instance.original.id}`}
+                >
+                  <Trash2 size={14} color={'#D3D3D3'} className="m-auto" />
                   <UncontrolledTooltip
                     placement="left"
                     target={`delete-${instance.original.id}`}

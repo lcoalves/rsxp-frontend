@@ -763,8 +763,6 @@ function* lessonEdit(action) {
   try {
     const { data } = action.payload;
 
-    console.tron.log(data.lesson_report_id);
-
     const response = yield call(
       api.put,
       `/lesson_report/${data.lesson_report_id}`,

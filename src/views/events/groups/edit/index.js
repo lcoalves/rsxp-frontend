@@ -2537,7 +2537,6 @@ export default function UserProfile({ match, className }) {
                   Enviar material
                 </ModalHeader>
                 <ModalBody>
-                  {console.tron.log(values.products)}
                   {values.products.map((product, index) => (
                     <Row className="align-items-center">
                       <Col sm="12" md="8" lg="8">

@@ -206,24 +206,23 @@ export default function GroupCreate({ match, className }) {
   }
 
   function handleSubmit(values) {
-    console.tron.log('teste');
     const data = {
       is_public: values.is_public === 'true' ? true : false,
       is_online_payment: values.is_online_payment === 'true' ? true : false,
       default_event_id: parseInt(values.default_event_id),
       responsible_organization_id: values.organization_id,
       organizator_id: values.organizator_id,
-      address_name: values.address_name,
       start_date: values.initial_date,
       end_date: values.end_date,
-      cep: values.cep,
-      city: values.city,
-      uf: values.uf,
-      country: 'Brasil',
-      street: values.street,
-      street_number: values.street_number,
-      neighborhood: values.neighborhood,
-      complement: values.complement,
+      // address_name: values.address_name,
+      // cep: values.cep,
+      // city: values.city,
+      // uf: values.uf,
+      // country: 'Brasil',
+      // street: values.street,
+      // street_number: values.street_number,
+      // neighborhood: values.neighborhood,
+      // complement: values.complement,
       img_address_url:
         'https://arcowebarquivos-us.s3.amazonaws.com/imagens/52/21/arq_85221.jpg',
       is_finished: false,

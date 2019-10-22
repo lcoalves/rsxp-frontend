@@ -78,7 +78,6 @@ export default function QuitterTable({ data, className }) {
     if (column === 'Ações' || participant === undefined) {
       return;
     }
-    console.tron.log(participant);
     setModalEditParticipant(!modalEditParticipant);
     setParticipantData(participant.original);
   }
