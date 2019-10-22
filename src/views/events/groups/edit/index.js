@@ -384,10 +384,15 @@ export default function UserProfile({ match, className }) {
     const { name, cpf, email, sex } = values;
     const password = randomstring.generate(6);
 
+    const formattedCpf = cpf
+      .replace('.', '')
+      .replace('.', '')
+      .replace('-', '');
+
     dispatch(
       ParticipantActions.createParticipantRequest(
         name,
-        cpf,
+        formattedCpf,
         email,
         sex,
         password,
@@ -441,7 +446,10 @@ export default function UserProfile({ match, className }) {
     const default_event_id = event_data.default_event_id;
 
     dispatch(
-      ParticipantActions.searchParticipantRequest(formattedCpf, default_event_id)
+      ParticipantActions.searchParticipantRequest(
+        formattedCpf,
+        default_event_id
+      )
     );
   }
 
@@ -2077,21 +2085,45 @@ export default function UserProfile({ match, className }) {
                           <div className="invalid-feedback">{errors.name}</div>
                         ) : null}
                       </Col>
-                      <Col sm="12" md="12" lg="12" className="mb-2">
-                        <Field
-                          type="text"
-                          placeholder="Digite o cpf do participante"
-                          name="cpf"
-                          id="cpf"
-                          className={`
-                                    form-control
-                                    ${errors.cpf && touched.cpf && 'is-invalid'}
-                                  `}
-                          validate={validateCPF}
-                        />
-                        {errors.cpf && touched.cpf ? (
-                          <div className="invalid-feedback">{errors.cpf}</div>
-                        ) : null}
+                      <Col lg="12" md="12" sm="12">
+                        <FormGroup>
+                          <div className="position-relative has-icon-right">
+                            <Field
+                              name="cpf"
+                              id="cpf"
+                              className={`
+                                form-control
+                                ${errors.cpf && touched.cpf && 'is-invalid'}
+                              `}
+                              validate={validateCPF}
+                              render={({ field }) => (
+                                <CpfFormat
+                                  {...field}
+                                  id="cpf"
+                                  name="cpf"
+                                  placeholder="digite aqui o CPF"
+                                  className={`
+                                      form-control
+                                      ${errors.cpf &&
+                                        touched.cpf &&
+                                        'is-invalid'}
+                                    `}
+                                  value={values.cpf}
+                                />
+                              )}
+                            />
+                            {errors.cpf && touched.cpf ? (
+                              <div className="invalid-feedback">
+                                {errors.cpf}
+                              </div>
+                            ) : null}
+                            {loadingOrganizator && (
+                              <div className="form-control-position">
+                                <RefreshCw size={16} className="spinner" />
+                              </div>
+                            )}
+                          </div>
+                        </FormGroup>
                       </Col>
                       <Col sm="12" md="12" lg="12" className="mb-2">
                         <Field
