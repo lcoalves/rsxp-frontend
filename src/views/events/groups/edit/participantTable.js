@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
+import { BounceLoader } from 'react-spinners';
+import { css } from '@emotion/core';
 import {
   UncontrolledDropdown,
   DropdownToggle,
@@ -11,8 +13,14 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  FormGroup,
+  Col,
+  Label,
+  Button,
 } from 'reactstrap';
-import { Formik, Field, Form, FieldArray } from 'formik';
+import { Formik, Field, Form } from 'formik';
+
+import * as Yup from 'yup';
 
 import { toastr } from 'react-redux-toastr';
 import { List, Mail } from 'react-feather';
@@ -21,12 +29,19 @@ import { List, Mail } from 'react-feather';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 
+// import { validateCPF } from '~/services/validateCPF';
 import { Creators as ParticipantActions } from '~/store/ducks/participant';
+
+const formEditParticipant = Yup.object().shape({
+  email: Yup.string().email('Digite um email válido'),
+});
 
 export default function ParticipantTable({ data, className }) {
   const dispatch = useDispatch();
   const [modalEditParticipant, setModalEditParticipant] = useState(false);
   const [participantData, setParticipantData] = useState(null);
+
+  const loading = useSelector(state => state.participant.loading);
 
   function deleteParticipant(instance) {
     const participant_id = instance.original.pivot.id;
@@ -71,6 +86,19 @@ export default function ParticipantTable({ data, className }) {
   function toggleCloseModalEditParticipant() {
     setModalEditParticipant(false);
     setParticipantData(null);
+  }
+
+  function handleEditParticipant(values) {
+    const data = {
+      id: !!participantData ? participantData.id : '',
+      name: !!values.name ? values.name : '',
+      cpf: !!values.cpf ? values.cpf : '',
+      email: !!values.email ? values.email : '',
+      phone: !!values.phone ? values.phone : '',
+      alt_phone: !!values.altPhone ? values.altPhone : '',
+    };
+
+    dispatch(ParticipantActions.editParticipantRequest(data));
   }
 
   return (
@@ -121,8 +149,8 @@ export default function ParticipantTable({ data, className }) {
           },
           {
             Header: 'Celular',
-            id: 'cellphone',
-            accessor: d => d.cellphone,
+            id: 'phone',
+            accessor: d => d.phone,
             maxWidth: 150,
           },
           {
@@ -200,14 +228,114 @@ export default function ParticipantTable({ data, className }) {
         toggle={toggleCloseModalEditParticipant}
         className={className}
       >
-        <Formik onSubmit={() => {}}>
-          {({ errors, touched, handleChange, values, setFieldValue }) => (
+        <Formik
+          initialValues={{
+            name: !!participantData ? participantData.name : '',
+            cpf: !!participantData ? participantData.cpf : '',
+            email: !!participantData ? participantData.email : '',
+            phone: !!participantData ? participantData.phone : '',
+            altPhone: !!participantData ? participantData.alt_phone : '',
+          }}
+          validationSchema={formEditParticipant}
+          onSubmit={values => handleEditParticipant(values)}
+        >
+          {({ errors, touched, values }) => (
             <Form>
               <ModalHeader toggle={toggleCloseModalEditParticipant}>
-                Enviar material
+                Editar participante
               </ModalHeader>
-              <ModalBody></ModalBody>
-              <ModalFooter></ModalFooter>
+              <ModalBody>
+                <Col sm="12" md="12" lg="12" className="mb-2">
+                  <FormGroup>
+                    <Label for="name">Nome</Label>
+                    <Field
+                      type="text"
+                      placeholder="Nome do participante"
+                      name="name"
+                      id="name"
+                      className="form-control"
+                    />
+                  </FormGroup>
+                </Col>
+                <Col sm="12" md="12" lg="12" className="mb-2">
+                  <FormGroup>
+                    <Label for="cpf">CPF</Label>
+                    <Field
+                      type="text"
+                      placeholder="CPF do participante"
+                      name="cpf"
+                      id="cpf"
+                      className="form-control"
+                      // validate={validateCPF}
+                    />
+                  </FormGroup>
+                </Col>
+                <Col sm="12" md="12" lg="12" className="mb-2">
+                  <FormGroup>
+                    <Label for="email">email</Label>
+                    <Field
+                      type="text"
+                      placeholder="Email do participante"
+                      name="email"
+                      id="email"
+                      className={`
+                        form-control
+                        ${errors.email && touched.email && 'is-invalid'}
+                      `}
+                    />
+                    {errors.email && touched.email ? (
+                      <div className="invalid-feedback">{errors.email}</div>
+                    ) : null}
+                  </FormGroup>
+                </Col>
+                <Col sm="12" md="12" lg="12" className="mb-2">
+                  <FormGroup>
+                    <Label for="phone">Celular</Label>
+                    <Field
+                      type="text"
+                      placeholder="Celular do participante"
+                      name="phone"
+                      id="phone"
+                      className="form-control"
+                    />
+                  </FormGroup>
+                </Col>
+                <Col sm="12" md="12" lg="12" className="mb-2">
+                  <FormGroup>
+                    <Label for="altPhone">Telefone</Label>
+                    <Field
+                      type="text"
+                      placeholder="Telefone do participante"
+                      name="altPhone"
+                      id="altPhone"
+                      className="form-control"
+                    />
+                  </FormGroup>
+                </Col>
+              </ModalBody>
+              <ModalFooter>
+                <Button
+                  className="ml-1 my-1"
+                  color="danger"
+                  onClick={toggleCloseModalEditParticipant}
+                >
+                  Cancelar
+                </Button>{' '}
+                <Button className="ml-1 my-1 btn-success" type="submit">
+                  {loading ? (
+                    <BounceLoader
+                      size={23}
+                      color={'#fff'}
+                      css={css`
+                        display: block;
+                        margin: 0 auto;
+                      `}
+                    />
+                  ) : (
+                    'Editar participante'
+                  )}
+                </Button>
+              </ModalFooter>
             </Form>
           )}
         </Formik>

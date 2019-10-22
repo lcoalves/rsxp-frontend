@@ -23,6 +23,10 @@ export const Types = {
   EDIT_REQUEST: 'EVENT_EDIT_REQUEST',
   EDIT_SUCCESS: 'EVENT_EDIT_SUCCESS',
   EDIT_FAILURE: 'EVENT_EDIT_FAILURE',
+
+  DELETE_REQUEST: 'EVENT_DELETE_REQUEST',
+  DELETE_SUCCESS: 'EVENT_DELETE_SUCCESS',
+  DELETE_FAILURE: 'EVENT_DELETE_FAILURE',
 };
 
 /**
@@ -44,7 +48,7 @@ const INITIAL_STATE = {
   data: null,
 };
 
-export default function groupEdit(state = INITIAL_STATE, action) {
+export default function event(state = INITIAL_STATE, action) {
   switch (action.type) {
     // CASE CARREGAR A TABELA DE TODOS OS EVENTOS
     case Types.ALL_REQUEST:
@@ -179,5 +183,21 @@ export const Creators = {
 
   addEventFailure: () => ({
     type: Types.ADD_FAILURE,
+  }),
+
+  // DELETE EVENT
+  deleteEventRequest: event_id => ({
+    type: Types.DELETE_REQUEST,
+    payload: {
+      event_id,
+    },
+  }),
+
+  deleteEventSuccess: () => ({
+    type: Types.DELETE_SUCCESS,
+  }),
+
+  deleteEventFailure: () => ({
+    type: Types.DELETE_FAILURE,
   }),
 };

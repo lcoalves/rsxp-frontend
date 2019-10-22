@@ -17,6 +17,9 @@ export const Types = {
   SET_QUITTER_REQUEST: 'SET_QUITTER_REQUEST',
   SET_QUITTER_SUCCESS: 'SET_QUITTER_SUCCESS',
   SET_QUITTER_FAILURE: 'SET_QUITTER_FAILURE',
+  EDIT_REQUEST: 'EDIT_PARTICIPANT_REQUEST',
+  EDIT_SUCCESS: 'EDIT_PARTICIPANT_SUCCESS',
+  EDIT_FAILURE: 'EDIT_PARTICIPANT_FAILURE',
 };
 
 /**
@@ -106,6 +109,21 @@ export default function participant(state = INITIAL_STATE, action) {
         loading: false,
       };
     case Types.SET_QUITTER_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
+      };
+
+    case Types.EDIT_REQUEST:
+      return { ...state, loading: true };
+    case Types.EDIT_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.EDIT_FAILURE:
       return {
         ...state,
         error: true,
@@ -211,5 +229,18 @@ export const Creators = {
 
   setQuitterParticipantFailure: () => ({
     type: Types.SET_QUITTER_FAILURE,
+  }),
+
+  editParticipantRequest: data => ({
+    type: Types.EDIT_REQUEST,
+    payload: {
+      data,
+    },
+  }),
+  editParticipantSuccess: () => ({
+    type: Types.EDIT_SUCCESS,
+  }),
+  editParticipantFailure: () => ({
+    type: Types.EDIT_FAILURE,
   }),
 };
