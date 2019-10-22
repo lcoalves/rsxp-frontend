@@ -309,7 +309,7 @@ export default function GroupCreate({ match, className }) {
 
     defaultData.map(default_event => {
       if (default_event.id === parseInt(value)) {
-        setFieldValue('ministery', default_event.ministery.id);
+        setFieldValue('ministery', default_event.ministery.name);
       }
     });
   }
@@ -556,37 +556,6 @@ export default function GroupCreate({ match, className }) {
                       )}
                     </Row>
                     <Row>
-                      <Col lg="4" md="12" sm="12">
-                        <FormGroup>
-                          <Label for="ministery">Ministério</Label>
-                          <div className="position-relative has-icon-left">
-                            <Field
-                              type="select"
-                              component="select"
-                              name="ministery"
-                              id="ministery"
-                              className="form-control"
-                              value={values.ministery}
-                              onChange={event =>
-                                handleMinistery(event, setFieldValue)
-                              }
-                            >
-                              <option value="" disabled="">
-                                Selecione um ministério
-                              </option>
-
-                              {defaultData.reduce(event => (
-                                <option value={event.ministery.id}>
-                                  {event.ministery.name}
-                                </option>
-                              ))}
-                            </Field>
-                            <div className="form-control-position">
-                              <Flag size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
                       <Col lg="8" md="12" sm="12">
                         <FormGroup>
                           <Label for="default_event_id">Tipo de grupo</Label>
@@ -595,31 +564,21 @@ export default function GroupCreate({ match, className }) {
                             component="select"
                             id="default_event_id"
                             name="default_event_id"
-                            onChange={event =>
-                              handleEvent(event, setFieldValue)
-                            }
+                            onChange={e => handleEvent(e, setFieldValue)}
                             className={`
-                              form-control
-                              ${errors.default_event_id &&
-                                touched.default_event_id &&
-                                'is-invalid'}
-                            `}
+                                  form-control
+                                  ${errors.default_event_id &&
+                                    touched.default_event_id &&
+                                    'is-invalid'}
+                                `}
                           >
                             <option value="" disabled="">
                               Selecione uma opção
                             </option>
 
-                            {defaultEvents &&
-                              defaultEvents.length > 0 &&
-                              defaultEvents.map(event => (
-                                <option value={event.id}>{event.name}</option>
-                              ))}
-
-                            {defaultEvents &&
-                              defaultEvents.length === 0 &&
-                              defaultData.map(event => (
-                                <option value={event.id}>{event.name}</option>
-                              ))}
+                            {defaultData.map(event => (
+                              <option value={event.id}>{event.name}</option>
+                            ))}
                           </Field>
                           {errors.default_event_id &&
                           touched.default_event_id ? (
@@ -627,6 +586,25 @@ export default function GroupCreate({ match, className }) {
                               {errors.default_event_id}
                             </div>
                           ) : null}
+                        </FormGroup>
+                      </Col>
+
+                      <Col lg="4" md="12" sm="12">
+                        <FormGroup>
+                          <Label for="ministery">Ministério</Label>
+                          <div className="position-relative has-icon-left">
+                            <Field
+                              readOnly
+                              type="text"
+                              name="ministery"
+                              id="ministery"
+                              className="form-control"
+                              value={values.ministery}
+                            />
+                            <div className="form-control-position">
+                              <Flag size={14} color="#212529" />
+                            </div>
+                          </div>
                         </FormGroup>
                       </Col>
                     </Row>
