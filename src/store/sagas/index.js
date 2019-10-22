@@ -379,6 +379,19 @@ function* addEvent(action) {
   }
 }
 
+function* deleteEvent(action) {
+  try {
+    const { event_id } = action.payload;
+
+    yield call(api.delete, `/event/${event_id}`);
+
+    yield put(EventActions.deleteEventSuccess());
+    window.location.reload();
+  } catch (err) {
+    yield put(EventActions.deleteEventFailure());
+  }
+}
+
 function* addOrganizator(action) {
   try {
     const { event_id, entity_id } = action.payload;
@@ -539,6 +552,25 @@ function* addParticipant(action) {
     }
   } catch (err) {
     yield put(ParticipantActions.addParticipantFailure());
+  }
+}
+
+function* editParticipant(action) {
+  try {
+    const { data } = action.payload;
+
+    const { id } = data;
+    delete data.id;
+
+    yield call(api.put, `entity/${id}`, data);
+
+    yield put(ParticipantActions.editParticipantSuccess());
+    toastr.confirm('Participante alterado com sucesso.', {
+      onOk: () => window.location.reload(),
+      disableCancel: true,
+    });
+  } catch (err) {
+    yield put(ParticipantActions.editParticipantFailure());
   }
 }
 
@@ -896,6 +928,7 @@ export default function* rootSaga() {
     takeLatest(EventTypes.REQUEST, event),
     takeLatest(EventTypes.ALL_REQUEST, allEvents),
     takeLatest(EventTypes.ADD_REQUEST, addEvent),
+    takeLatest(EventTypes.DELETE_REQUEST, deleteEvent),
 
     takeLatest(InviteTypes.ADD_REQUEST, addInvite),
     takeLatest(InviteTypes.DELETE_REQUEST, deleteInvite),
@@ -909,6 +942,7 @@ export default function* rootSaga() {
     takeLatest(ParticipantTypes.DELETE_REQUEST, deleteParticipant),
     takeLatest(ParticipantTypes.SEARCH_REQUEST, searchParticipant),
     takeLatest(ParticipantTypes.CREATE_REQUEST, createParticipant),
+    takeLatest(ParticipantTypes.EDIT_REQUEST, editParticipant),
     takeLatest(ParticipantTypes.SET_QUITTER_REQUEST, setQuitterParticipant),
 
     takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),

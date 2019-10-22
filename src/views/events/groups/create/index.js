@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 
 import { Formik, Field, Form } from 'formik';
-
 import { Datepicker } from 'react-formik-ui';
 
 import * as Yup from 'yup';
@@ -13,8 +12,6 @@ import 'react-table/react-table.css';
 import { subMonths } from 'date-fns';
 
 import ContentHeader from '../../../../components/contentHead/contentHeader';
-
-import statesCities from '../../../../assets/data/statesCities';
 
 import {
   Row,
@@ -28,9 +25,6 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  UncontrolledPopover,
-  PopoverHeader,
-  PopoverBody,
   CardHeader,
 } from 'reactstrap';
 
@@ -189,6 +183,7 @@ export default function GroupCreate({ match, className }) {
   }
 
   function handleSubmit(values) {
+    console.tron.log('teste');
     const data = {
       is_public: values.is_public === 'true' ? true : false,
       is_online_payment: values.is_online_payment === 'true' ? true : false,
@@ -499,18 +494,8 @@ export default function GroupCreate({ match, className }) {
                                 timeFormat="HH:mm"
                                 timeIntervals={5}
                                 timeCaption="Horário"
-                                className={`
-                                  form-control
-                                  ${errors.end_date &&
-                                    touched.end_date &&
-                                    'is-invalid'}
-                                `}
+                                className="form-control"
                               />
-                              {errors.end_date && touched.end_date ? (
-                                <div className="invalid-feedback">
-                                  {errors.end_date}
-                                </div>
-                              ) : null}
                               <div className="form-control-position">
                                 <Calendar size={14} color="#212529" />
                               </div>
