@@ -293,6 +293,14 @@ function* editProfile(action) {
     yield put(ProfileActions.editProfileSuccess());
     toastr.success('Sucesso!', 'Seu perfil foi atualizado.');
   } catch (err) {
+    const { data } = err.response;
+
+    if (data && data.length > 0) {
+      data.map(error => {
+        toastr.error('Falha!', error.message);
+      });
+    }
+
     yield put(ProfileActions.editProfileFailure());
   }
 }

@@ -1,6 +1,7 @@
 /* eslint-disable array-callback-return */
-import React, { useState } from 'react';
+import React, { useState, Component } from 'react';
 
+import NumberFormat from 'react-number-format';
 import AvatarImageCropper from 'react-avatar-image-cropper';
 
 import { Formik, Field, Form } from 'formik';
@@ -48,6 +49,8 @@ import {
 import { css } from '@emotion/core';
 import { BounceLoader } from 'react-spinners';
 
+import { validateCPF } from '~/services/validateCPF';
+
 import CustomTabs from '../../components/tabs/default';
 
 import statesCities from '../../assets/data/statesCities';
@@ -56,18 +59,80 @@ import TableExtended from './table';
 import classnames from 'classnames';
 
 const formSchema = Yup.object().shape({
-  firstname: Yup.string().required('O nome é obrigatório'),
-  lastname: Yup.string().required('O sobrenome é obrigatório'),
+  name: Yup.string().required('O nome é obrigatório'),
   email: Yup.string()
     .email('O email inválido')
     .required('O email é obrigatório'),
   personalState: Yup.string().required('O estado civil é obrigatório'),
-  cpf: Yup.string()
-    .max(11, 'Um CPF válido contem 11 dígitos')
-    .required('O CPF é obrigatório'),
   sex: Yup.string().required('O sexo é obrigatório'),
   phone: Yup.string().required('O celular é obrigatório'),
 });
+
+class CpfFormat extends Component {
+  state = {
+    value: '',
+  };
+
+  render() {
+    return (
+      <NumberFormat
+        inputMode="decimal"
+        displayType="input"
+        format="###.###.###-##"
+        allowNegative={false}
+        value={this.state.value}
+        onValueChange={vals => {
+          this.setState({ value: vals.value });
+        }}
+        {...this.props}
+      />
+    );
+  }
+}
+
+class PhoneFormat extends Component {
+  state = {
+    value: '',
+  };
+
+  render() {
+    return (
+      <NumberFormat
+        inputMode="decimal"
+        displayType="input"
+        format="(##)#####-####"
+        allowNegative={false}
+        value={this.state.value}
+        onValueChange={vals => {
+          this.setState({ value: vals.value });
+        }}
+        {...this.props}
+      />
+    );
+  }
+}
+
+class AltPhoneFormat extends Component {
+  state = {
+    value: '',
+  };
+
+  render() {
+    return (
+      <NumberFormat
+        inputMode="decimal"
+        displayType="input"
+        format="(##)####-####"
+        allowNegative={false}
+        value={this.state.value}
+        onValueChange={vals => {
+          this.setState({ value: vals.value });
+        }}
+        {...this.props}
+      />
+    );
+  }
+}
 
 export default function TabsBorderBottom() {
   const [activeTab, setActiveTab] = useState('1');
@@ -83,7 +148,7 @@ export default function TabsBorderBottom() {
     <Button
       outline
       color="secondary"
-      className="width-250 height-38"
+      className="width-225 height-38"
       onClick={onClick}
     >
       {value}
@@ -113,11 +178,20 @@ export default function TabsBorderBottom() {
       name: values.name,
       email: values.email,
       personal_state_id: values.personalState,
-      cpf: values.cpf,
+      cpf: values.cpf
+        .replace('.', '')
+        .replace('.', '')
+        .replace('-', ''),
       birthday: values.birthday,
       sex: values.sex,
-      phone: values.phone,
-      alt_phone: values.altPhone,
+      phone: values.phone
+        .replace('(', '')
+        .replace(')', '')
+        .replace('-', ''),
+      alt_phone: values.altPhone
+        .replace('(', '')
+        .replace(')', '')
+        .replace('-', ''),
     };
 
     dispatch(ProfileActions.editProfileRequest(data));
@@ -243,8 +317,8 @@ export default function TabsBorderBottom() {
                     initialValues={{
                       name: !!data.name ? data.name : '',
                       email: !!data.email ? data.email : '',
-                      personalState: !!data.personal_state
-                        ? data.personal_state
+                      personalState: !!data.personal_state_id
+                        ? data.personal_state_id
                         : '',
                       cpf: !!data.cpf ? data.cpf : '',
                       birthday: !!data.birthday ? data.birthday : new Date(),
@@ -253,6 +327,7 @@ export default function TabsBorderBottom() {
                       altPhone: !!data.alt_phone ? data.alt_phone : '',
                     }}
                     validationSchema={formSchema}
+                    onSubmit={values => handleUpdateProfile(values)}
                   >
                     {({ errors, touched, setFieldValue, values }) => (
                       <Form>
@@ -363,30 +438,44 @@ export default function TabsBorderBottom() {
                               lg="5"
                               className="has-icon-left"
                             >
-                              <Label>CPF</Label>
-                              <div className="position-relative has-icon-left">
-                                <Field
-                                  type="text"
-                                  name="cpf"
-                                  id="cpf"
-                                  className={`
+                              <FormGroup>
+                                <Label for="cpf">CPF</Label>
+                                <div className="position-relative has-icon-left">
+                                  <Field
+                                    name="cpf"
+                                    id="cpf"
+                                    className={`
+                                    form-control
+                                    ${errors.cpf && touched.cpf && 'is-invalid'}
+                                  `}
+                                    validate={validateCPF}
+                                    render={({ field }) => (
+                                      <CpfFormat
+                                        {...field}
+                                        id="cpf"
+                                        name="cpf"
+                                        className={`
                                       form-control
                                       ${errors.cpf &&
                                         touched.cpf &&
                                         'is-invalid'}
                                     `}
-                                />
-                                {errors.cpf && touched.cpf ? (
-                                  <div className="invalid-feedback">
-                                    {errors.cpf}
+                                        value={values.cpf}
+                                      />
+                                    )}
+                                  />
+                                  {errors.cpf && touched.cpf ? (
+                                    <div className="invalid-feedback">
+                                      {errors.cpf}
+                                    </div>
+                                  ) : null}
+                                  <div className="form-control-position">
+                                    <CreditCard size={14} color="#212529" />
                                   </div>
-                                ) : null}
-                                <div className="form-control-position">
-                                  <CreditCard size={14} color="#212529" />
                                 </div>
-                              </div>
+                              </FormGroup>
                             </Col>
-                            <Col sm="12" md="12" lg="3">
+                            <Col sm="12" md="12" lg="4">
                               <FormGroup>
                                 <Label for="birthday">Nascimento</Label>
                                 <div className="position-relative has-icon-left">
@@ -419,7 +508,7 @@ export default function TabsBorderBottom() {
                                 </div>
                               </FormGroup>
                             </Col>
-                            <Col sm="12" md="12" lg="4">
+                            <Col sm="12" md="12" lg="3">
                               <Label>Sexo</Label>
                               <Field
                                 type="select"
@@ -459,15 +548,28 @@ export default function TabsBorderBottom() {
                               <Label>Celular</Label>
                               <div className="position-relative has-icon-left">
                                 <Field
-                                  type="text"
                                   name="phone"
                                   id="phone"
                                   className={`
-                                      form-control
-                                      ${errors.phone &&
-                                        touched.phone &&
-                                        'is-invalid'}
-                                    `}
+                                    form-control
+                                    ${errors.phone &&
+                                      touched.phone &&
+                                      'is-invalid'}
+                                  `}
+                                  render={({ field }) => (
+                                    <PhoneFormat
+                                      {...field}
+                                      id="phone"
+                                      name="phone"
+                                      className={`
+                                        form-control
+                                        ${errors.phone &&
+                                          touched.phone &&
+                                          'is-invalid'}
+                                      `}
+                                      value={values.phone}
+                                    />
+                                  )}
                                 />
                                 {errors.phone && touched.phone ? (
                                   <div className="invalid-feedback">
@@ -483,15 +585,28 @@ export default function TabsBorderBottom() {
                               <Label>Telefone</Label>
                               <div className="position-relative has-icon-left">
                                 <Field
-                                  type="text"
                                   name="altPhone"
                                   id="altPhone"
                                   className={`
-                                      form-control
-                                      ${errors.altPhone &&
-                                        touched.altPhone &&
-                                        'is-invalid'}
-                                    `}
+                                    form-control
+                                    ${errors.altPhone &&
+                                      touched.altPhone &&
+                                      'is-invalid'}
+                                  `}
+                                  render={({ field }) => (
+                                    <AltPhoneFormat
+                                      {...field}
+                                      id="altPhone"
+                                      name="altPhone"
+                                      className={`
+                                        form-control
+                                        ${errors.altPhone &&
+                                          touched.altPhone &&
+                                          'is-invalid'}
+                                      `}
+                                      value={values.altPhone}
+                                    />
+                                  )}
                                 />
                                 {errors.altPhone && touched.altPhone ? (
                                   <div className="invalid-feedback">
@@ -524,10 +639,10 @@ export default function TabsBorderBottom() {
                             </Button>
                           ) : (
                             <Button
+                              type="submit"
                               color="success"
                               block
                               className="btn-default btn-raised"
-                              onClick={() => handleUpdateProfile(values)}
                             >
                               Atualizar perfil
                             </Button>
