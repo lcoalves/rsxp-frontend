@@ -445,12 +445,14 @@ export default function UserProfile({ match, className }) {
 
     const default_event_id = event_data.default_event_id;
 
-    dispatch(
-      ParticipantActions.searchParticipantRequest(
-        formattedCpf,
-        default_event_id
-      )
-    );
+    if (formattedCpf.length === 11) {
+      dispatch(
+        ParticipantActions.searchParticipantRequest(
+          formattedCpf,
+          default_event_id
+        )
+      );
+    }
   }
 
   function handleDeleteOrganizator(entity_id) {
@@ -1877,7 +1879,6 @@ export default function UserProfile({ match, className }) {
                 cpf: '',
               }}
               validationSchema={formParticipant}
-              onSubmit={values => handleSearchParticipant(values)}
             >
               {({ errors, touched, values, setFieldValue }) => (
                 <Form>
