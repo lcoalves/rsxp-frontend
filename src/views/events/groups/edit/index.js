@@ -96,6 +96,7 @@ class CpfFormat extends Component {
         displayType="input"
         format="###.###.###-##"
         allowNegative={false}
+        allowLeadingZeros
         value={this.state.value}
         onValueChange={vals => {
           this.setState({ value: vals.value });
@@ -159,7 +160,6 @@ const formCertificate = Yup.object().shape({
 
 export default function UserProfile({ match, className }) {
   const [activeTab, setActiveTab] = useState('1');
-  const [modalSendMaterial, setModalSendMaterial] = useState(false);
   const [modalOrganizator, setModalOrganizator] = useState(false);
   const [modalChangeOrganizator, setModalChangeOrganizator] = useState(false);
   const [modalParticipant, setModalParticipant] = useState(false);
@@ -276,10 +276,6 @@ export default function UserProfile({ match, className }) {
   }, [participant_error]);
 
   const dispatch = useDispatch();
-
-  function toogleModalSendMaterial() {
-    setModalSendMaterial(!modalSendMaterial);
-  }
 
   function toogleModalOrganizator() {
     setLeaderData(null);
@@ -563,6 +559,14 @@ export default function UserProfile({ match, className }) {
     }
   }
 
+  function amountCalc(event, setFieldValue) {
+    const { name, value } = event.target;
+
+    const valorTeste = parseInt(value, 10);
+
+    setFieldValue(name, valorTeste.toString());
+  }
+
   useEffect(() => {
     const storageTab = localStorage.getItem('@dashboard/editGroupActiveTab');
 
@@ -596,7 +600,7 @@ export default function UserProfile({ match, className }) {
         setAssistants(assistantsData);
       }
 
-      // CRIAR LISTA DE PRODUTO PARA MOSTRAR NO MODAL DO ENVIAR MATERIAL
+      // CRIAR LISTA DE PRODUTO PARA MOSTRAR NO MODAL DO SOLICITAR MATERIAL
       if (
         event_data.defaultEvent.kit.products &&
         event_data.defaultEvent.kit.products.length > 0
@@ -639,9 +643,9 @@ export default function UserProfile({ match, className }) {
                         disabled={
                           event_data.status !== 'Finalizado' ? true : false
                         }
-                        onClick={toogleModalSendMaterial}
+                        // onClick={}
                       >
-                        <i className="fa fa-plus mr-2" /> Enviar material
+                        <i className="fa fa-plus mr-2" /> Solicitar material
                       </DropdownItem>
                       )
                       {/* <DropdownItem>
@@ -675,7 +679,7 @@ export default function UserProfile({ match, className }) {
                             {/* 3 situacoes para esse mesmo botao sendo,
                               tem pedido = sim, entao relatorio semanal;
                               tem pedido = sim, relatorios semanais = sim, então emitir certificado;
-                              tem pedido = nao, entao enviar material
+                              tem pedido = nao, entao solicitar material
                             */}
                             <Button
                               color="success"
@@ -685,9 +689,9 @@ export default function UserProfile({ match, className }) {
                                   ? false
                                   : true
                               }
-                              onClick={toogleModalSendMaterial}
+                              // onClick={}
                             >
-                              <i className="fa fa-plus" /> Enviar material
+                              <i className="fa fa-plus" /> Solicitar material
                             </Button>
                             {/* <Button
                               href={`/eventos/grupo/${match.params.event_id}/crachas`}
@@ -2517,88 +2521,7 @@ export default function UserProfile({ match, className }) {
             )}
           </Formik>
         </Modal>
-
-        {/* MODAL SEND MATERIAL */}
-        <Modal
-          isOpen={modalSendMaterial}
-          toggle={toogleModalSendMaterial}
-          className={className}
-          size="lg"
-        >
-          <Formik
-            initialValues={{
-              products: productsKit,
-            }}
-            onSubmit={() => {}}
-          >
-            {({ errors, touched, handleChange, values, setFieldValue }) => (
-              <Form>
-                <ModalHeader toggle={toogleModalSendMaterial}>
-                  Enviar material
-                </ModalHeader>
-                <ModalBody>
-                  {values.products.map((product, index) => (
-                    <Row className="align-items-center">
-                      <Col sm="12" md="8" lg="8">
-                        <FormGroup>
-                          <Label for="id">{product.name}</Label>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="6" md="2" lg="2">
-                        <FormGroup>
-                          <Label for="id">R${product.unit_price}</Label>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="6" md="2" lg="2">
-                        <FormGroup>
-                          <div className="position-relative">
-                            <Field
-                              type="number"
-                              id={`products.${index}.quantity`}
-                              name={`products.${index}.quantity`}
-                              className="form-control"
-                            />
-                          </div>
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  ))}
-                </ModalBody>
-                <ModalFooter>
-                  <Form>
-                    <Button
-                      className="ml-1 my-1"
-                      color="danger"
-                      onClick={toogleModalSendMaterial}
-                    >
-                      Cancelar
-                    </Button>{' '}
-                    <Button className="ml-1 my-1 btn-success" type="submit">
-                      {loading ? (
-                        <BounceLoader
-                          size={23}
-                          color={'#fff'}
-                          css={css`
-                            display: block;
-                            margin: 0 auto;
-                          `}
-                        />
-                      ) : (
-                        'Enviar material'
-                      )}
-                    </Button>
-                  </Form>
-                </ModalFooter>
-              </Form>
-            )}
-          </Formik>
-        </Modal>
       </Fragment>
     )
   );
-
-  // input campo de data de formatura
-  //
 }
-
-//TESTE COMMIT SSH KEY ERICK
