@@ -291,7 +291,10 @@ function* editProfile(action) {
     );
 
     yield put(ProfileActions.editProfileSuccess());
-    toastr.success('Sucesso!', 'Seu perfil foi atualizado.');
+    toastr.confirm('Perfil atualizado com sucesso.', {
+      onOk: () => window.location.reload(),
+      disableCancel: true,
+    });
   } catch (err) {
     const { data } = err.response;
 
@@ -640,12 +643,14 @@ function* searchChurch(action) {
 
 function* cep(action) {
   try {
-    const { cep } = action.payload;
+    const { cep, index } = action.payload;
 
     const response = yield call(
       axios.get,
       `https://viacep.com.br/ws/${cep}/json/`
     );
+
+    response.data.index = index;
 
     yield put(CepActions.cepSuccess(response.data));
     toastr.success('Sucesso!', 'CEP encontrado.');

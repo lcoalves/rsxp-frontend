@@ -1,10 +1,10 @@
 /* eslint-disable array-callback-return */
-import React, { useState, Component } from 'react';
+import React, { useState, useEffect, Component } from 'react';
 
 import NumberFormat from 'react-number-format';
 import AvatarImageCropper from 'react-avatar-image-cropper';
 
-import { Formik, Field, Form } from 'formik';
+import { Formik, Field, Form, FieldArray } from 'formik';
 import { Datepicker } from 'react-formik-ui';
 import * as Yup from 'yup';
 
@@ -12,6 +12,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { Creators as AvatarActions } from '~/store/ducks/avatar';
 import { Creators as ProfileActions } from '~/store/ducks/profile';
+import { Creators as CepActions } from '~/store/ducks/cep';
 
 import {
   TabContent,
@@ -44,6 +45,8 @@ import {
   Linkedin,
   Edit,
   Navigation,
+  Plus,
+  X,
 } from 'react-feather';
 
 import { css } from '@emotion/core';
@@ -57,6 +60,7 @@ import statesCities from '../../assets/data/statesCities';
 import TableExtended from './table';
 
 import classnames from 'classnames';
+import { push } from 'connected-react-router';
 
 const formSchema = Yup.object().shape({
   name: Yup.string().required('O nome é obrigatório'),
@@ -134,15 +138,51 @@ class AltPhoneFormat extends Component {
   }
 }
 
+class CepFormat extends Component {
+  state = {
+    value: '',
+  };
+
+  render() {
+    return (
+      <NumberFormat
+        inputMode="decimal"
+        displayType="input"
+        format="#####-###"
+        allowNegative={false}
+        value={this.state.value}
+        onValueChange={vals => {
+          this.setState({ value: vals.value });
+        }}
+        {...this.props}
+      />
+    );
+  }
+}
+
 export default function TabsBorderBottom() {
   const [activeTab, setActiveTab] = useState('1');
   const [estado, setEstado] = useState('');
   const [src, setSrc] = useState(null);
+  const [addresses, setAddresses] = useState([
+    {
+      type: '',
+      other_type_name: '',
+      cep: '',
+      uf: '',
+      city: '',
+      street: '',
+      street_number: '',
+      neighborhood: '',
+      complement: '',
+    },
+  ]);
 
   const dispatch = useDispatch();
 
   const loading = useSelector(state => state.profile.loading);
   const data = useSelector(state => state.profile.data);
+  const cepData = useSelector(state => state.cep.data);
 
   const DatepickerButton = ({ value, onClick }) => (
     <Button
@@ -169,33 +209,71 @@ export default function TabsBorderBottom() {
     );
   }
 
-  function stateChange(values) {
-    setEstado(values);
+  function handleCep(cep, setFieldValue, values, index) {
+    setFieldValue(`addresses.${index}.cep`, cep);
+    console.tron.log(addresses);
+    console.tron.log(cep);
+    console.tron.log(values);
+
+    if (cep.length === 8) {
+      setAddresses(values.addresses);
+
+      dispatch(CepActions.cepRequest(cep, index));
+    }
   }
 
   function handleUpdateProfile(values) {
-    const data = {
+    const formattedCpf = values.cpf
+      .replace('.', '')
+      .replace('.', '')
+      .replace('-', '');
+    const formattedPhone = values.phone
+      .replace('(', '')
+      .replace(')', '')
+      .replace('-', '');
+    const formattedAltPhone = values.altPhone
+      .replace('(', '')
+      .replace(')', '')
+      .replace('-', '');
+
+    const toSend = {
       name: values.name,
-      email: values.email,
+      email: values.email !== data.email && values.email,
       personal_state_id: values.personalState,
-      cpf: values.cpf
-        .replace('.', '')
-        .replace('.', '')
-        .replace('-', ''),
+      cpf: formattedCpf !== data.cpf && formattedCpf,
       birthday: values.birthday,
       sex: values.sex,
-      phone: values.phone
-        .replace('(', '')
-        .replace(')', '')
-        .replace('-', ''),
-      alt_phone: values.altPhone
-        .replace('(', '')
-        .replace(')', '')
-        .replace('-', ''),
+      phone: formattedPhone,
+      alt_phone: formattedAltPhone,
     };
 
-    dispatch(ProfileActions.editProfileRequest(data));
+    !toSend.cpf && delete toSend.cpf;
+    !toSend.email && delete toSend.email;
+
+    dispatch(ProfileActions.editProfileRequest(toSend));
   }
+
+  function handleUpdateAddress(values) {
+    console.tron.log(values);
+  }
+
+  useEffect(() => {
+    if (!!cepData.cep) {
+      const copy = addresses;
+
+      copy[cepData.index].cep = cepData.cep.replace('-', '');
+      copy[cepData.index].uf = cepData.uf !== '' ? cepData.uf : '';
+      copy[cepData.index].city =
+        cepData.localidade !== '' ? cepData.localidade : '';
+      copy[cepData.index].street =
+        cepData.logradouro !== '' ? cepData.logradouro : '';
+      copy[cepData.index].neighborhood =
+        cepData.bairro !== '' ? cepData.bairro : '';
+
+      setAddresses(copy);
+      setAddresses([...addresses]);
+    }
+  }, [cepData]);
 
   return (
     <div>
@@ -661,332 +739,327 @@ export default function TabsBorderBottom() {
         <TabPane tabId="2">
           <Card>
             <CardBody>
-              <div className="px-3">
-                <Form>
-                  <h3>Endereço 1</h3>
-                  <div className="form-body">
-                    <Row>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="cep">Tipo endereço</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input
-                              type="select"
-                              id="state"
-                              name="state"
-                              onChange={e => {
-                                stateChange(`${e.target.value}`);
-                              }}
-                            >
-                              <option
-                                value="none"
-                                defaultValue="none"
-                                disabled=""
-                              >
-                                Selecione uma opção
-                              </option>
-                              <option key="home" value="home">
-                                Casa
-                              </option>
-                              <option key="work" value="work">
-                                Trabalho
-                              </option>
-                              <option key="other" value="other">
-                                Outro
-                              </option>
-                            </Input>
-                            <div className="form-control-position">
-                              <Map size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="cep">CEP</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input type="text" id="cep" name="cep" />
-                            <div className="form-control-position">
-                              <MapPin size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="state">Estado</Label>
-                          <Input
-                            type="select"
-                            id="state"
-                            name="state"
-                            onChange={e => {
-                              stateChange(`${e.target.value}`);
-                            }}
+              <Formik
+                enableReinitialize
+                initialValues={{
+                  addresses,
+                }}
+                onSubmit={values => handleUpdateAddress(values)}
+              >
+                {({ errors, touched, setFieldValue, values, handleChange }) => (
+                  <Form>
+                    <FieldArray
+                      name="addresses"
+                      render={({ remove, push }) => (
+                        <>
+                          {values.addresses.length > 0 &&
+                            values.addresses.map((address, index) => (
+                              <div key={index}>
+                                <Row className="justify-content-between">
+                                  <h3>Endereço {index + 1}</h3>
+                                  {values.addresses.length > 1 && (
+                                    <Button
+                                      color="danger"
+                                      onClick={() => remove(index)}
+                                    >
+                                      <X size={18} color="#fff" />
+                                    </Button>
+                                  )}
+                                </Row>
+                                <Row>
+                                  <Col sm="4">
+                                    <FormGroup>
+                                      <Label for={`addresses.${index}.type`}>
+                                        Tipo endereço
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <Field
+                                          type="select"
+                                          component="select"
+                                          id={`addresses.${index}.type`}
+                                          name={`addresses.${index}.type`}
+                                          className={`
+                                          form-control
+                                          ${errors.type &&
+                                            touched.type &&
+                                            'is-invalid'}
+                                        `}
+                                          onChange={handleChange}
+                                        >
+                                          <option
+                                            value=""
+                                            defaultValue=""
+                                            disabled=""
+                                          >
+                                            Selecione uma opção
+                                          </option>
+                                          <option key="home" value="home">
+                                            Casa
+                                          </option>
+                                          <option key="work" value="work">
+                                            Trabalho
+                                          </option>
+                                          <option key="other" value="other">
+                                            Outro
+                                          </option>
+                                        </Field>
+                                        <div className="form-control-position">
+                                          <Map size={14} color="#212529" />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                  {address.type === 'other' && (
+                                    <Col sm="8">
+                                      <FormGroup>
+                                        <Label
+                                          for={`addresses.${index}.other_type_name`}
+                                        >
+                                          Apelido do endereço
+                                        </Label>
+                                        <Field
+                                          type="text"
+                                          id={`addresses.${index}.other_type_name`}
+                                          name={`addresses.${index}.other_type_name`}
+                                          placeholder="Ex: Casa da minha mãe"
+                                          className={`
+                                        form-control
+                                        ${errors.other_type_name &&
+                                          touched.other_type_name &&
+                                          'is-invalid'}
+                                      `}
+                                        />
+                                        {errors.other_type_name &&
+                                        touched.other_type_name ? (
+                                          <div className="invalid-feedback">
+                                            {errors.other_type_name}
+                                          </div>
+                                        ) : null}
+                                      </FormGroup>
+                                    </Col>
+                                  )}
+                                </Row>
+                                <Row>
+                                  <Col sm="3">
+                                    <FormGroup>
+                                      <Label for={`addresses.${index}.cep`}>
+                                        CEP
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <CepFormat
+                                          autoComplete="cep"
+                                          name={`addresses.${index}.cep`}
+                                          id={`addresses.${index}.cep`}
+                                          placeholder="Ex: 17580-000"
+                                          className={`
+                                            form-control
+                                            ${errors.cep &&
+                                              touched.cep &&
+                                              'is-invalid'}
+                                          `}
+                                          value={values.cep}
+                                          onValueChange={val =>
+                                            handleCep(
+                                              val.value,
+                                              setFieldValue,
+                                              values,
+                                              index
+                                            )
+                                          }
+                                        />
+                                        {errors.cep && touched.cep ? (
+                                          <div className="invalid-feedback">
+                                            {errors.cep}
+                                          </div>
+                                        ) : null}
+                                        <div className="form-control-position">
+                                          <MapPin size={14} color="#212529" />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                  <Col sm="3">
+                                    <FormGroup>
+                                      <Label for={`addresses.${index}.uf`}>
+                                        Estado
+                                      </Label>
+                                      <Field
+                                        readOnly
+                                        type="text"
+                                        id={`addresses.${index}.uf`}
+                                        name={`addresses.${index}.uf`}
+                                        className="form-control"
+                                      />
+                                    </FormGroup>
+                                  </Col>
+                                  <Col sm="6">
+                                    <FormGroup>
+                                      <Label for={`addresses.${index}.city`}>
+                                        Cidade
+                                      </Label>
+                                      <Field
+                                        type="text"
+                                        id={`addresses.${index}.city`}
+                                        name={`addresses.${index}.city`}
+                                        className={`
+                                        form-control
+                                        ${errors.city &&
+                                          touched.city &&
+                                          'is-invalid'}
+                                      `}
+                                      />
+                                      {errors.city && touched.city ? (
+                                        <div className="invalid-feedback">
+                                          {errors.city}
+                                        </div>
+                                      ) : null}
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
+                                <Row>
+                                  <Col sm="6">
+                                    <FormGroup>
+                                      <Label for={`addresses.${index}.street`}>
+                                        Rua
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <Field
+                                          type="text"
+                                          id={`addresses.${index}.street`}
+                                          name={`addresses.${index}.street`}
+                                          className={`
+                                        form-control
+                                        ${errors.street &&
+                                          touched.street &&
+                                          'is-invalid'}
+                                      `}
+                                        />
+                                        {errors.street && touched.street ? (
+                                          <div className="invalid-feedback">
+                                            {errors.street}
+                                          </div>
+                                        ) : null}
+                                        <div className="form-control-position">
+                                          <i className="fa fa-road" />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                  <Col sm="2">
+                                    <FormGroup>
+                                      <Label
+                                        for={`addresses.${index}.street_number`}
+                                      >
+                                        Número
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <Field
+                                          type="text"
+                                          id={`addresses.${index}.street_number`}
+                                          name={`addresses.${index}.street_number`}
+                                          className={`
+                                        form-control
+                                        ${errors.street_number &&
+                                          touched.street_number &&
+                                          'is-invalid'}
+                                      `}
+                                        />
+                                        {errors.street_number &&
+                                        touched.street_number ? (
+                                          <div className="invalid-feedback">
+                                            {errors.street_number}
+                                          </div>
+                                        ) : null}
+                                        <div className="form-control-position">
+                                          <Navigation
+                                            size={14}
+                                            color="#212529"
+                                          />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                  <Col sm="4">
+                                    <FormGroup>
+                                      <Label
+                                        for={`addresses.${index}.neighborhood`}
+                                      >
+                                        Bairro
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <Field
+                                          type="text"
+                                          id={`addresses.${index}.neighborhood`}
+                                          name={`addresses.${index}.neighborhood`}
+                                          className={`
+                                        form-control
+                                        ${errors.neighborhood &&
+                                          touched.neighborhood &&
+                                          'is-invalid'}
+                                      `}
+                                        />
+                                        {errors.neighborhood &&
+                                        touched.neighborhood ? (
+                                          <div className="invalid-feedback">
+                                            {errors.neighborhood}
+                                          </div>
+                                        ) : null}
+                                        <div className="form-control-position">
+                                          <i className="fa fa-map-signs" />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
+                                <FormGroup>
+                                  <Label for={`addresses.${index}.complement`}>
+                                    Complemento
+                                  </Label>
+                                  <div className="position-relative has-icon-left">
+                                    <Field
+                                      type="text"
+                                      id={`addresses.${index}.complement`}
+                                      name={`addresses.${index}.complement`}
+                                      className="form-control"
+                                    />
+                                    <div className="form-control-position">
+                                      <Edit size={14} color="#212529" />
+                                    </div>
+                                  </div>
+                                </FormGroup>
+                                <div className="form-actions right" />
+                              </div>
+                            ))}
+
+                          <Button
+                            color="success"
+                            onClick={() =>
+                              push({
+                                type: '',
+                                other_type_name: '',
+                                cep: '',
+                                uf: '',
+                                city: '',
+                                street: '',
+                                street_number: '',
+                                neighborhood: '',
+                                complement: '',
+                              })
+                            }
                           >
-                            <option
-                              value="none"
-                              defaultValue="none"
-                              disabled=""
-                            >
-                              Selecione uma opção
-                            </option>
+                            <Plus size={16} color="#fff" /> Adicionar outro
+                            endereço
+                          </Button>
+                        </>
+                      )}
+                    />
 
-                            {statesCities.map(state => {
-                              return (
-                                <option key={state.sigla} value={state.sigla}>
-                                  {state.nome}
-                                </option>
-                              );
-                            })}
-                          </Input>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="city">Cidade</Label>
-                          <Input type="select" id="city" name="city">
-                            <option
-                              value="none"
-                              defaultValue="none"
-                              disabled=""
-                            >
-                              Selecione uma opção
-                            </option>
+                    <div className="form-actions right" />
 
-                            {statesCities.map(element => {
-                              if (estado === element.sigla) {
-                                const teste = element.cidades.map(cidade => {
-                                  return (
-                                    <option key={cidade} value={cidade}>
-                                      {cidade}
-                                    </option>
-                                  );
-                                });
-                                return teste;
-                              }
-                            })}
-                          </Input>
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col sm="6">
-                        <FormGroup>
-                          <Label for="street">Rua</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input type="text" id="street" name="street" />
-                            <div className="form-control-position">
-                              <i className="fa fa-road" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="2">
-                        <FormGroup>
-                          <Label for="streetNumber">Número</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input
-                              type="text"
-                              id="streetNumber"
-                              name="streetNumber"
-                            />
-                            <div className="form-control-position">
-                              <Navigation size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="4">
-                        <FormGroup>
-                          <Label for="neighborhood">Bairro</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input
-                              type="text"
-                              id="neighborhood"
-                              name="neighborhood"
-                            />
-                            <div className="form-control-position">
-                              <i className="fa fa-map-signs" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <FormGroup>
-                      <Label for="complement">Complemento</Label>
-                      <div className="position-relative has-icon-left">
-                        <Input type="text" id="complement" name="complement" />
-                        <div className="form-control-position">
-                          <Edit size={14} color="#212529" />
-                        </div>
-                      </div>
-                    </FormGroup>
-                  </div>
-                  <div className="form-actions right" />
-                  <h3>Endereço 2</h3>
-                  <div className="form-body">
-                    <Row>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="cep">Tipo endereço</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input
-                              type="select"
-                              id="state"
-                              name="state"
-                              onChange={e => {
-                                stateChange(`${e.target.value}`);
-                              }}
-                            >
-                              <option
-                                value="none"
-                                defaultValue="none"
-                                disabled=""
-                              >
-                                Selecione uma opção
-                              </option>
-                              <option key="home" value="home">
-                                Casa
-                              </option>
-                              <option key="work" value="work">
-                                Trabalho
-                              </option>
-                              <option key="other" value="other">
-                                Outro
-                              </option>
-                            </Input>
-                            <div className="form-control-position">
-                              <Map size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="cep">CEP</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input type="text" id="cep" name="cep" />
-                            <div className="form-control-position">
-                              <MapPin size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="state">Estado</Label>
-                          <Input
-                            type="select"
-                            id="state"
-                            name="state"
-                            onChange={e => {
-                              stateChange(`${e.target.value}`);
-                            }}
-                          >
-                            <option
-                              value="none"
-                              defaultValue="none"
-                              disabled=""
-                            >
-                              Selecione uma opção
-                            </option>
-
-                            {statesCities.map(state => {
-                              return (
-                                <option key={state.sigla} value={state.sigla}>
-                                  {state.nome}
-                                </option>
-                              );
-                            })}
-                          </Input>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="3">
-                        <FormGroup>
-                          <Label for="city">Cidade</Label>
-                          <Input type="select" id="city" name="city">
-                            <option
-                              value="none"
-                              defaultValue="none"
-                              disabled=""
-                            >
-                              Selecione uma opção
-                            </option>
-
-                            {statesCities.map(element => {
-                              if (estado === element.sigla) {
-                                const teste = element.cidades.map(cidade => {
-                                  return (
-                                    <option key={cidade} value={cidade}>
-                                      {cidade}
-                                    </option>
-                                  );
-                                });
-                                return teste;
-                              }
-                            })}
-                          </Input>
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <Row>
-                      <Col sm="6">
-                        <FormGroup>
-                          <Label for="street">Rua</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input type="text" id="street" name="street" />
-                            <div className="form-control-position">
-                              <i className="fa fa-road" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="2">
-                        <FormGroup>
-                          <Label for="streetNumber">Número</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input
-                              type="text"
-                              id="streetNumber"
-                              name="streetNumber"
-                            />
-                            <div className="form-control-position">
-                              <Navigation size={14} color="#212529" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                      <Col sm="4">
-                        <FormGroup>
-                          <Label for="neighborhood">Bairro</Label>
-                          <div className="position-relative has-icon-left">
-                            <Input
-                              type="text"
-                              id="neighborhood"
-                              name="neighborhood"
-                            />
-                            <div className="form-control-position">
-                              <i className="fa fa-map-signs" />
-                            </div>
-                          </div>
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                    <FormGroup>
-                      <Label for="complement">Complemento</Label>
-                      <div className="position-relative has-icon-left">
-                        <Input type="text" id="complement" name="complement" />
-                        <div className="form-control-position">
-                          <Edit size={14} color="#212529" />
-                        </div>
-                      </div>
-                    </FormGroup>
-                  </div>
-                  <div className="form-actions right">
                     {loading ? (
                       <Button
                         disabled
-                        color="success"
+                        color="secondary"
                         block
                         className="btn-default btn-raised"
                       >
@@ -1001,6 +1074,7 @@ export default function TabsBorderBottom() {
                       </Button>
                     ) : (
                       <Button
+                        type="submit"
                         color="success"
                         block
                         className="btn-default btn-raised"
@@ -1008,9 +1082,9 @@ export default function TabsBorderBottom() {
                         Atualizar endereços
                       </Button>
                     )}
-                  </div>
-                </Form>
-              </div>
+                  </Form>
+                )}
+              </Formik>
             </CardBody>
           </Card>
         </TabPane>

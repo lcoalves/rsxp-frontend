@@ -2,9 +2,9 @@
  * Action Types
  */
 export const Types = {
-  REQUEST: "CEP_REQUEST",
-  SUCCESS: "CEP_SUCCESS",
-  FAILURE: "CEP_FAILURE"
+  REQUEST: 'CEP_REQUEST',
+  SUCCESS: 'CEP_SUCCESS',
+  FAILURE: 'CEP_FAILURE',
 };
 
 /**
@@ -13,7 +13,7 @@ export const Types = {
 const INITIAL_STATE = {
   loading: false,
   error: false,
-  data: {}
+  data: {},
 };
 
 export default function cep(state = INITIAL_STATE, action) {
@@ -25,13 +25,13 @@ export default function cep(state = INITIAL_STATE, action) {
         ...state,
         error: false,
         loading: false,
-        data: action.payload.data
+        data: action.payload.data,
       };
     case Types.FAILURE:
       return {
         ...state,
         error: true,
-        loading: false
+        loading: false,
       };
     default:
       return state;
@@ -42,19 +42,20 @@ export default function cep(state = INITIAL_STATE, action) {
  * Actions Creators
  */
 export const Creators = {
-  cepRequest: cep => ({
+  cepRequest: (cep, index) => ({
     type: Types.REQUEST,
     payload: {
-      cep
-    }
+      cep,
+      index,
+    },
   }),
   cepSuccess: data => ({
     type: Types.SUCCESS,
     payload: {
-      data
-    }
+      data,
+    },
   }),
   cepFailure: () => ({
-    type: Types.FAILURE
-  })
+    type: Types.FAILURE,
+  }),
 };
