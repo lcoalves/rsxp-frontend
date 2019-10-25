@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Creators as AvatarActions } from '~/store/ducks/avatar';
 import { Creators as ProfileActions } from '~/store/ducks/profile';
 import { Creators as CepActions } from '~/store/ducks/cep';
+import { Creators as AddressActions } from '~/store/ducks/address';
 
 import {
   TabContent,
@@ -40,6 +41,7 @@ import {
   Smartphone,
   Phone,
   MapPin,
+  RefreshCw,
   Facebook,
   Instagram,
   Linkedin,
@@ -161,20 +163,24 @@ class CepFormat extends Component {
 }
 
 export default function TabsBorderBottom() {
+  const user_id = localStorage.getItem('@dashboard/user');
   const [activeTab, setActiveTab] = useState('1');
-  const [estado, setEstado] = useState('');
   const [src, setSrc] = useState(null);
   const [addresses, setAddresses] = useState([
     {
+      id: null,
+      entity_id: parseInt(user_id),
       type: '',
       other_type_name: '',
       cep: '',
+      country: 'Brasil',
       uf: '',
       city: '',
       street: '',
       street_number: '',
       neighborhood: '',
       complement: '',
+      receiver: '',
     },
   ]);
 
@@ -183,6 +189,7 @@ export default function TabsBorderBottom() {
   const loading = useSelector(state => state.profile.loading);
   const data = useSelector(state => state.profile.data);
   const cepData = useSelector(state => state.cep.data);
+  const cepLoading = useSelector(state => state.cep.loading);
 
   const DatepickerButton = ({ value, onClick }) => (
     <Button
@@ -211,9 +218,8 @@ export default function TabsBorderBottom() {
 
   function handleCep(cep, setFieldValue, values, index) {
     setFieldValue(`addresses.${index}.cep`, cep);
-    console.tron.log(addresses);
-    console.tron.log(cep);
-    console.tron.log(values);
+    setFieldValue(`addresses.${index}.cep`, cep);
+    setFieldValue(`addresses.${index}.cep`, cep);
 
     if (cep.length === 8) {
       setAddresses(values.addresses);
@@ -254,7 +260,21 @@ export default function TabsBorderBottom() {
   }
 
   function handleUpdateAddress(values) {
-    console.tron.log(values);
+    let addresses = values.addresses;
+
+    const addressesPut = addresses.filter(address => address.id !== null);
+
+    addresses = values.addresses;
+
+    const addressesPost = addresses.filter(address => {
+      if (address.id === null) {
+        delete address.id;
+
+        return address;
+      }
+    });
+
+    dispatch(AddressActions.addressRequest(addressesPost, addressesPut));
   }
 
   useEffect(() => {
@@ -266,14 +286,24 @@ export default function TabsBorderBottom() {
       copy[cepData.index].city =
         cepData.localidade !== '' ? cepData.localidade : '';
       copy[cepData.index].street =
-        cepData.logradouro !== '' ? cepData.logradouro : '';
+        cepData.logradouro !== ''
+          ? cepData.logradouro
+          : addresses[cepData.index].street;
       copy[cepData.index].neighborhood =
-        cepData.bairro !== '' ? cepData.bairro : '';
+        cepData.bairro !== ''
+          ? cepData.bairro
+          : addresses[cepData.index].neighborhood;
 
       setAddresses(copy);
       setAddresses([...addresses]);
     }
   }, [cepData]);
+
+  useEffect(() => {
+    if (data.addresses && data.addresses.length > 0) {
+      setAddresses(data.addresses);
+    }
+  }, [data]);
 
   return (
     <div>
@@ -845,7 +875,7 @@ export default function TabsBorderBottom() {
                                       <Label for={`addresses.${index}.cep`}>
                                         CEP
                                       </Label>
-                                      <div className="position-relative has-icon-left">
+                                      <div className="position-relative has-icon-right">
                                         <CepFormat
                                           autoComplete="cep"
                                           name={`addresses.${index}.cep`}
@@ -857,7 +887,7 @@ export default function TabsBorderBottom() {
                                               touched.cep &&
                                               'is-invalid'}
                                           `}
-                                          value={values.cep}
+                                          value={address.cep}
                                           onValueChange={val =>
                                             handleCep(
                                               val.value,
@@ -872,9 +902,15 @@ export default function TabsBorderBottom() {
                                             {errors.cep}
                                           </div>
                                         ) : null}
-                                        <div className="form-control-position">
-                                          <MapPin size={14} color="#212529" />
-                                        </div>
+                                        {cepLoading && (
+                                          <div className="form-control-position">
+                                            <RefreshCw
+                                              size={14}
+                                              color="#212529"
+                                              className="spinner"
+                                            />
+                                          </div>
+                                        )}
                                       </div>
                                     </FormGroup>
                                   </Col>
@@ -899,6 +935,7 @@ export default function TabsBorderBottom() {
                                       </Label>
                                       <Field
                                         type="text"
+                                        disabled={cepLoading}
                                         id={`addresses.${index}.city`}
                                         name={`addresses.${index}.city`}
                                         className={`
@@ -925,6 +962,7 @@ export default function TabsBorderBottom() {
                                       <div className="position-relative has-icon-left">
                                         <Field
                                           type="text"
+                                          disabled={cepLoading}
                                           id={`addresses.${index}.street`}
                                           name={`addresses.${index}.street`}
                                           className={`
@@ -989,6 +1027,7 @@ export default function TabsBorderBottom() {
                                       <div className="position-relative has-icon-left">
                                         <Field
                                           type="text"
+                                          disabled={cepLoading}
                                           id={`addresses.${index}.neighborhood`}
                                           name={`addresses.${index}.neighborhood`}
                                           className={`
@@ -1011,22 +1050,48 @@ export default function TabsBorderBottom() {
                                     </FormGroup>
                                   </Col>
                                 </Row>
-                                <FormGroup>
-                                  <Label for={`addresses.${index}.complement`}>
-                                    Complemento
-                                  </Label>
-                                  <div className="position-relative has-icon-left">
-                                    <Field
-                                      type="text"
-                                      id={`addresses.${index}.complement`}
-                                      name={`addresses.${index}.complement`}
-                                      className="form-control"
-                                    />
-                                    <div className="form-control-position">
-                                      <Edit size={14} color="#212529" />
-                                    </div>
-                                  </div>
-                                </FormGroup>
+                                <Row>
+                                  <Col sm="12" md="6" lg="6">
+                                    <FormGroup>
+                                      <Label
+                                        for={`addresses.${index}.complement`}
+                                      >
+                                        Complemento
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <Field
+                                          type="text"
+                                          id={`addresses.${index}.complement`}
+                                          name={`addresses.${index}.complement`}
+                                          className="form-control"
+                                        />
+                                        <div className="form-control-position">
+                                          <Edit size={14} color="#212529" />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                  <Col sm="12" md="6" lg="6">
+                                    <FormGroup>
+                                      <Label
+                                        for={`addresses.${index}.receiver`}
+                                      >
+                                        Recebedor
+                                      </Label>
+                                      <div className="position-relative has-icon-left">
+                                        <Field
+                                          type="text"
+                                          id={`addresses.${index}.receiver`}
+                                          name={`addresses.${index}.receiver`}
+                                          className="form-control"
+                                        />
+                                        <div className="form-control-position">
+                                          <Edit size={14} color="#212529" />
+                                        </div>
+                                      </div>
+                                    </FormGroup>
+                                  </Col>
+                                </Row>
                                 <div className="form-actions right" />
                               </div>
                             ))}
@@ -1035,15 +1100,19 @@ export default function TabsBorderBottom() {
                             color="success"
                             onClick={() =>
                               push({
+                                id: null,
+                                entity_id: parseInt(user_id),
                                 type: '',
                                 other_type_name: '',
                                 cep: '',
+                                country: 'Brasil',
                                 uf: '',
                                 city: '',
                                 street: '',
                                 street_number: '',
                                 neighborhood: '',
                                 complement: '',
+                                receiver: '',
                               })
                             }
                           >

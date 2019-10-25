@@ -33,6 +33,11 @@ import {
 } from '~/store/ducks/profile';
 
 import {
+  Creators as AddressActions,
+  Types as AddressTypes,
+} from '~/store/ducks/address';
+
+import {
   Creators as EventActions,
   Types as EventTypes,
 } from '~/store/ducks/event';
@@ -274,6 +279,22 @@ function* profile() {
     yield put(ProfileActions.profileSuccess(response.data));
   } catch (err) {
     yield put(ProfileActions.profileFailure());
+  }
+}
+
+function* address(action) {
+  try {
+    const { addressesPost, addressesPut } = action.payload;
+
+    yield call(api.post, '/address', {
+      addressesPost,
+      addressesPut,
+    });
+
+    yield put(AddressActions.addressSuccess());
+    toastr.success('Sucesso!', 'Seus endereços foram atualizados.');
+  } catch (err) {
+    yield put(AddressActions.addressFailure());
   }
 }
 
@@ -934,6 +955,7 @@ export default function* rootSaga() {
     takeLatest(ResetPasswordTypes.CONFIRM_REQUEST, confirmResetPassword),
     takeLatest(LoginTypes.LOGOUT_REQUEST, logout),
     takeLatest(ProfileTypes.REQUEST, profile),
+    takeLatest(AddressTypes.REQUEST, address),
     takeLatest(ProfileTypes.EDIT_REQUEST, editProfile),
 
     takeLatest(EventTypes.REQUEST, event),

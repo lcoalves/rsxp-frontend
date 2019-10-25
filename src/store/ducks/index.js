@@ -15,6 +15,7 @@ import types from './types';
 import signup from './signup';
 import login from './login';
 import profile from './profile';
+import address from './address';
 import resetPassword from './resetPassword';
 import event from './event';
 import invite from './invite';
@@ -45,6 +46,7 @@ export default combineReducers({
   signup,
   login,
   profile,
+  address,
   resetPassword,
   event,
   invite,
