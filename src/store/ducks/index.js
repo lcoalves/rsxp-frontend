@@ -30,6 +30,7 @@ import organization from './organization';
 import avatar from './avatar';
 import organizator from './organizator';
 import participant from './participant';
+import order from './order';
 
 import { reducer as toastrReducer } from 'react-redux-toastr';
 
@@ -60,5 +61,6 @@ export default combineReducers({
   avatar,
   organizator,
   participant,
+  order,
   router: connectRouter(history),
 });
