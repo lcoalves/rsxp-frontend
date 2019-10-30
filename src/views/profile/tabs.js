@@ -1,11 +1,11 @@
 /* eslint-disable array-callback-return */
 import React, { useState, useEffect, Component } from 'react';
-
+import { toastr } from 'react-redux-toastr';
 import NumberFormat from 'react-number-format';
 import AvatarImageCropper from 'react-avatar-image-cropper';
-
-import { Formik, Field, Form, FieldArray } from 'formik';
+import { Formik, Field, Form, FieldArray, getIn } from 'formik';
 import { Datepicker } from 'react-formik-ui';
+import pt from 'date-fns/locale/pt';
 import * as Yup from 'yup';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -72,6 +72,24 @@ const formSchema = Yup.object().shape({
   personalState: Yup.string().required('O estado civil é obrigatório'),
   sex: Yup.string().required('O sexo é obrigatório'),
   phone: Yup.string().required('O celular é obrigatório'),
+});
+
+const addressSchema = Yup.object().shape({
+  addresses: Yup.array().of(
+    Yup.object().shape({
+      type: Yup.string().required('O tipo é obrigatório.'),
+      other_type_name: Yup.string().when('type', {
+        is: 'other',
+        then: Yup.string().required('O apelido é obrigatório.'),
+      }),
+      cep: Yup.string().required('O cep é obrigatório.'),
+      city: Yup.string().required('A cidade é obrigatória.'),
+      street: Yup.string().required('A rua é obrigatória.'),
+      street_number: Yup.string().required('O número é obrigatório.'),
+      neighborhood: Yup.string().required('A bairro é obrigatório.'),
+      receiver: Yup.string().required('O recebedor é obrigatório.'),
+    })
+  ),
 });
 
 class CpfFormat extends Component {
@@ -141,10 +159,6 @@ class AltPhoneFormat extends Component {
 }
 
 class CepFormat extends Component {
-  state = {
-    value: '',
-  };
-
   render() {
     return (
       <NumberFormat
@@ -152,10 +166,6 @@ class CepFormat extends Component {
         displayType="input"
         format="#####-###"
         allowNegative={false}
-        value={this.state.value}
-        onValueChange={vals => {
-          this.setState({ value: vals.value });
-        }}
         {...this.props}
       />
     );
@@ -183,6 +193,11 @@ export default function TabsBorderBottom() {
       receiver: '',
     },
   ]);
+  const [social_network, setSocialNetwork] = useState({
+    facebook: '',
+    instagram: '',
+    linkedin: '',
+  });
 
   const dispatch = useDispatch();
 
@@ -217,8 +232,6 @@ export default function TabsBorderBottom() {
   }
 
   function handleCep(cep, setFieldValue, values, index) {
-    setFieldValue(`addresses.${index}.cep`, cep);
-    setFieldValue(`addresses.${index}.cep`, cep);
     setFieldValue(`addresses.${index}.cep`, cep);
 
     if (cep.length === 8) {
@@ -277,6 +290,25 @@ export default function TabsBorderBottom() {
     dispatch(AddressActions.addressRequest(addressesPost, addressesPut));
   }
 
+  function handleDeleteAddress(id, remove, index) {
+    toastr.confirm('Deseja realmente remover esse endereço?', {
+      onOk: () => (
+        dispatch(AddressActions.deleteAddressRequest(id)), remove(index)
+      ),
+      onCancel: () => {},
+    });
+  }
+
+  function handleUpdateSocialNetwork(values) {
+    const toSend = {
+      facebook: values.facebook,
+      instagram: values.instagram,
+      linkedin: values.linkedin,
+    };
+
+    dispatch(ProfileActions.editProfileRequest(toSend));
+  }
+
   useEffect(() => {
     if (!!cepData.cep) {
       const copy = addresses;
@@ -302,6 +334,15 @@ export default function TabsBorderBottom() {
   useEffect(() => {
     if (data.addresses && data.addresses.length > 0) {
       setAddresses(data.addresses);
+    }
+
+    if (!!data.email) {
+      setSocialNetwork({
+        ...social_network,
+        facebook: data.facebook,
+        instagram: data.instagram,
+        linkedin: data.linkedin,
+      });
     }
   }, [data]);
 
@@ -590,6 +631,7 @@ export default function TabsBorderBottom() {
                                   <Datepicker
                                     name="birthday"
                                     id="birthday"
+                                    locale={pt}
                                     selected={values.birthday}
                                     onChange={date =>
                                       setFieldValue('birthday', date)
@@ -774,327 +816,390 @@ export default function TabsBorderBottom() {
                 initialValues={{
                   addresses,
                 }}
+                validationSchema={addressSchema}
                 onSubmit={values => handleUpdateAddress(values)}
               >
-                {({ errors, touched, setFieldValue, values, handleChange }) => (
+                {({
+                  errors,
+                  touched,
+                  setFieldValue,
+                  values,
+                  handleChange,
+                  setFieldTouched,
+                }) => (
                   <Form>
                     <FieldArray
                       name="addresses"
                       render={({ remove, push }) => (
                         <>
                           {values.addresses.length > 0 &&
-                            values.addresses.map((address, index) => (
-                              <div key={index}>
-                                <Row className="justify-content-between">
-                                  <h3>Endereço {index + 1}</h3>
-                                  {values.addresses.length > 1 && (
-                                    <Button
-                                      color="danger"
-                                      onClick={() => remove(index)}
-                                    >
-                                      <X size={18} color="#fff" />
-                                    </Button>
-                                  )}
-                                </Row>
-                                <Row>
-                                  <Col sm="4">
-                                    <FormGroup>
-                                      <Label for={`addresses.${index}.type`}>
-                                        Tipo endereço
-                                      </Label>
-                                      <div className="position-relative has-icon-left">
-                                        <Field
-                                          type="select"
-                                          component="select"
-                                          id={`addresses.${index}.type`}
-                                          name={`addresses.${index}.type`}
-                                          className={`
-                                          form-control
-                                          ${errors.type &&
-                                            touched.type &&
-                                            'is-invalid'}
-                                        `}
-                                          onChange={handleChange}
-                                        >
-                                          <option
-                                            value=""
-                                            defaultValue=""
-                                            disabled=""
-                                          >
-                                            Selecione uma opção
-                                          </option>
-                                          <option key="home" value="home">
-                                            Casa
-                                          </option>
-                                          <option key="work" value="work">
-                                            Trabalho
-                                          </option>
-                                          <option key="other" value="other">
-                                            Outro
-                                          </option>
-                                        </Field>
-                                        <div className="form-control-position">
-                                          <Map size={14} color="#212529" />
-                                        </div>
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                  {address.type === 'other' && (
-                                    <Col sm="8">
+                            values.addresses.map((address, index) => {
+                              const type = `addresses[${index}].type`;
+                              const errorType = getIn(errors, type);
+                              const touchedType = getIn(touched, type);
+
+                              const other_type_name = `addresses[${index}].other_type_name`;
+                              const errorOtherTypeName = getIn(
+                                errors,
+                                other_type_name
+                              );
+                              const touchedOtherTypeName = getIn(
+                                touched,
+                                other_type_name
+                              );
+
+                              const cep = `addresses[${index}].cep`;
+                              const errorCep = getIn(errors, cep);
+                              const touchedCep = getIn(touched, cep);
+
+                              const city = `addresses[${index}].city`;
+                              const errorCity = getIn(errors, city);
+                              const touchedCity = getIn(touched, city);
+
+                              const street = `addresses[${index}].street`;
+                              const errorStreet = getIn(errors, street);
+                              const touchedStreet = getIn(touched, street);
+
+                              const street_number = `addresses[${index}].street_number`;
+                              const errorStreet_number = getIn(
+                                errors,
+                                street_number
+                              );
+                              const touchedStreet_number = getIn(
+                                touched,
+                                street_number
+                              );
+
+                              const neighborhood = `addresses[${index}].neighborhood`;
+                              const errorNeighborhood = getIn(
+                                errors,
+                                neighborhood
+                              );
+                              const touchedNeighborhood = getIn(
+                                touched,
+                                neighborhood
+                              );
+
+                              const receiver = `addresses[${index}].receiver`;
+                              const errorReceiver = getIn(errors, receiver);
+                              const touchedReceiver = getIn(touched, receiver);
+
+                              return (
+                                <div key={index}>
+                                  <Row className="justify-content-between">
+                                    <h3>Endereço {index + 1}</h3>
+                                    {values.addresses.length > 1 && (
+                                      <Button
+                                        color="danger"
+                                        onClick={() =>
+                                          address.id !== null
+                                            ? handleDeleteAddress(
+                                                address.id,
+                                                remove,
+                                                index
+                                              )
+                                            : remove(index)
+                                        }
+                                      >
+                                        <X size={18} color="#fff" />
+                                      </Button>
+                                    )}
+                                  </Row>
+                                  <Row>
+                                    <Col sm="4">
                                       <FormGroup>
-                                        <Label
-                                          for={`addresses.${index}.other_type_name`}
-                                        >
-                                          Apelido do endereço
+                                        <Label for={type}>Tipo endereço</Label>
+                                        <div className="position-relative has-icon-left">
+                                          <Field
+                                            type="select"
+                                            component="select"
+                                            id={type}
+                                            name={type}
+                                            className={`
+                                              form-control
+                                              ${errorType &&
+                                                touchedType &&
+                                                'is-invalid'}
+                                            `}
+                                            onChange={handleChange}
+                                          >
+                                            <option
+                                              value=""
+                                              defaultValue=""
+                                              disabled=""
+                                            >
+                                              Selecione uma opção
+                                            </option>
+                                            <option key="home" value="home">
+                                              Casa
+                                            </option>
+                                            <option key="work" value="work">
+                                              Trabalho
+                                            </option>
+                                            <option key="other" value="other">
+                                              Outro
+                                            </option>
+                                          </Field>
+                                          {errorType && touchedType ? (
+                                            <div className="invalid-feedback">
+                                              {errorType}
+                                            </div>
+                                          ) : null}
+                                          <div className="form-control-position">
+                                            <Map size={14} color="#212529" />
+                                          </div>
+                                        </div>
+                                      </FormGroup>
+                                    </Col>
+                                    {address.type === 'other' && (
+                                      <Col sm="8">
+                                        <FormGroup>
+                                          <Label for={other_type_name}>
+                                            Apelido do endereço
+                                          </Label>
+                                          <Field
+                                            type="text"
+                                            id={other_type_name}
+                                            name={other_type_name}
+                                            placeholder="Ex: Casa da minha mãe"
+                                            className={`
+                                              form-control
+                                              ${errorOtherTypeName &&
+                                                touchedOtherTypeName &&
+                                                'is-invalid'}
+                                            `}
+                                          />
+                                          {errorOtherTypeName &&
+                                          touchedOtherTypeName ? (
+                                            <div className="invalid-feedback">
+                                              {errorOtherTypeName}
+                                            </div>
+                                          ) : null}
+                                        </FormGroup>
+                                      </Col>
+                                    )}
+                                  </Row>
+                                  <Row>
+                                    <Col sm="3">
+                                      <FormGroup>
+                                        <Label for={cep}>CEP</Label>
+                                        <div className="position-relative has-icon-right">
+                                          <CepFormat
+                                            autoComplete="cep"
+                                            id={cep}
+                                            name={cep}
+                                            placeholder="Ex: 17580-000"
+                                            value={address.cep}
+                                            className={`
+                                              form-control
+                                              ${errorCep &&
+                                                touchedCep &&
+                                                'is-invalid'}
+                                            `}
+                                            onValueChange={val =>
+                                              handleCep(
+                                                val.value,
+                                                setFieldValue,
+                                                values,
+                                                index
+                                              )
+                                            }
+                                          />
+                                          {errorCep && touchedCep ? (
+                                            <div className="invalid-feedback">
+                                              {errorCep}
+                                            </div>
+                                          ) : null}
+                                          {cepLoading && (
+                                            <div className="form-control-position">
+                                              <RefreshCw
+                                                size={14}
+                                                color="#212529"
+                                                className="spinner"
+                                              />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </FormGroup>
+                                    </Col>
+                                    <Col sm="3">
+                                      <FormGroup>
+                                        <Label for={`addresses.${index}.uf`}>
+                                          Estado
                                         </Label>
                                         <Field
+                                          readOnly
                                           type="text"
-                                          id={`addresses.${index}.other_type_name`}
-                                          name={`addresses.${index}.other_type_name`}
-                                          placeholder="Ex: Casa da minha mãe"
+                                          id={`addresses.${index}.uf`}
+                                          name={`addresses.${index}.uf`}
+                                          className="form-control"
+                                        />
+                                      </FormGroup>
+                                    </Col>
+                                    <Col sm="6">
+                                      <FormGroup>
+                                        <Label for={city}>Cidade</Label>
+                                        <Field
+                                          type="text"
+                                          disabled={cepLoading}
+                                          id={city}
+                                          name={city}
                                           className={`
                                         form-control
-                                        ${errors.other_type_name &&
-                                          touched.other_type_name &&
+                                        ${errorCity &&
+                                          touchedCity &&
                                           'is-invalid'}
                                       `}
                                         />
-                                        {errors.other_type_name &&
-                                        touched.other_type_name ? (
+                                        {errorCity && touchedCity ? (
                                           <div className="invalid-feedback">
-                                            {errors.other_type_name}
+                                            {errorCity}
                                           </div>
                                         ) : null}
                                       </FormGroup>
                                     </Col>
-                                  )}
-                                </Row>
-                                <Row>
-                                  <Col sm="3">
-                                    <FormGroup>
-                                      <Label for={`addresses.${index}.cep`}>
-                                        CEP
-                                      </Label>
-                                      <div className="position-relative has-icon-right">
-                                        <CepFormat
-                                          autoComplete="cep"
-                                          name={`addresses.${index}.cep`}
-                                          id={`addresses.${index}.cep`}
-                                          placeholder="Ex: 17580-000"
-                                          className={`
-                                            form-control
-                                            ${errors.cep &&
-                                              touched.cep &&
-                                              'is-invalid'}
-                                          `}
-                                          value={address.cep}
-                                          onValueChange={val =>
-                                            handleCep(
-                                              val.value,
-                                              setFieldValue,
-                                              values,
-                                              index
-                                            )
-                                          }
-                                        />
-                                        {errors.cep && touched.cep ? (
-                                          <div className="invalid-feedback">
-                                            {errors.cep}
-                                          </div>
-                                        ) : null}
-                                        {cepLoading && (
+                                  </Row>
+                                  <Row>
+                                    <Col sm="6">
+                                      <FormGroup>
+                                        <Label for={street}>Rua</Label>
+                                        <div className="position-relative has-icon-left">
+                                          <Field
+                                            type="text"
+                                            disabled={cepLoading}
+                                            id={street}
+                                            name={street}
+                                            className={`
+                                              form-control
+                                              ${errorStreet &&
+                                                touchedStreet &&
+                                                'is-invalid'}
+                                            `}
+                                          />
+                                          {errorStreet && touchedStreet ? (
+                                            <div className="invalid-feedback">
+                                              {errorStreet}
+                                            </div>
+                                          ) : null}
                                           <div className="form-control-position">
-                                            <RefreshCw
+                                            <i className="fa fa-road" />
+                                          </div>
+                                        </div>
+                                      </FormGroup>
+                                    </Col>
+                                    <Col sm="2">
+                                      <FormGroup>
+                                        <Label for={street_number}>
+                                          Número
+                                        </Label>
+                                        <div className="position-relative has-icon-left">
+                                          <Field
+                                            type="text"
+                                            id={street_number}
+                                            name={street_number}
+                                            className={`
+                                              form-control
+                                              ${errorStreet_number &&
+                                                touchedStreet_number &&
+                                                'is-invalid'}
+                                            `}
+                                          />
+                                          {errorStreet_number &&
+                                          touchedStreet_number ? (
+                                            <div className="invalid-feedback">
+                                              {errorStreet_number}
+                                            </div>
+                                          ) : null}
+                                          <div className="form-control-position">
+                                            <Navigation
                                               size={14}
                                               color="#212529"
-                                              className="spinner"
                                             />
                                           </div>
-                                        )}
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                  <Col sm="3">
-                                    <FormGroup>
-                                      <Label for={`addresses.${index}.uf`}>
-                                        Estado
-                                      </Label>
-                                      <Field
-                                        readOnly
-                                        type="text"
-                                        id={`addresses.${index}.uf`}
-                                        name={`addresses.${index}.uf`}
-                                        className="form-control"
-                                      />
-                                    </FormGroup>
-                                  </Col>
-                                  <Col sm="6">
-                                    <FormGroup>
-                                      <Label for={`addresses.${index}.city`}>
-                                        Cidade
-                                      </Label>
-                                      <Field
-                                        type="text"
-                                        disabled={cepLoading}
-                                        id={`addresses.${index}.city`}
-                                        name={`addresses.${index}.city`}
-                                        className={`
-                                        form-control
-                                        ${errors.city &&
-                                          touched.city &&
-                                          'is-invalid'}
-                                      `}
-                                      />
-                                      {errors.city && touched.city ? (
-                                        <div className="invalid-feedback">
-                                          {errors.city}
                                         </div>
-                                      ) : null}
-                                    </FormGroup>
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <Col sm="6">
-                                    <FormGroup>
-                                      <Label for={`addresses.${index}.street`}>
-                                        Rua
-                                      </Label>
-                                      <div className="position-relative has-icon-left">
-                                        <Field
-                                          type="text"
-                                          disabled={cepLoading}
-                                          id={`addresses.${index}.street`}
-                                          name={`addresses.${index}.street`}
-                                          className={`
-                                        form-control
-                                        ${errors.street &&
-                                          touched.street &&
-                                          'is-invalid'}
-                                      `}
-                                        />
-                                        {errors.street && touched.street ? (
-                                          <div className="invalid-feedback">
-                                            {errors.street}
-                                          </div>
-                                        ) : null}
-                                        <div className="form-control-position">
-                                          <i className="fa fa-road" />
-                                        </div>
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                  <Col sm="2">
-                                    <FormGroup>
-                                      <Label
-                                        for={`addresses.${index}.street_number`}
-                                      >
-                                        Número
-                                      </Label>
-                                      <div className="position-relative has-icon-left">
-                                        <Field
-                                          type="text"
-                                          id={`addresses.${index}.street_number`}
-                                          name={`addresses.${index}.street_number`}
-                                          className={`
-                                        form-control
-                                        ${errors.street_number &&
-                                          touched.street_number &&
-                                          'is-invalid'}
-                                      `}
-                                        />
-                                        {errors.street_number &&
-                                        touched.street_number ? (
-                                          <div className="invalid-feedback">
-                                            {errors.street_number}
-                                          </div>
-                                        ) : null}
-                                        <div className="form-control-position">
-                                          <Navigation
-                                            size={14}
-                                            color="#212529"
+                                      </FormGroup>
+                                    </Col>
+                                    <Col sm="4">
+                                      <FormGroup>
+                                        <Label for={neighborhood}>Bairro</Label>
+                                        <div className="position-relative has-icon-left">
+                                          <Field
+                                            type="text"
+                                            disabled={cepLoading}
+                                            id={neighborhood}
+                                            name={neighborhood}
+                                            className={`
+                                              form-control
+                                              ${errorNeighborhood &&
+                                                touchedNeighborhood &&
+                                                'is-invalid'}
+                                            `}
                                           />
-                                        </div>
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                  <Col sm="4">
-                                    <FormGroup>
-                                      <Label
-                                        for={`addresses.${index}.neighborhood`}
-                                      >
-                                        Bairro
-                                      </Label>
-                                      <div className="position-relative has-icon-left">
-                                        <Field
-                                          type="text"
-                                          disabled={cepLoading}
-                                          id={`addresses.${index}.neighborhood`}
-                                          name={`addresses.${index}.neighborhood`}
-                                          className={`
-                                        form-control
-                                        ${errors.neighborhood &&
-                                          touched.neighborhood &&
-                                          'is-invalid'}
-                                      `}
-                                        />
-                                        {errors.neighborhood &&
-                                        touched.neighborhood ? (
-                                          <div className="invalid-feedback">
-                                            {errors.neighborhood}
+                                          {errorNeighborhood &&
+                                          touchedNeighborhood ? (
+                                            <div className="invalid-feedback">
+                                              {errorNeighborhood}
+                                            </div>
+                                          ) : null}
+                                          <div className="form-control-position">
+                                            <i className="fa fa-map-signs" />
                                           </div>
-                                        ) : null}
-                                        <div className="form-control-position">
-                                          <i className="fa fa-map-signs" />
                                         </div>
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                </Row>
-                                <Row>
-                                  <Col sm="12" md="6" lg="6">
-                                    <FormGroup>
-                                      <Label
-                                        for={`addresses.${index}.complement`}
-                                      >
-                                        Complemento
-                                      </Label>
-                                      <div className="position-relative has-icon-left">
-                                        <Field
-                                          type="text"
-                                          id={`addresses.${index}.complement`}
-                                          name={`addresses.${index}.complement`}
-                                          className="form-control"
-                                        />
-                                        <div className="form-control-position">
-                                          <Edit size={14} color="#212529" />
+                                      </FormGroup>
+                                    </Col>
+                                  </Row>
+                                  <Row>
+                                    <Col sm="12" md="6" lg="6">
+                                      <FormGroup>
+                                        <Label
+                                          for={`addresses.${index}.complement`}
+                                        >
+                                          Complemento
+                                        </Label>
+                                        <div className="position-relative has-icon-left">
+                                          <Field
+                                            type="text"
+                                            id={`addresses.${index}.complement`}
+                                            name={`addresses.${index}.complement`}
+                                            className="form-control"
+                                          />
+                                          <div className="form-control-position">
+                                            <Edit size={14} color="#212529" />
+                                          </div>
                                         </div>
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                  <Col sm="12" md="6" lg="6">
-                                    <FormGroup>
-                                      <Label
-                                        for={`addresses.${index}.receiver`}
-                                      >
-                                        Recebedor
-                                      </Label>
-                                      <div className="position-relative has-icon-left">
-                                        <Field
-                                          type="text"
-                                          id={`addresses.${index}.receiver`}
-                                          name={`addresses.${index}.receiver`}
-                                          className="form-control"
-                                        />
-                                        <div className="form-control-position">
-                                          <Edit size={14} color="#212529" />
+                                      </FormGroup>
+                                    </Col>
+                                    <Col sm="12" md="6" lg="6">
+                                      <FormGroup>
+                                        <Label for={receiver}>Recebedor</Label>
+                                        <div className="position-relative has-icon-left">
+                                          <Field
+                                            type="text"
+                                            id={receiver}
+                                            name={receiver}
+                                            className={`
+                                              form-control
+                                              ${errorReceiver &&
+                                                touchedReceiver &&
+                                                'is-invalid'}
+                                            `}
+                                          />
+                                          {errorReceiver && touchedReceiver ? (
+                                            <div className="invalid-feedback">
+                                              {errorReceiver}
+                                            </div>
+                                          ) : null}
+                                          <div className="form-control-position">
+                                            <Edit size={14} color="#212529" />
+                                          </div>
                                         </div>
-                                      </div>
-                                    </FormGroup>
-                                  </Col>
-                                </Row>
-                                <div className="form-actions right" />
-                              </div>
-                            ))}
+                                      </FormGroup>
+                                    </Col>
+                                  </Row>
+                                  <div className="form-actions right" />
+                                </div>
+                              );
+                            })}
 
                           <Button
                             color="success"
@@ -1161,81 +1266,103 @@ export default function TabsBorderBottom() {
         <TabPane tabId="3">
           <Card>
             <CardBody>
-              <div className="px-3">
-                <Form>
-                  <div className="form-body">
-                    <FormGroup>
-                      <Label for="facebook">Facebook</Label>
-                      <div className="input-group">
-                        <div className="has-icon-left input-group-prepend">
-                          <span className="pl-4 input-group-text">
-                            https://www.facebook.com/
-                          </span>
-                          <div className="form-control-position">
-                            <Facebook size={14} color="#212529" />
+              <Formik
+                enableReinitialize
+                initialValues={social_network}
+                onSubmit={values => handleUpdateSocialNetwork(values)}
+              >
+                {({ errors, touched }) => (
+                  <Form>
+                    <div className="form-body">
+                      <FormGroup>
+                        <Label for="facebook">Facebook</Label>
+                        <div className="input-group">
+                          <div className="has-icon-left input-group-prepend">
+                            <span className="pl-4 input-group-text">
+                              https://www.facebook.com/
+                            </span>
+                            <div className="form-control-position">
+                              <Facebook size={14} color="#212529" />
+                            </div>
                           </div>
+                          <Field
+                            type="text"
+                            id="facebook"
+                            name="facebook"
+                            className="form-control"
+                          />
                         </div>
-                        <Input type="text" id="facebook" name="facebook" />
-                      </div>
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="instagram">Instagram</Label>
-                      <div className="input-group">
-                        <div className="has-icon-left input-group-prepend">
-                          <span className="pl-4 input-group-text">
-                            https://www.instagram.com/
-                          </span>
-                          <div className="form-control-position">
-                            <Instagram size={14} color="#212529" />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="instagram">Instagram</Label>
+                        <div className="input-group">
+                          <div className="has-icon-left input-group-prepend">
+                            <span className="pl-4 input-group-text">
+                              https://www.instagram.com/
+                            </span>
+                            <div className="form-control-position">
+                              <Instagram size={14} color="#212529" />
+                            </div>
                           </div>
+                          <Field
+                            type="text"
+                            id="instagram"
+                            name="instagram"
+                            className="form-control"
+                          />
                         </div>
-                        <Input type="text" id="instagram" name="instagram" />
-                      </div>
-                    </FormGroup>
-                    <FormGroup>
-                      <Label for="linkedin">Linkedin</Label>
-                      <div className="input-group">
-                        <div className="has-icon-left input-group-prepend">
-                          <span className="pl-4 input-group-text">
-                            https://www.linkedin.com/in/
-                          </span>
-                          <div className="form-control-position">
-                            <Linkedin size={14} color="#212529" />
+                      </FormGroup>
+                      <FormGroup>
+                        <Label for="linkedin">Linkedin</Label>
+                        <div className="input-group">
+                          <div className="has-icon-left input-group-prepend">
+                            <span className="pl-4 input-group-text">
+                              https://www.linkedin.com/in/
+                            </span>
+                            <div className="form-control-position">
+                              <Linkedin size={14} color="#212529" />
+                            </div>
                           </div>
+                          <Field
+                            type="text"
+                            id="linkedin"
+                            name="linkedin"
+                            className="form-control"
+                          />
                         </div>
-                        <Input type="text" id="linkedin" name="linkedin" />
-                      </div>
-                    </FormGroup>
-                  </div>
-                  <div className="form-actions right">
-                    {loading ? (
-                      <Button
-                        disabled
-                        color="success"
-                        block
-                        className="btn-default btn-raised"
-                      >
-                        <BounceLoader
-                          size={23}
-                          color={'#fff'}
-                          css={css`
-                            display: block;
-                            margin: 0 auto;
-                          `}
-                        />
-                      </Button>
-                    ) : (
-                      <Button
-                        color="success"
-                        block
-                        className="btn-default btn-raised"
-                      >
-                        Atualizar redes sociais
-                      </Button>
-                    )}
-                  </div>
-                </Form>
-              </div>
+                      </FormGroup>
+                    </div>
+                    <div className="form-actions right">
+                      {loading ? (
+                        <Button
+                          disabled
+                          color="secondary"
+                          block
+                          className="btn-default btn-raised"
+                        >
+                          <BounceLoader
+                            size={23}
+                            color={'#fff'}
+                            css={css`
+                              display: block;
+                              margin: 0 auto;
+                            `}
+                          />
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          color="success"
+                          block
+                          className="btn-default btn-raised"
+                        >
+                          Atualizar redes sociais
+                        </Button>
+                      )}
+                    </div>
+                  </Form>
+                )}
+              </Formik>
             </CardBody>
           </Card>
         </TabPane>

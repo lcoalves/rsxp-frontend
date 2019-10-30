@@ -8,7 +8,7 @@ import { Link, Redirect, withRouter } from 'react-router-dom';
 import { Formik, Field, Form, FieldArray } from 'formik';
 import { Datepicker } from 'react-formik-ui';
 import { subHours, parseISO, format, subMonths } from 'date-fns';
-import { pt } from 'date-fns/locale';
+import pt from 'date-fns/locale/pt';
 import { toastr } from 'react-redux-toastr';
 import * as Yup from 'yup';
 import randomstring from 'randomstring';
@@ -1060,6 +1060,7 @@ export default function UserProfile({ match, className }) {
                                   <Datepicker
                                     name="initialDate"
                                     id="initialDate"
+                                    locale={pt}
                                     selected={event_data.start_date}
                                     onChange={date =>
                                       setFieldValue('initialDate', date)
@@ -1100,6 +1101,7 @@ export default function UserProfile({ match, className }) {
                                   <Datepicker
                                     name="endDate"
                                     id="endDate"
+                                    locale={pt}
                                     selected={values.endDate}
                                     onChange={date =>
                                       setFieldValue('endDate', date)
@@ -2382,6 +2384,7 @@ export default function UserProfile({ match, className }) {
                           <Datepicker
                             name="certificateDate"
                             id="certificateDate"
+                            locale={pt}
                             selected={values.certificateDate}
                             onChange={date =>
                               setFieldValue('certificateDate', date)

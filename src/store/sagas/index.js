@@ -298,6 +298,20 @@ function* address(action) {
   }
 }
 
+function* deleteAddress(action) {
+  try {
+    const { id } = action.payload;
+
+    yield call(api.delete, `/address/${id}`);
+
+    yield put(AddressActions.addressSuccess());
+    toastr.success('Sucesso!', 'O endereço foi removido.');
+  } catch (err) {
+    toastr.error('Falha!', 'Houve um erro ao remover o endereço.');
+    yield put(AddressActions.addressFailure());
+  }
+}
+
 function* editProfile(action) {
   try {
     const { data } = action.payload;
@@ -673,8 +687,13 @@ function* cep(action) {
 
     response.data.index = index;
 
-    yield put(CepActions.cepSuccess(response.data));
-    toastr.success('Sucesso!', 'CEP encontrado.');
+    if (response.data.erro) {
+      yield put(CepActions.cepFailure());
+      toastr.warning('Aviso!', 'CEP não encontrado.');
+    } else {
+      yield put(CepActions.cepSuccess(response.data));
+      toastr.success('Sucesso!', 'CEP encontrado.');
+    }
   } catch (err) {
     toastr.error('Falha!', 'CEP inválido.');
     yield put(CepActions.cepFailure());
@@ -956,6 +975,7 @@ export default function* rootSaga() {
     takeLatest(LoginTypes.LOGOUT_REQUEST, logout),
     takeLatest(ProfileTypes.REQUEST, profile),
     takeLatest(AddressTypes.REQUEST, address),
+    takeLatest(AddressTypes.DELETE_REQUEST, deleteAddress),
     takeLatest(ProfileTypes.EDIT_REQUEST, editProfile),
 
     takeLatest(EventTypes.REQUEST, event),

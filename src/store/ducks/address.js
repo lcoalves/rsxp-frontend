@@ -5,6 +5,9 @@ export const Types = {
   REQUEST: 'ADDRESS_REQUEST',
   SUCCESS: 'ADDRESS_SUCCESS',
   FAILURE: 'ADDRESS_FAILURE',
+  DELETE_REQUEST: 'DELETE_ADDRESS_REQUEST',
+  DELETE_SUCCESS: 'DELETE_ADDRESS_SUCCESS',
+  DELETE_FAILURE: 'DELETE_ADDRESS_FAILURE',
 };
 
 /**
@@ -31,6 +34,22 @@ export default function address(state = INITIAL_STATE, action) {
         error: true,
         loading: false,
       };
+
+    //DELETANDO ENDEREÇO
+    case Types.DELETE_REQUEST:
+      return { ...state, loading: true };
+    case Types.DELETE_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.DELETE_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
+      };
     default:
       return state;
   }
@@ -52,5 +71,19 @@ export const Creators = {
   }),
   addressFailure: () => ({
     type: Types.FAILURE,
+  }),
+
+  //DELETANDO
+  deleteAddressRequest: id => ({
+    type: Types.DELETE_REQUEST,
+    payload: {
+      id,
+    },
+  }),
+  deleteAddressSuccess: () => ({
+    type: Types.DELETE_SUCCESS,
+  }),
+  deleteAddressFailure: () => ({
+    type: Types.DELETE_FAILURE,
   }),
 };
