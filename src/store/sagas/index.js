@@ -33,6 +33,11 @@ import {
 } from '~/store/ducks/profile';
 
 import {
+  Creators as AddressActions,
+  Types as AddressTypes,
+} from '~/store/ducks/address';
+
+import {
   Creators as EventActions,
   Types as EventTypes,
 } from '~/store/ducks/event';
@@ -282,6 +287,36 @@ function* profile() {
   }
 }
 
+function* address(action) {
+  try {
+    const { addressesPost, addressesPut } = action.payload;
+
+    yield call(api.post, '/address', {
+      addressesPost,
+      addressesPut,
+    });
+
+    yield put(AddressActions.addressSuccess());
+    toastr.success('Sucesso!', 'Seus endereços foram atualizados.');
+  } catch (err) {
+    yield put(AddressActions.addressFailure());
+  }
+}
+
+function* deleteAddress(action) {
+  try {
+    const { id } = action.payload;
+
+    yield call(api.delete, `/address/${id}`);
+
+    yield put(AddressActions.addressSuccess());
+    toastr.success('Sucesso!', 'O endereço foi removido.');
+  } catch (err) {
+    toastr.error('Falha!', 'Houve um erro ao remover o endereço.');
+    yield put(AddressActions.addressFailure());
+  }
+}
+
 function* editProfile(action) {
   try {
     const { data } = action.payload;
@@ -296,8 +331,19 @@ function* editProfile(action) {
     );
 
     yield put(ProfileActions.editProfileSuccess());
-    toastr.success('Sucesso!', 'Seu perfil foi atualizado.');
+    toastr.confirm('Perfil atualizado com sucesso.', {
+      onOk: () => window.location.reload(),
+      disableCancel: true,
+    });
   } catch (err) {
+    const { data } = err.response;
+
+    if (data && data.length > 0) {
+      data.map(error => {
+        toastr.error('Falha!', error.message);
+      });
+    }
+
     yield put(ProfileActions.editProfileFailure());
   }
 }
@@ -637,15 +683,22 @@ function* searchChurch(action) {
 
 function* cep(action) {
   try {
-    const { cep } = action.payload;
+    const { cep, index } = action.payload;
 
     const response = yield call(
       axios.get,
       `https://viacep.com.br/ws/${cep}/json/`
     );
 
-    yield put(CepActions.cepSuccess(response.data));
-    toastr.success('Sucesso!', 'CEP encontrado.');
+    response.data.index = index;
+
+    if (response.data.erro) {
+      yield put(CepActions.cepFailure());
+      toastr.warning('Aviso!', 'CEP não encontrado.');
+    } else {
+      yield put(CepActions.cepSuccess(response.data));
+      toastr.success('Sucesso!', 'CEP encontrado.');
+    }
   } catch (err) {
     toastr.error('Falha!', 'CEP inválido.');
     yield put(CepActions.cepFailure());
@@ -934,6 +987,8 @@ export default function* rootSaga() {
     takeLatest(ResetPasswordTypes.CONFIRM_REQUEST, confirmResetPassword),
     takeLatest(LoginTypes.LOGOUT_REQUEST, logout),
     takeLatest(ProfileTypes.REQUEST, profile),
+    takeLatest(AddressTypes.REQUEST, address),
+    takeLatest(AddressTypes.DELETE_REQUEST, deleteAddress),
     takeLatest(ProfileTypes.EDIT_REQUEST, editProfile),
 
     takeLatest(EventTypes.REQUEST, event),

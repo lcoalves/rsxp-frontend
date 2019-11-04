@@ -12,6 +12,7 @@ import * as Yup from 'yup';
 import 'react-table/react-table.css';
 
 import { subMonths } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 
 import ContentHeader from '../../../../components/contentHead/contentHeader';
 
@@ -489,6 +490,7 @@ export default function GroupCreate({ match, className }) {
                             <Datepicker
                               name="initial_date"
                               id="initial_date"
+                              locale={pt}
                               selected={values.initial_date}
                               onChange={date =>
                                 setFieldValue('initial_date', date)
@@ -529,6 +531,7 @@ export default function GroupCreate({ match, className }) {
                               <Datepicker
                                 name="end_date"
                                 id="end_date"
+                                locale={pt}
                                 selected={values.end_date}
                                 onChange={date =>
                                   setFieldValue('end_date', date)

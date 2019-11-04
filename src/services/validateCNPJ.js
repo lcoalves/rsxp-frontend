@@ -15,16 +15,16 @@ export function validateCNPJ(cnpj) {
 
   // Elimina CNPJs invalidos conhecidos
   if (
-    cnpj == '00000000000000' ||
-    cnpj == '11111111111111' ||
-    cnpj == '22222222222222' ||
-    cnpj == '33333333333333' ||
-    cnpj == '44444444444444' ||
-    cnpj == '55555555555555' ||
-    cnpj == '66666666666666' ||
-    cnpj == '77777777777777' ||
-    cnpj == '88888888888888' ||
-    cnpj == '99999999999999'
+    cnpj === '00000000000000' ||
+    cnpj === '11111111111111' ||
+    cnpj === '22222222222222' ||
+    cnpj === '33333333333333' ||
+    cnpj === '44444444444444' ||
+    cnpj === '55555555555555' ||
+    cnpj === '66666666666666' ||
+    cnpj === '77777777777777' ||
+    cnpj === '88888888888888' ||
+    cnpj === '99999999999999'
   )
     error = 'O CNPJ é inválido';
 
@@ -56,7 +56,7 @@ export function validateCNPJ(cnpj) {
 
   result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
-  if (result != digits.charAt(1)) error = 'O CNPJ é inválido';
+  if (result !== digits.charAt(1)) error = 'O CNPJ é inválido';
 
   return error;
 }
