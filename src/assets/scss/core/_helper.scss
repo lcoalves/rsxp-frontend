@@ -924,3 +924,7 @@
   .plyr__control[role='menuitemradio'][aria-checked='true']::before {
   background: #fc0;
 }
+
+.react-datepicker-wrapper {
+  display: block !important;
+}

@@ -9,7 +9,7 @@ export function validateCNPJ(cnpj) {
   let pos;
   let result;
 
-  if (cnpj == '') error = 'O CNPJ é obrigatório';
+  if (cnpj === '') error = 'O CNPJ é obrigatório';
 
   if (cnpj.length !== 14) error = 'O CNPJ deve conter 14 dígitos';
 
@@ -42,7 +42,7 @@ export function validateCNPJ(cnpj) {
 
   result = sum % 11 < 2 ? 0 : 11 - (sum % 11);
 
-  if (result != digits.charAt(0)) error = 'O CNPJ é inválido';
+  if (result !== digits.charAt(0)) error = 'O CNPJ é inválido';
 
   size = size + 1;
   numbers = cnpj.substring(0, size);

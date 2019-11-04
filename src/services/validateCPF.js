@@ -8,7 +8,7 @@ export function validateCPF(cpf) {
   let sum = 0;
   let rest = 0;
 
-  if (formattedCpf == '') error = 'O CPF é obrigatório';
+  if (formattedCpf === '') error = 'O CPF é obrigatório';
 
   if (formattedCpf.length !== 11) error = 'O CPF deve conter 11 dígitos';
 

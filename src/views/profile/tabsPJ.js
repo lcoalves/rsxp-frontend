@@ -80,7 +80,7 @@ export default function TabsBorderBottom() {
     <Button
       outline
       color="secondary"
-      className="width-250 height-38"
+      className="form-control height-38"
       onClick={onClick}
     >
       {value}
@@ -394,7 +394,7 @@ export default function TabsBorderBottom() {
                                 </div>
                               </div>
                             </Col>
-                            <Col sm="12" md="12" lg="4">
+                            <Col sm="12" md="6" lg="4">
                               <FormGroup className="mb-0">
                                 <Label for="foundation">Fundação</Label>
                                 <div className="position-relative has-icon-left">
@@ -410,11 +410,11 @@ export default function TabsBorderBottom() {
                                     showYearDropdown
                                     dropdownMode="select"
                                     className={`
-                                  form-control
-                                  ${errors.foundation &&
-                                    touched.foundation &&
-                                    'is-invalid'}
-                                `}
+                                      form-control
+                                      ${errors.foundation &&
+                                        touched.foundation &&
+                                        'is-invalid'}
+                                    `}
                                   />
                                   {errors.foundation && touched.foundation ? (
                                     <div className="invalid-feedback">

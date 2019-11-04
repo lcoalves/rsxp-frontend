@@ -191,7 +191,7 @@ export default function GroupCreate({ match, className }) {
       outline
       block
       color="secondary"
-      className="width-225 height-38"
+      className="form-control height-38"
       onClick={onClick}
     >
       {value}
@@ -507,10 +507,11 @@ export default function GroupCreate({ match, className }) {
                               timeIntervals={5}
                               timeCaption="Horário"
                               className={`
-                                  ${errors.initial_date &&
-                                    touched.initial_date &&
-                                    'is-invalid'}
-                                `}
+                                form-control
+                                ${errors.initial_date &&
+                                  touched.initial_date &&
+                                  'is-invalid'}
+                              `}
                             />
                             {errors.initial_date && touched.initial_date ? (
                               <div className="invalid-feedback">
@@ -524,7 +525,7 @@ export default function GroupCreate({ match, className }) {
                         </FormGroup>
                       </Col>
                       {!!values.initial_date && (
-                        <Col lg="2" md="6" sm="12">
+                        <Col xl="3" lg="4" md="4" sm="12">
                           <FormGroup>
                             <Label for="end_date">Formatura</Label>
                             <div className="position-relative has-icon-left">
