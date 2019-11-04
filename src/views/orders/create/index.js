@@ -114,16 +114,11 @@ class CepFormat extends Component {
 }
 
 export default function GroupCreate({ match, className }) {
-  const [dataProducts, setDataProducts] = useState([
-    { name: 'Teste', unit_price: 10, quantity: 10 },
-  ]);
-  const [products, setProducts] = useState([
-    {
-      name: '',
-      unit_price: null,
-      quantity: 0,
-    },
-  ]);
+  const [dataProducts, setDataProducts] = useState([]);
+  const [kit, setKit] = useState({
+    default_event_id: '',
+    products: [],
+  });
 
   const [modalAddMaterial, setModalAddMaterial] = useState(false);
   const [orders, setOrders] = useState([
@@ -154,34 +149,50 @@ export default function GroupCreate({ match, className }) {
     setModalAddMaterial(false);
   }
 
-  function handleSelectedDefaultEvent(id) {
-    const eventData = defaultData.find(event => event.id === parseInt(id));
+  function handleSelectedDefaultEvent(event, setFieldValue) {
+    const { name, value } = event.target;
 
-    return eventData.kit.products.map((product, index) => (
-      <Row className="justify-content-between">
-        <Col sm="6" md="6" lg="6">
-          <Label>{product.name}</Label>
-          <Field
-            type="hidden"
-            name={`products[${index}].name`}
-            className="form-control"
-          ></Field>
-        </Col>
-        <Col sm="6" md="6" lg="4">
-          <Label>R$ {product.unit_price}</Label>
-        </Col>
-        <Col sm="12" md="12" lg="2">
-          <Field
-            name={`products[${index}].quantity`}
-            className="form-control"
-          ></Field>
-        </Col>
-      </Row>
-    ));
+    if (value === '') {
+      setKit({ default_event_id: value, products: [] });
+    } else {
+      const eventData = defaultData.find(event => event.id === parseInt(value));
+
+      setKit({
+        default_event_id: value,
+        products: eventData.kit.products.map(product => {
+          return {
+            id: product.id,
+            name: product.name,
+            unit_price: product.unit_price,
+            quantity: 0,
+          };
+        }),
+      });
+    }
   }
 
-  function handleAddMaterial(event) {
-    console.tron.log(event);
+  function handleAddMaterial(values) {
+    const products = values.products.filter(product => product.quantity > 0);
+    const auxDataProducts = dataProducts;
+
+    console.tron.log(auxDataProducts);
+
+    if (auxDataProducts.length > 0) {
+      products.map(product => {
+        auxDataProducts.forEach((dataProduct, index) => {
+          if (product.id === auxDataProducts.id) {
+            auxDataProducts[index] = product;
+            console.tron.log(auxDataProducts);
+          } else {
+            setDataProducts([...dataProducts, product]);
+          }
+        });
+      });
+    } else {
+      setDataProducts([...dataProducts, ...products]);
+    }
+
+    setModalAddMaterial(false);
   }
 
   function handleAddOrder() {}
@@ -207,6 +218,7 @@ export default function GroupCreate({ match, className }) {
         <Card>
           <CardBody className="d-flex flex-column justify-content-center">
             <Formik
+              enableReinitialize
               initialValues={{
                 orders,
               }}
@@ -222,28 +234,27 @@ export default function GroupCreate({ match, className }) {
                   >
                     Adicionar material
                   </Button>
-                  <Row>
-                    <Col sm="12">
-                      {!!dataProducts.length && (
-                        <Table striped>
-                          <tr>
-                            <th>Produto</th>
-                            <th>Preço</th>
-                            <th>Quantidade</th>
-                          </tr>
-                          {dataProducts.map(product => {
-                            return (
-                              <tr>
-                                <td>{product.name}</td>
-                                <td>{product.unit_price}</td>
-                                <td>{product.quantity}</td>
-                              </tr>
-                            );
-                          })}
-                        </Table>
-                      )}
-                    </Col>
-                  </Row>
+
+                  <Table striped>
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Nome produto</th>
+                        <th>Preço</th>
+                        <th>Quantidade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dataProducts.map(product => (
+                        <tr>
+                          <th scope="row">{product.id}</th>
+                          <td>{product.name}</td>
+                          <td>{product.unit_price}</td>
+                          <td>{product.quantity}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
 
                   <h4 className="form-section">Endereço</h4>
                   <Row>
@@ -434,14 +445,12 @@ export default function GroupCreate({ match, className }) {
             Adicionar item ao kit
           </ModalHeader>
           <Formik
-            initialValues={{
-              item_id: '',
-              products,
-            }}
+            enableReinitialize
+            initialValues={kit}
             // validationSchema={formItemSchema}
-            onSubmit={event => handleAddMaterial(event)}
+            onSubmit={values => handleAddMaterial(values)}
           >
-            {({ errors, touched, handleChange, values }) => (
+            {({ errors, touched, handleChange, values, setFieldValue }) => (
               <Form className="pt-2">
                 <ModalBody>
                   <Row>
@@ -450,12 +459,16 @@ export default function GroupCreate({ match, className }) {
                         <Field
                           type="select"
                           component="select"
-                          id="item_id"
-                          name="item_id"
-                          onChange={handleChange}
+                          id="default_event_id"
+                          name="default_event_id"
+                          onChange={event =>
+                            handleSelectedDefaultEvent(event, setFieldValue)
+                          }
                           className={`
                             form-control
-                            ${errors.item_id && touched.item_id && 'is-invalid'}
+                            ${errors.default_event_id &&
+                              touched.default_event_id &&
+                              'is-invalid'}
                           `}
                         >
                           <option value="" disabled="">
@@ -464,7 +477,7 @@ export default function GroupCreate({ match, className }) {
 
                           {!!defaultData &&
                             defaultData.map(eventData => (
-                              <option value={eventData.id}>
+                              <option key={eventData.id} value={eventData.id}>
                                 {eventData.name}
                               </option>
                             ))}
@@ -473,9 +486,25 @@ export default function GroupCreate({ match, className }) {
                     </Col>
                   </Row>
 
-                  {values.item_id !== '' && (
-                    <Row>{handleSelectedDefaultEvent(values.item_id)}</Row>
-                  )}
+                  {values.products &&
+                    values.products.length > 0 &&
+                    values.products.map((product, index) => (
+                      <Row key={index} className="justify-content-between">
+                        <Col sm="6" md="6" lg="6">
+                          <Label>{product.name}</Label>
+                        </Col>
+                        <Col sm="6" md="6" lg="4">
+                          <Label>R$ {product.unit_price}</Label>
+                        </Col>
+                        <Col sm="12" md="12" lg="2">
+                          <Field
+                            type="number"
+                            name={`products[${index}].quantity`}
+                            className="form-control"
+                          ></Field>
+                        </Col>
+                      </Row>
+                    ))}
                 </ModalBody>
                 <ModalFooter>
                   <Button color="primary" type="submit">
