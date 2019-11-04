@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Component } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import Plyr from 'plyr';
+import Plyr from 'react-plyr';
 import NumberFormat from 'react-number-format';
 import history from '~/app/history';
 
@@ -18,10 +18,6 @@ import {
   Table,
   Label,
   Button,
-  Modal,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
 } from 'reactstrap';
 
 import { Creators as LessonActions } from '../../../../../store/ducks/lesson';
@@ -128,18 +124,7 @@ export default function Lesson({ match, className }) {
   }, [data]);
 
   useEffect(() => {
-    const options = {};
-    const player = new Plyr('#plyr-player', options);
-
     dispatch(LessonActions.lessonRequest(match.params.lesson_id));
-
-    return () => {
-      if (player.length > 0) {
-        for (const playerEl of player) {
-          playerEl.destroy();
-        }
-      }
-    };
   }, []);
 
   return (
@@ -156,11 +141,7 @@ export default function Lesson({ match, className }) {
               </CardHeader>
               <CardBody className="d-flex flex-column justify-content-center align-items-center p-0">
                 <Col xl="8" lg="7" md="12" xs="12" className="form-group">
-                  <div
-                    id="plyr-player"
-                    data-plyr-provider="vimeo"
-                    data-plyr-embed-id={data.lesson.video_id}
-                  />
+                  <Plyr type="vimeo" videoId={data.lesson.video_id} />
                 </Col>
                 <Formik
                   enableReinitialize
@@ -207,6 +188,7 @@ export default function Lesson({ match, className }) {
                                 <>
                                   {values.selecteds.map((selecteds, index) => (
                                     <tr
+                                      key={index}
                                       className={`${!selecteds.is_present &&
                                         'table-danger'}`}
                                     >
@@ -231,13 +213,17 @@ export default function Lesson({ match, className }) {
                                         <Label>{selecteds.name}</Label>
                                       </td>
                                       <td>
-                                        <Label>
-                                          {differenceInCalendarYears(
-                                            new Date(),
-                                            new Date(selecteds.birthday)
-                                          )}{' '}
-                                          anos
-                                        </Label>
+                                        {!!selecteds.birthday ? (
+                                          <Label>
+                                            {differenceInCalendarYears(
+                                              new Date(),
+                                              new Date(selecteds.birthday)
+                                            )}{' '}
+                                            anos
+                                          </Label>
+                                        ) : (
+                                          <Label>Não informado</Label>
+                                        )}
                                       </td>
                                     </tr>
                                   ))}
@@ -248,7 +234,7 @@ export default function Lesson({ match, className }) {
                         </Table>
                       </Col>
 
-                      <Col lg="4" md="12" xs="12">
+                      <Col lg="8" md="12" xs="12">
                         <h2 className="black mt-4">Oferta</h2>
                         <CurrencyFormat
                           disabled={data.is_finished}
@@ -306,10 +292,14 @@ export default function Lesson({ match, className }) {
                         </Button>
                         <Button
                           disabled={data.is_finished}
-                          className={`mt-4 ${data.is_finished &&
-                            'cursor-not-allowed'}`}
+                          className={`mt-4
+                            ${
+                              data.is_finished
+                                ? 'cursor-not-allowed btn-secondary'
+                                : 'btn-success'
+                            }
+                          `}
                           type="submit"
-                          color="success"
                         >
                           Confirmar relatório
                         </Button>

@@ -8,7 +8,7 @@ import {
   DropdownItem,
 } from 'reactstrap';
 import { toastr } from 'react-redux-toastr';
-import { List, Mail } from 'react-feather';
+import { List } from 'react-feather';
 
 // Import React Table
 import ReactTable from 'react-table';

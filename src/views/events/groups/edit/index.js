@@ -197,7 +197,7 @@ export default function UserProfile({ match, className }) {
     <Button
       outline
       color="secondary"
-      className="width-225 height-38"
+      className="form-control height-38"
       onClick={onClick}
     >
       {value}
@@ -1219,7 +1219,7 @@ export default function UserProfile({ match, className }) {
               {/* ORGANIZADORES */}
               {event_data.organizators.map(organizator => {
                 return (
-                  <Col xs="12" md="6" lg="4">
+                  <Col xs="12" md="6" lg="4" key={organizator.id}>
                     <Card className="height-350 justify-content-center">
                       <CardHeader className="text-center">
                         <img
@@ -1303,7 +1303,7 @@ export default function UserProfile({ match, className }) {
               {event_data.participants.map(participant => {
                 if (participant.pivot.assistant) {
                   return (
-                    <Col xs="12" md="6" lg="4">
+                    <Col xs="12" md="6" lg="4" key={participant.id}>
                       <Card className="height-350 justify-content-center">
                         <CardHeader className="text-center">
                           <img
@@ -1497,7 +1497,10 @@ export default function UserProfile({ match, className }) {
                       <Row className="justify-content-around align-items-center">
                         {event_data.lessonReports.map(lessonReport => {
                           return (
-                            <div className="lesson-container">
+                            <div
+                              className="lesson-container"
+                              key={lessonReport.id}
+                            >
                               <figure
                                 className={`${
                                   lessonReport.is_finished
@@ -1524,7 +1527,7 @@ export default function UserProfile({ match, className }) {
                                     </p>
                                   </div>
                                   <Link
-                                    to={`/eventos/grupo/1/editar/aula/${lessonReport.id}`}
+                                    to={`/eventos/grupo/${event_data.id}/editar/aula/${lessonReport.id}`}
                                   />
                                 </figcaption>
                               </figure>
@@ -2473,11 +2476,11 @@ export default function UserProfile({ match, className }) {
                             showYearDropdown
                             dropdownMode="select"
                             className={`
-                                  form-control
-                                  ${errors.certificateDate &&
-                                    touched.certificateDate &&
-                                    'is-invalid'}
-                                `}
+                              form-control
+                              ${errors.certificateDate &&
+                                touched.certificateDate &&
+                                'is-invalid'}
+                            `}
                           />
                           {errors.certificateDate && touched.certificateDate ? (
                             <div className="invalid-feedback">
@@ -2528,7 +2531,7 @@ export default function UserProfile({ match, className }) {
                         render={arrayHelpers => (
                           <>
                             {values.selected.map((selected, index) => (
-                              <tr>
+                              <tr key={selected.id}>
                                 <td>
                                   <Field
                                     type="checkbox"

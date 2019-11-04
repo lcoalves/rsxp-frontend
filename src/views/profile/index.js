@@ -1,5 +1,5 @@
 // import external modules
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 
 import { Row, Col, Card, CardBody, CardTitle } from 'reactstrap';
 
@@ -24,19 +24,19 @@ class Profile extends Component {
 
   render() {
     return (
-      <Fragment>
+      <>
         <Row>
           <Col md="12" lg="12">
             <Card>
               <CardBody>
                 {user_type === 'entity' ? (
                   <>
-                    <CardTitle>Meu perfil</CardTitle>
+                    <h2 className="text-center">Meu perfil</h2>
                     <CustomTabs TabContent1={<TabsBorderBottomPF />} />
                   </>
                 ) : (
                   <>
-                    <CardTitle>Minha empresa</CardTitle>
+                    <h2 className="text-center">Minha empresa</h2>
                     <CustomTabs TabContent1={<TabsBorderBottomPJ />} />
                   </>
                 )}
@@ -44,7 +44,7 @@ class Profile extends Component {
             </Card>
           </Col>
         </Row>
-      </Fragment>
+      </>
     );
   }
 }
