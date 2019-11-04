@@ -21,7 +21,7 @@ const LazyLessonEdit = lazy(() =>
   import('../views/events/groups/edit/lesson/index')
 );
 
-const LazyGorupCreate = lazy(() =>
+const LazyGroupCreate = lazy(() =>
   import('../views/events/groups/create/index')
 );
 
@@ -29,6 +29,7 @@ const LazyTrainings = lazy(() => import('../views/events/trainings/index'));
 const LazySeminaries = lazy(() => import('../views/events/seminaries/index'));
 
 const LazyOrders = lazy(() => import('../views/orders/index'));
+const LazyOrdersCreate = lazy(() => import('../views/orders/create/index'));
 
 const LazyUserProfile = lazy(() => import('../views/profile/index'));
 const LazyHome = lazy(() => import('../views/home/index'));
@@ -171,7 +172,7 @@ class Router extends Component {
             path="/eventos/grupo/criar"
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
-                <LazyGorupCreate {...matchprops} />
+                <LazyGroupCreate {...matchprops} />
               </Suspense>
             )}
           />
@@ -202,6 +203,16 @@ class Router extends Component {
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyOrders {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/pedidos/criar"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyOrdersCreate {...matchprops} />
               </Suspense>
             )}
           />

@@ -94,6 +94,11 @@ import {
   Types as AvatarTypes,
 } from '~/store/ducks/avatar';
 
+import {
+  Creators as OrderActions,
+  Types as OrderTypes,
+} from '~/store/ducks/order';
+
 function* signup(action) {
   try {
     const { entity_company, name, email, cpf_cnpj, password } = action.payload;
@@ -808,6 +813,14 @@ function* organizatorEvent(action) {
   }
 }
 
+function* order(action) {}
+
+function* allOrders(action) {}
+
+function* addOrder(action) {}
+
+function* deleteOrder(action) {}
+
 //CUSTOMIZAÇÕES DO TEMA
 function* customizerBgImage(action) {
   try {
@@ -942,6 +955,11 @@ export default function* rootSaga() {
     takeLatest(ParticipantTypes.CREATE_REQUEST, createParticipant),
     takeLatest(ParticipantTypes.EDIT_REQUEST, editParticipant),
     takeLatest(ParticipantTypes.SET_QUITTER_REQUEST, setQuitterParticipant),
+
+    takeLatest(OrderTypes.REQUEST, order),
+    takeLatest(OrderTypes.ALL_REQUEST, allOrders),
+    takeLatest(OrderTypes.ADD_REQUEST, addOrder),
+    takeLatest(OrderTypes.DELETE_REQUEST, deleteOrder),
 
     takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),
 

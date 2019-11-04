@@ -66,6 +66,8 @@ import {
   RefreshCw,
   Mail,
   Phone,
+  ArrowRightCircle,
+  UserPlus,
 } from 'react-feather';
 
 import { css } from '@emotion/core';
@@ -163,6 +165,7 @@ export default function UserProfile({ match, className }) {
   const [modalOrganizator, setModalOrganizator] = useState(false);
   const [modalChangeOrganizator, setModalChangeOrganizator] = useState(false);
   const [modalParticipant, setModalParticipant] = useState(false);
+  const [modalSearchParticipant, setModalSearchParticipant] = useState(false);
   const [modalAddParticipant, setModalAddParticipant] = useState(false);
   const [modalInvite, setModalInvite] = useState(false);
   const [modalCertificate, setModalCertificate] = useState(false);
@@ -277,33 +280,38 @@ export default function UserProfile({ match, className }) {
 
   const dispatch = useDispatch();
 
-  function toogleModalOrganizator() {
+  function toggleModalOrganizator() {
     setLeaderData(null);
     setModalOrganizator(!modalOrganizator);
   }
 
-  function toogleModalParticipant() {
+  function toggleModalParticipant() {
     setParticipantData(null);
     setParticipantError(false);
     setModalParticipant(!modalParticipant);
   }
 
-  function toogleModalAddParticipant() {
+  function toggleModalSearchParticipant() {
+    setModalParticipant(false);
+    setModalSearchParticipant(!modalSearchParticipant);
+  }
+
+  function toggleModalAddParticipant() {
     setModalParticipant(false);
     setModalAddParticipant(!modalAddParticipant);
   }
 
-  function toogleModalChangeOrganizator() {
-    setLeaderData(null);
-    setModalChangeOrganizator(!modalChangeOrganizator);
-  }
-
-  function toogleModalInvite() {
+  function toggleModalInvite() {
     setModalParticipant(false);
     setModalInvite(!modalInvite);
   }
 
-  function toogleModalCertificate() {
+  function toggleModalChangeOrganizator() {
+    setLeaderData(null);
+    setModalChangeOrganizator(!modalChangeOrganizator);
+  }
+
+  function toggleModalCertificate() {
     setPdfButton(null);
     setModalCertificate(!modalCertificate);
   }
@@ -364,7 +372,7 @@ export default function UserProfile({ match, className }) {
     setLeaderData(null);
   }
 
-  function confirmModalParticipant() {
+  function confirmModalSearchParticipant() {
     dispatch(
       ParticipantActions.addParticipantRequest(
         participantData.id,
@@ -661,7 +669,7 @@ export default function UserProfile({ match, className }) {
                       {/* <DropdownItem>
                         <i className="fa fa-user mr-2" /> Cartão de nomes
                       </DropdownItem> */}
-                      <DropdownItem onClick={toogleModalCertificate}>
+                      <DropdownItem onClick={toggleModalCertificate}>
                         <i className="fa fa-graduation-cap mr-2" /> Emitir
                         certificados
                       </DropdownItem>
@@ -722,7 +730,7 @@ export default function UserProfile({ match, className }) {
                             <Button
                               color="success"
                               className="btn-raised mr-3"
-                              onClick={toogleModalCertificate}
+                              onClick={toggleModalCertificate}
                             >
                               <i className="fa fa-graduation-cap" /> Emitir
                               certificados
@@ -1177,7 +1185,7 @@ export default function UserProfile({ match, className }) {
                         className="rounded-circle width-150 height-150"
                         outline
                         color="success"
-                        onClick={toogleModalOrganizator}
+                        onClick={toggleModalOrganizator}
                       >
                         <i className="fa fa-plus" />
                       </Button>
@@ -1247,7 +1255,7 @@ export default function UserProfile({ match, className }) {
                               top: '0',
                             }}
                             className="fonticon-container"
-                            onClick={toogleModalChangeOrganizator}
+                            onClick={toggleModalChangeOrganizator}
                           >
                             <RefreshCw
                               color="#FC0"
@@ -1385,19 +1393,19 @@ export default function UserProfile({ match, className }) {
                                 <Button
                                   color="success"
                                   className="btn-raised mr-2 mb-0 font-small-3"
-                                  onClick={toogleModalParticipant}
+                                  onClick={toggleModalParticipant}
                                 >
                                   <i className="fa fa-user fa-xs" /> Inserir
                                   participante
                                 </Button>
-                                <Button
+                                {/* <Button
                                   color="warning"
                                   className="btn-raised mr-2 mb-0 font-small-3"
-                                  onClick={toogleModalInvite}
+                                  onClick={toggleModalInvite}
                                 >
                                   <i className="fa fa-paper-plane fa-xs" />{' '}
                                   Convidar por email
-                                </Button>
+                                </Button> */}
                                 {/* Esse botão aparece quando o evento for um seminário */}
                                 {/* <Button
                                   href={`/eventos/grupo/${match.params.event_id}/organizacao-grupos`}
@@ -1412,7 +1420,7 @@ export default function UserProfile({ match, className }) {
                                 <Button
                                   color="success"
                                   className="btn-raised mr-3 d-lg-none"
-                                  onClick={toogleModalParticipant}
+                                  onClick={toggleModalParticipant}
                                 >
                                   <i className="fa fa-plus" />
                                 </Button>
@@ -1533,10 +1541,10 @@ export default function UserProfile({ match, className }) {
         {/* MODAL PARA ADICIONAR ORGANIZADOR */}
         <Modal
           isOpen={modalOrganizator}
-          toggle={toogleModalOrganizator}
+          toggle={toggleModalOrganizator}
           className={className}
         >
-          <ModalHeader toggle={toogleModalOrganizator}>
+          <ModalHeader toggle={toggleModalOrganizator}>
             Pesquisar Líder ou Líder em Treinamento
           </ModalHeader>
           <ModalBody>
@@ -1703,7 +1711,7 @@ export default function UserProfile({ match, className }) {
             <Button
               className="ml-1 my-1"
               color="danger"
-              onClick={toogleModalOrganizator}
+              onClick={toggleModalOrganizator}
             >
               Cancelar
             </Button>{' '}
@@ -1736,10 +1744,10 @@ export default function UserProfile({ match, className }) {
         {/* MODAL PARA TROCAR ORGANIZADOR */}
         <Modal
           isOpen={modalChangeOrganizator}
-          toggle={toogleModalChangeOrganizator}
+          toggle={toggleModalChangeOrganizator}
           className={className}
         >
-          <ModalHeader toggle={toogleModalChangeOrganizator}>
+          <ModalHeader toggle={toggleModalChangeOrganizator}>
             Pesquisar Líder
           </ModalHeader>
           <ModalBody>
@@ -1837,7 +1845,7 @@ export default function UserProfile({ match, className }) {
               <Button
                 className="ml-1 my-1"
                 color="danger"
-                onClick={toogleModalChangeOrganizator}
+                onClick={toggleModalChangeOrganizator}
               >
                 Cancelar
               </Button>{' '}
@@ -1868,13 +1876,75 @@ export default function UserProfile({ match, className }) {
           </ModalFooter>
         </Modal>
 
-        {/* MODAL PARA PESQUISAR PARTICIPANTE */}
+        {/* MODAL PARA LISTA DE ADD PARTICIPANTE */}
         <Modal
           isOpen={modalParticipant}
-          toggle={toogleModalParticipant}
+          toggle={toggleModalParticipant}
           className={className}
         >
-          <ModalHeader toggle={toogleModalParticipant}>
+          <ModalHeader toggle={toggleModalParticipant}>
+            Inserir participante
+          </ModalHeader>
+          <ModalBody>
+            <CardBody className="d-flex flex-column justify-content-center">
+              <Button
+                outline
+                type="submit"
+                color="default"
+                className="btn-default height-100 icon-light-hover font-medium-2"
+                onClick={toggleModalSearchParticipant}
+              >
+                <div className="d-flex justify-content-around align-items-center">
+                  <Search size={24} color="#000" className="mr-2" />
+                  <div>
+                    <h5 className="mb-0">Pesquisar participante existente</h5>
+                  </div>
+                  <ArrowRightCircle size={24} color="#000" className="mr-2" />
+                </div>
+              </Button>
+
+              <Button
+                outline
+                type="submit"
+                color="default"
+                className="btn-default height-100 icon-light-hover font-medium-2"
+                onClick={toggleModalAddParticipant}
+              >
+                <div className="d-flex justify-content-around align-items-center">
+                  <UserPlus size={24} color="#000" className="mr-2" />
+                  <div>
+                    <h5 className="mb-0">Cadastrar participante manualmente</h5>
+                  </div>
+                  <ArrowRightCircle size={24} color="#000" className="mr-2" />
+                </div>
+              </Button>
+
+              <Button
+                outline
+                type="submit"
+                color="default"
+                className="btn-default height-100 icon-light-hover font-medium-2"
+                onClick={toggleModalInvite}
+              >
+                <div className="d-flex justify-content-around align-items-center">
+                  <Mail size={24} color="#000" className="mr-2" />
+                  <div>
+                    <h5 className="mb-0">Convidar participante por email</h5>
+                  </div>
+                  <ArrowRightCircle size={24} color="#000" className="mr-2" />
+                </div>
+              </Button>
+            </CardBody>
+          </ModalBody>
+        </Modal>
+
+        {/* MODAL PARA PESQUISAR PARTICIPANTE */}
+        <Modal
+          isOpen={modalSearchParticipant}
+          toggle={toggleModalSearchParticipant}
+          className={className}
+        >
+          <ModalHeader toggle={toggleModalSearchParticipant}>
             Pesquisar participante por CPF
           </ModalHeader>
           <ModalBody>
@@ -2000,13 +2070,13 @@ export default function UserProfile({ match, className }) {
                   dados
                 </p>
                 <Row className="justify-content-between p-3">
-                  <Button color="success" onClick={toogleModalAddParticipant}>
+                  <Button color="success" onClick={toggleModalAddParticipant}>
                     <i className="fa fa-plus" /> Cadastrar novo participante
                   </Button>
                   <Button
                     color="warning"
                     className="text-white"
-                    onClick={toogleModalInvite}
+                    onClick={toggleModalInvite}
                   >
                     <i className="fa fa-paper-plane fa-xs" /> Convidar por email
                   </Button>
@@ -2019,7 +2089,7 @@ export default function UserProfile({ match, className }) {
               <Button
                 className="ml-1 my-1"
                 color="danger"
-                onClick={toogleModalParticipant}
+                onClick={toggleModalSearchParticipant}
               >
                 Cancelar
               </Button>{' '}
@@ -2029,7 +2099,7 @@ export default function UserProfile({ match, className }) {
                     ? 'ml-1 my-1 btn-success'
                     : 'btn-secundary ml-1 my-1'
                 }`}
-                onClick={confirmModalParticipant}
+                onClick={confirmModalSearchParticipant}
                 disabled={participantData !== null ? false : true}
               >
                 {participant_loading ? (
@@ -2052,7 +2122,7 @@ export default function UserProfile({ match, className }) {
         {/* MODAL PARA CADASTRAR PARTICIPANTE MANUALMENTE */}
         <Modal
           isOpen={modalAddParticipant}
-          toggle={toogleModalAddParticipant}
+          toggle={toggleModalAddParticipant}
           className={className}
         >
           <Formik
@@ -2067,28 +2137,32 @@ export default function UserProfile({ match, className }) {
           >
             {({ errors, touched, values }) => (
               <Form>
-                <ModalHeader toggle={toogleModalAddParticipant}>
+                <ModalHeader toggle={toggleModalAddParticipant}>
                   Cadastrar participante
                 </ModalHeader>
                 <ModalBody>
                   <div className="form-body">
                     <Row className="d-flex flex-row">
-                      <Col sm="12" md="12" lg="12" className="mb-2">
-                        <Field
-                          type="text"
-                          placeholder="Digite o nome do participante"
-                          name="name"
-                          id="name"
-                          className={`
+                      <Col sm="12" md="12" lg="12">
+                        <FormGroup>
+                          <Field
+                            type="text"
+                            placeholder="Digite o nome do participante"
+                            name="name"
+                            id="name"
+                            className={`
                                     form-control
                                     ${errors.name &&
                                       touched.name &&
                                       'is-invalid'}
                                   `}
-                        />
-                        {errors.name && touched.name ? (
-                          <div className="invalid-feedback">{errors.name}</div>
-                        ) : null}
+                          />
+                          {errors.name && touched.name ? (
+                            <div className="invalid-feedback">
+                              {errors.name}
+                            </div>
+                          ) : null}
+                        </FormGroup>
                       </Col>
                       <Col lg="12" md="12" sm="12">
                         <FormGroup>
@@ -2130,22 +2204,26 @@ export default function UserProfile({ match, className }) {
                           </div>
                         </FormGroup>
                       </Col>
-                      <Col sm="12" md="12" lg="12" className="mb-2">
-                        <Field
-                          type="text"
-                          placeholder="Digite o email"
-                          name="email"
-                          id="email"
-                          className={`
+                      <Col sm="12" md="12" lg="12">
+                        <FormGroup>
+                          <Field
+                            type="text"
+                            placeholder="Digite o email"
+                            name="email"
+                            id="email"
+                            className={`
                                     form-control
                                     ${errors.email &&
                                       touched.email &&
                                       'is-invalid'}
                                   `}
-                        />
-                        {errors.email && touched.email ? (
-                          <div className="invalid-feedback">{errors.email}</div>
-                        ) : null}
+                          />
+                          {errors.email && touched.email ? (
+                            <div className="invalid-feedback">
+                              {errors.email}
+                            </div>
+                          ) : null}
+                        </FormGroup>
                       </Col>
                       <Col sm="12" md="12" lg="12" className="mb-2">
                         <RadioButtonGroup
@@ -2209,7 +2287,7 @@ export default function UserProfile({ match, className }) {
                     <Button
                       className="ml-1 my-1"
                       color="danger"
-                      onClick={toogleModalAddParticipant}
+                      onClick={toggleModalAddParticipant}
                     >
                       Cancelar
                     </Button>{' '}
@@ -2253,11 +2331,11 @@ export default function UserProfile({ match, className }) {
           {({ errors, touched, values }) => (
             <Modal
               isOpen={modalInvite}
-              toggle={toogleModalInvite}
+              toggle={toggleModalInvite}
               className={className}
               size="lg"
             >
-              <ModalHeader toggle={toogleModalInvite}>
+              <ModalHeader toggle={toggleModalInvite}>
                 Convidar participante por email
               </ModalHeader>
               <ModalBody>
@@ -2317,7 +2395,7 @@ export default function UserProfile({ match, className }) {
                   <Button
                     className="ml-1 my-1"
                     color="danger"
-                    onClick={toogleModalInvite}
+                    onClick={toggleModalInvite}
                   >
                     Cancelar
                   </Button>{' '}
@@ -2351,7 +2429,7 @@ export default function UserProfile({ match, className }) {
         {/* MODAL PARA IMPRIMIR CERTIFICADOS */}
         <Modal
           isOpen={modalCertificate}
-          toggle={toogleModalCertificate}
+          toggle={toggleModalCertificate}
           className={className}
           size="md"
         >
@@ -2366,7 +2444,7 @@ export default function UserProfile({ match, className }) {
           >
             {({ errors, touched, handleChange, values, setFieldValue }) => (
               <Form>
-                <ModalHeader toggle={toogleModalCertificate}>
+                <ModalHeader toggle={toggleModalCertificate}>
                   Emitir certificados
                   <Certificate />
                 </ModalHeader>
@@ -2483,7 +2561,7 @@ export default function UserProfile({ match, className }) {
                     {pdfButton !== null && (
                       <Button
                         onClick={
-                          downloadDisable ? toogleModalCertificate : () => {}
+                          downloadDisable ? toggleModalCertificate : () => {}
                         }
                         color="success"
                         disabled={downloadDisable}
