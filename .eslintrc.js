@@ -21,6 +21,7 @@ module.exports = {
     'prettier/prettier': 'error',
     'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.js'] }],
     'import/prefer-default-export': 'off',
+    'no-unused-expressions': ['error', { allowTaggedTemplates: true }],
     'no-param-reassign': 'off',
     'react-hooks/rules-of-hooks': 'error',
     'react-hooks/exhaustive-deps': 'warn',
@@ -28,6 +29,7 @@ module.exports = {
   settings: {
     'import/resolver': {
       'babel-plugin-root-import': {
+        rootPathPrefix: '~',
         rootPathSuffix: 'src',
       },
     },

@@ -86,6 +86,10 @@ const LazyCheckoutLogin = lazy(() =>
 const LazyCheckoutPayment = lazy(() =>
   import('../views/pages/checkout/checkoutPayment')
 );
+const LazyInviteConfirmation = lazy(() =>
+  import('../views/pages/inviteConfirmation')
+);
+
 const LazyMaintainance = lazy(() => import('../views/pages/maintainance'));
 const LazyLockScreen = lazy(() => import('../views/pages/lockScreen'));
 
@@ -403,6 +407,17 @@ class Router extends Component {
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazySiteEvent {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          {/* Tela de escolha do item do checkout - inscrição em eventos */}
+          <FullPageLayout
+            exact
+            path="/evento/:event_id/convite/:id/confirmacao"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyInviteConfirmation {...matchprops} />
               </Suspense>
             )}
           />

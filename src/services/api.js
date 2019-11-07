@@ -5,7 +5,7 @@ const api = axios.create({
     process.env.NODE_ENV === 'development'
       ? 'http://172.16.3.26:3333'
       : 'https://dashboard-eventos-backend.herokuapp.com',
-  timeout: 10000,
+  timeout: 20000,
 });
 
 api.interceptors.request.use(async config => {

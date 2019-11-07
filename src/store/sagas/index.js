@@ -133,8 +133,13 @@ function* signup(action) {
     }
     toastr.success('Sucesso!', 'Cadastro realizado com sucesso.');
   } catch (err) {
-    toastr.error('Falha!', 'Tente cadastrar novamente.');
-    yield put(SignupActions.signupFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(SignupActions.signupFailure());
+    } else {
+      toastr.error('Falha!', 'Tente cadastrar novamente.');
+      yield put(SignupActions.signupFailure());
+    }
   }
 }
 
@@ -180,8 +185,13 @@ function* login(action) {
       );
     }
   } catch (err) {
-    toastr.error(err.response.data.title, err.response.data.message);
-    yield put(LoginActions.loginFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(LoginActions.loginFailure());
+    } else {
+      toastr.error(err.response.data.title, err.response.data.message);
+      yield put(LoginActions.loginFailure());
+    }
   }
 }
 
@@ -228,8 +238,13 @@ function* resetPassword(action) {
     yield put(push('/'));
     toastr.success('Boa!', `Acesse o email ${email}`);
   } catch (err) {
-    toastr.error(err.response.data.title, err.response.data.message);
-    yield put(ResetPasswordActions.resetPasswordFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ResetPasswordActions.resetPasswordFailure());
+    } else {
+      toastr.error(err.response.data.title, err.response.data.message);
+      yield put(ResetPasswordActions.resetPasswordFailure());
+    }
   }
 }
 
@@ -254,8 +269,13 @@ function* confirmResetPassword(action) {
     yield put(push('/'));
     toastr.success('Parabéns!', 'A senha foi alterada com sucesso');
   } catch (err) {
-    toastr.error(err.response.data.title, err.response.data.message);
-    yield put(ResetPasswordActions.confirmResetPasswordFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ResetPasswordActions.confirmResetPasswordFailure());
+    } else {
+      toastr.error(err.response.data.title, err.response.data.message);
+      yield put(ResetPasswordActions.confirmResetPasswordFailure());
+    }
   }
 }
 
@@ -270,8 +290,13 @@ function* logout() {
 
     yield put(LoginActions.logoutSuccess());
   } catch (err) {
-    toastr.error(err.response.data.title, err.response.data.message);
-    yield put(LoginActions.logoutFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(LoginActions.logoutFailure());
+    } else {
+      toastr.error(err.response.data.title, err.response.data.message);
+      yield put(LoginActions.logoutFailure());
+    }
   }
 }
 
@@ -283,7 +308,13 @@ function* profile() {
 
     yield put(ProfileActions.profileSuccess(response.data));
   } catch (err) {
-    yield put(ProfileActions.profileFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ProfileActions.profileFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao carregar os seus dados.');
+      yield put(ProfileActions.profileFailure());
+    }
   }
 }
 
@@ -299,7 +330,13 @@ function* address(action) {
     yield put(AddressActions.addressSuccess());
     toastr.success('Sucesso!', 'Seus endereços foram atualizados.');
   } catch (err) {
-    yield put(AddressActions.addressFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(AddressActions.addressFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao atualizar seus endereços.');
+      yield put(AddressActions.addressFailure());
+    }
   }
 }
 
@@ -312,8 +349,13 @@ function* deleteAddress(action) {
     yield put(AddressActions.addressSuccess());
     toastr.success('Sucesso!', 'O endereço foi removido.');
   } catch (err) {
-    toastr.error('Falha!', 'Houve um erro ao remover o endereço.');
-    yield put(AddressActions.addressFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(AddressActions.addressFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao remover o endereço.');
+      yield put(AddressActions.addressFailure());
+    }
   }
 }
 
@@ -336,15 +378,20 @@ function* editProfile(action) {
       disableCancel: true,
     });
   } catch (err) {
-    const { data } = err.response;
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ProfileActions.editProfileFailure());
+    } else {
+      const { data } = err.response;
 
-    if (data && data.length > 0) {
-      data.map(error => {
-        toastr.error('Falha!', error.message);
-      });
+      if (data && data.length > 0) {
+        data.map(error => {
+          toastr.error('Falha!', error.message);
+        });
+      }
+
+      yield put(ProfileActions.editProfileFailure());
     }
-
-    yield put(ProfileActions.editProfileFailure());
   }
 }
 
@@ -356,7 +403,13 @@ function* event(action) {
 
     yield put(EventActions.eventSuccess(response.data));
   } catch (err) {
-    yield put(EventActions.eventFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(EventActions.eventFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao carregar os dados do evento.');
+      yield put(EventActions.eventFailure());
+    }
   }
 }
 
@@ -372,7 +425,13 @@ function* allEvents() {
 
     yield put(EventActions.allEventSuccess(response.data));
   } catch (err) {
-    yield put(EventActions.allEventFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(EventActions.allEventFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao carregar os eventos.');
+      yield put(EventActions.allEventFailure());
+    }
   }
 }
 
@@ -387,10 +446,54 @@ function* addInvite(action) {
       redirect_url: `http://localhost:3000/evento/${event_id}/checkout`,
     });
 
-    yield put(EventActions.confirmInviteSuccess());
+    yield put(InviteActions.inviteSuccess());
     toastr.success('Sucesso!', 'Convite enviado com sucesso.');
   } catch (err) {
-    yield put(EventActions.confirmInviteFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(InviteActions.inviteFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao enviar o convite.');
+      yield put(InviteActions.inviteFailure());
+    }
+  }
+}
+
+function* confirmInvite(action) {
+  try {
+    const { data } = action.payload;
+    const { invite_id, entity_id, event_id, assistant } = data;
+
+    const response = yield call(api.post, '/event_participant', {
+      entity_id,
+      event_id,
+      assistant,
+    });
+
+    if (response.data.error) {
+      yield put(ParticipantActions.addParticipantFailure());
+      yield put(InviteActions.confirmInviteFailure());
+      toastr.error(response.data.error.title, response.data.error.message);
+    } else {
+      yield put(ParticipantActions.addParticipantSuccess());
+
+      yield call(api.delete, `/invite/${invite_id}`);
+      yield put(InviteActions.deleteInviteSuccess());
+
+      yield put(
+        push(`/evento/${event_id}/convite/${invite_id}/confirmacao/sucesso`)
+      );
+    }
+
+    yield put(InviteActions.confirmInviteSuccess());
+  } catch (err) {
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(InviteActions.confirmInviteFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao confirmar o convite.');
+      yield put(InviteActions.confirmInviteFailure());
+    }
   }
 }
 
@@ -403,7 +506,13 @@ function* deleteInvite(action) {
     yield put(InviteActions.deleteInviteSuccess());
     window.location.reload();
   } catch (err) {
-    yield put(InviteActions.deleteInviteFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(InviteActions.deleteInviteFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao remover o convite.');
+      yield put(InviteActions.deleteInviteFailure());
+    }
   }
 }
 
@@ -426,7 +535,13 @@ function* addEvent(action) {
     yield put(push('/eventos/grupos'));
     toastr.success('Sucesso!', 'O grupo foi criado.');
   } catch (err) {
-    yield put(EventActions.addEventFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(EventActions.addEventFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao criar o evento.');
+      yield put(EventActions.addEventFailure());
+    }
   }
 }
 
@@ -439,7 +554,13 @@ function* deleteEvent(action) {
     yield put(EventActions.deleteEventSuccess());
     window.location.reload();
   } catch (err) {
-    yield put(EventActions.deleteEventFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(EventActions.deleteEventFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao remover o evento.');
+      yield put(EventActions.deleteEventFailure());
+    }
   }
 }
 
@@ -456,7 +577,16 @@ function* addOrganizator(action) {
       disableCancel: true,
     });
   } catch (err) {
-    yield put(OrganizatorActions.addOrganizatorFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(OrganizatorActions.addOrganizatorFailure());
+    } else {
+      toastr.error(
+        err.response.data.error.title,
+        err.response.data.error.message
+      );
+      yield put(OrganizatorActions.addOrganizatorFailure());
+    }
   }
 }
 
@@ -469,7 +599,13 @@ function* deleteOrganizator(action) {
     yield put(OrganizatorActions.deleteOrganizatorSuccess());
     window.location.reload();
   } catch (err) {
-    yield put(OrganizatorActions.deleteOrganizatorFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(OrganizatorActions.deleteOrganizatorFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao remover o organizador.');
+      yield put(OrganizatorActions.deleteOrganizatorFailure());
+    }
   }
 }
 
@@ -497,7 +633,13 @@ function* changeOrganizator(action) {
       yield put(push('/eventos/grupos'));
     }
   } catch (err) {
-    yield put(OrganizatorActions.changeOrganizatorFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(OrganizatorActions.changeOrganizatorFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao trocar o organizador.');
+      yield put(OrganizatorActions.changeOrganizatorFailure());
+    }
   }
 }
 
@@ -517,11 +659,16 @@ function* searchOrganizator(action) {
       toastr.warning(response.data.error.title, response.data.error.message);
     }
   } catch (err) {
-    toastr.error(
-      err.response.data.error.title,
-      err.response.data.error.message
-    );
-    yield put(OrganizatorActions.searchOrganizatorFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(OrganizatorActions.searchOrganizatorFailure());
+    } else {
+      toastr.error(
+        err.response.data.error.title,
+        err.response.data.error.message
+      );
+      yield put(OrganizatorActions.searchOrganizatorFailure());
+    }
   }
 }
 
@@ -553,8 +700,13 @@ function* createParticipant(action) {
       disableCancel: true,
     });
   } catch (err) {
-    toastr.error('Falha!', 'Tente cadastrar novamente.');
-    yield put(ParticipantActions.createParticipantFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ParticipantActions.createParticipantFailure());
+    } else {
+      toastr.error('Falha!', 'Tente cadastrar novamente.');
+      yield put(ParticipantActions.createParticipantFailure());
+    }
   }
 }
 
@@ -569,7 +721,16 @@ function* setQuitterParticipant(action) {
     yield put(ParticipantActions.setQuitterParticipantSuccess());
     window.location.reload();
   } catch (err) {
-    yield put(ParticipantActions.setQuitterParticipantFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ParticipantActions.setQuitterParticipantFailure());
+    } else {
+      toastr.error(
+        'Falha!',
+        'Houve um erro ao tornar o participante desistente.'
+      );
+      yield put(ParticipantActions.setQuitterParticipantFailure());
+    }
   }
 }
 
@@ -602,7 +763,13 @@ function* addParticipant(action) {
       }
     }
   } catch (err) {
-    yield put(ParticipantActions.addParticipantFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ParticipantActions.addParticipantFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao adicionar o participante.');
+      yield put(ParticipantActions.addParticipantFailure());
+    }
   }
 }
 
@@ -621,7 +788,13 @@ function* editParticipant(action) {
       disableCancel: true,
     });
   } catch (err) {
-    yield put(ParticipantActions.editParticipantFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ParticipantActions.editParticipantFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao editar o participante.');
+      yield put(ParticipantActions.editParticipantFailure());
+    }
   }
 }
 
@@ -634,7 +807,13 @@ function* deleteParticipant(action) {
     yield put(ParticipantActions.deleteParticipantSuccess());
     window.location.reload();
   } catch (err) {
-    yield put(ParticipantActions.deleteParticipantFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ParticipantActions.deleteParticipantFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao remover o participante.');
+      yield put(ParticipantActions.deleteParticipantFailure());
+    }
   }
 }
 
@@ -654,11 +833,16 @@ function* searchParticipant(action) {
       toastr.warning(response.data.error.title, response.data.error.message);
     }
   } catch (err) {
-    toastr.error(
-      err.response.data.error.title,
-      err.response.data.error.message
-    );
-    yield put(ParticipantActions.searchParticipantFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ParticipantActions.searchParticipantFailure());
+    } else {
+      toastr.error(
+        err.response.data.error.title,
+        err.response.data.error.message
+      );
+      yield put(ParticipantActions.searchParticipantFailure());
+    }
   }
 }
 
@@ -677,7 +861,13 @@ function* searchChurch(action) {
 
     yield put(SearchChurchActions.searchChurchSuccess(response.data));
   } catch (err) {
-    yield put(SearchChurchActions.searchChurchFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(SearchChurchActions.searchChurchFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao buscar uma organização.');
+      yield put(SearchChurchActions.searchChurchFailure());
+    }
   }
 }
 
@@ -700,8 +890,13 @@ function* cep(action) {
       toastr.success('Sucesso!', 'CEP encontrado.');
     }
   } catch (err) {
-    toastr.error('Falha!', 'CEP inválido.');
-    yield put(CepActions.cepFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(CepActions.cepFailure());
+    } else {
+      toastr.error('Falha!', 'CEP inválido.');
+      yield put(CepActions.cepFailure());
+    }
   }
 }
 
@@ -713,8 +908,13 @@ function* certificate(action) {
 
     yield put(push(`/eventos/grupo/${data.event_id}/certificados`));
   } catch (err) {
-    toastr.error('Falha!', 'Tente novamente');
-    yield put(CertificateActions.certificateFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(CertificateActions.certificateFailure());
+    } else {
+      toastr.error('Falha!', 'Tente novamente');
+      yield put(CertificateActions.certificateFailure());
+    }
   }
 }
 
@@ -764,11 +964,16 @@ function* checkoutLogin(action) {
       toastr.warning(response.data.error.title, response.data.error.message);
     }
   } catch (err) {
-    toastr.error(
-      err.response.data.error.title,
-      err.response.data.error.message
-    );
-    yield put(CheckoutActions.checkoutLoginFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(CheckoutActions.checkoutLoginFailure());
+    } else {
+      toastr.error(
+        err.response.data.error.title,
+        err.response.data.error.message
+      );
+      yield put(CheckoutActions.checkoutLoginFailure());
+    }
   }
 }
 
@@ -797,8 +1002,13 @@ function* checkoutSignup(action) {
     yield put(push('/'));
     toastr.success('Sucesso!', 'Cadastro realizado com sucesso.');
   } catch (err) {
-    toastr.error('Falha!', 'Tente cadastrar novamente.');
-    yield put(CheckoutActions.checkoutSignupFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(CheckoutActions.checkoutSignupFailure());
+    } else {
+      toastr.error('Falha!', 'Tente cadastrar novamente.');
+      yield put(CheckoutActions.checkoutSignupFailure());
+    }
   }
 }
 
@@ -812,8 +1022,13 @@ function* lesson(action) {
 
     yield put(LessonActions.lessonSuccess(response.data));
   } catch (err) {
-    toastr.error('Falha!', 'Tente novamente');
-    yield put(LessonActions.lessonFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(LessonActions.lessonFailure());
+    } else {
+      toastr.error('Falha!', 'Tente novamente');
+      yield put(LessonActions.lessonFailure());
+    }
   }
 }
 
@@ -829,8 +1044,13 @@ function* lessonEdit(action) {
 
     yield put(LessonActions.editLessonSuccess(response.data));
   } catch (err) {
-    toastr.error('Falha!', 'Tente novamente');
-    yield put(LessonActions.editLessonFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(LessonActions.editLessonFailure());
+    } else {
+      toastr.error('Falha!', 'Tente novamente');
+      yield put(LessonActions.editLessonFailure());
+    }
   }
 }
 
@@ -842,8 +1062,13 @@ function* siteEvent(action) {
 
     yield put(SiteEventActions.siteEventSuccess(response.data));
   } catch (err) {
-    toastr.error('Falha!', 'Tente novamente');
-    yield put(SiteEventActions.siteEventFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(SiteEventActions.siteEventFailure());
+    } else {
+      toastr.error('Falha!', 'Tente novamente');
+      yield put(SiteEventActions.siteEventFailure());
+    }
   }
 }
 
@@ -861,8 +1086,13 @@ function* organizatorEvent(action) {
 
     yield put(DefaultEventActions.organizatorEventSuccess(response.data));
   } catch (err) {
-    toastr.error('Falha!', 'Tente novamente');
-    yield put(DefaultEventActions.organizatorEventFailure());
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(DefaultEventActions.organizatorEventFailure());
+    } else {
+      toastr.error('Falha!', 'Tente novamente');
+      yield put(DefaultEventActions.organizatorEventFailure());
+    }
   }
 }
 
@@ -997,6 +1227,7 @@ export default function* rootSaga() {
     takeLatest(EventTypes.DELETE_REQUEST, deleteEvent),
 
     takeLatest(InviteTypes.ADD_REQUEST, addInvite),
+    takeLatest(InviteTypes.CONFIRM_REQUEST, confirmInvite),
     takeLatest(InviteTypes.DELETE_REQUEST, deleteInvite),
 
     takeLatest(OrganizatorTypes.ADD_REQUEST, addOrganizator),

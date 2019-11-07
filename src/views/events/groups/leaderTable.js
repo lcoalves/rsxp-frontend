@@ -59,9 +59,9 @@ export default function LeaderTableGroups({ data }) {
       }
       columns={[
         {
-          Header: 'Código',
+          Header: 'ID',
           accessor: 'id',
-          width: 110,
+          width: 90,
           Filter: ({ filter, onChange }) => (
             <input
               onChange={event => onChange(event.target.value)}
@@ -91,13 +91,13 @@ export default function LeaderTableGroups({ data }) {
         },
         {
           Header: 'Início',
-          id: 'startDate',
+          id: 'start_date',
           accessor: d => {
-            return d.startDate;
+            return d.start_date;
           },
           Cell: row => moment(row.value).format('DD/MM/YYYY'),
           filterAll: true,
-          width: 170,
+          width: 120,
         },
         {
           Header: 'Igreja',

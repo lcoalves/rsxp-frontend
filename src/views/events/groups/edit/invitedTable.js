@@ -77,7 +77,6 @@ export default function InvitedTable({ data }) {
                   <DropdownItem onClick={() => removeInvite(instance)}>
                     Remover
                   </DropdownItem>
-                  <DropdownItem>Reenviar email</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             );

@@ -298,11 +298,13 @@ export default function UserProfile({ match, className }) {
 
   function toggleModalAddParticipant() {
     setModalParticipant(false);
+    setModalSearchParticipant(false);
     setModalAddParticipant(!modalAddParticipant);
   }
 
   function toggleModalInvite() {
     setModalParticipant(false);
+    setModalSearchParticipant(false);
     setModalInvite(!modalInvite);
   }
 
@@ -500,7 +502,7 @@ export default function UserProfile({ match, className }) {
     };
 
     dispatch(
-      InviteActions.confirmInviteRequest(
+      InviteActions.inviteRequest(
         match.params.event_id,
         invite_name,
         invite_email
@@ -1075,7 +1077,7 @@ export default function UserProfile({ match, className }) {
                                     }
                                     customInput={<DatepickerButton />}
                                     minDate={subMonths(new Date(), 12)}
-                                    calendarClassName="width-350"
+                                    calendarClassName="width-328"
                                     dateFormat="dd/MM/yyyy hh:mm aa"
                                     showMonthDropdown
                                     showYearDropdown
@@ -1116,7 +1118,7 @@ export default function UserProfile({ match, className }) {
                                     }
                                     customInput={<DatepickerButton />}
                                     minDate={values.initialDate}
-                                    calendarClassName="width-350"
+                                    calendarClassName="width-328"
                                     dateFormat="dd/MM/yyyy hh:mm aa"
                                     showMonthDropdown
                                     showYearDropdown
@@ -2090,37 +2092,35 @@ export default function UserProfile({ match, className }) {
             )}
           </ModalBody>
           <ModalFooter>
-            <Form>
-              <Button
-                className="ml-1 my-1"
-                color="danger"
-                onClick={toggleModalSearchParticipant}
-              >
-                Cancelar
-              </Button>{' '}
-              <Button
-                className={`${
-                  participantData !== null
-                    ? 'ml-1 my-1 btn-success'
-                    : 'btn-secundary ml-1 my-1'
-                }`}
-                onClick={confirmModalSearchParticipant}
-                disabled={participantData !== null ? false : true}
-              >
-                {participant_loading ? (
-                  <BounceLoader
-                    size={23}
-                    color={'#fff'}
-                    css={css`
-                      display: block;
-                      margin: 0 auto;
-                    `}
-                  />
-                ) : (
-                  'Adicionar participante'
-                )}
-              </Button>
-            </Form>
+            <Button
+              className="ml-1 my-1"
+              color="danger"
+              onClick={toggleModalSearchParticipant}
+            >
+              Cancelar
+            </Button>{' '}
+            <Button
+              className={`${
+                participantData !== null
+                  ? 'ml-1 my-1 btn-success'
+                  : 'btn-secundary ml-1 my-1'
+              }`}
+              onClick={confirmModalSearchParticipant}
+              disabled={participantData !== null ? false : true}
+            >
+              {participant_loading ? (
+                <BounceLoader
+                  size={23}
+                  color={'#fff'}
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
+              ) : (
+                'Adicionar participante'
+              )}
+            </Button>
           </ModalFooter>
         </Modal>
 
@@ -2288,33 +2288,31 @@ export default function UserProfile({ match, className }) {
                   </div>
                 </ModalBody>
                 <ModalFooter>
-                  <Form>
-                    <Button
-                      className="ml-1 my-1"
-                      color="danger"
-                      onClick={toggleModalAddParticipant}
-                    >
-                      Cancelar
-                    </Button>{' '}
-                    <Button
-                      className="ml-1 my-1 btn-success"
-                      type="submit"
-                      //onClick={() => confirmModalAddParticipant(values)}
-                    >
-                      {participant_loading ? (
-                        <BounceLoader
-                          size={23}
-                          color={'#fff'}
-                          css={css`
-                            display: block;
-                            margin: 0 auto;
-                          `}
-                        />
-                      ) : (
-                        'Cadastrar participante'
-                      )}
-                    </Button>
-                  </Form>
+                  <Button
+                    className="ml-1 my-1"
+                    color="danger"
+                    onClick={toggleModalAddParticipant}
+                  >
+                    Cancelar
+                  </Button>{' '}
+                  <Button
+                    className="ml-1 my-1 btn-success"
+                    type="submit"
+                    //onClick={() => confirmModalAddParticipant(values)}
+                  >
+                    {participant_loading ? (
+                      <BounceLoader
+                        size={23}
+                        color={'#fff'}
+                        css={css`
+                          display: block;
+                          margin: 0 auto;
+                        `}
+                      />
+                    ) : (
+                      'Cadastrar participante'
+                    )}
+                  </Button>
                 </ModalFooter>
               </Form>
             )}
@@ -2343,8 +2341,8 @@ export default function UserProfile({ match, className }) {
               <ModalHeader toggle={toggleModalInvite}>
                 Convidar participante por email
               </ModalHeader>
-              <ModalBody>
-                <Form>
+              <Form>
+                <ModalBody>
                   <div className="form-body">
                     <Row className="d-flex flex-row f">
                       <Col lg="6" md="6" sm="12">
@@ -2393,10 +2391,8 @@ export default function UserProfile({ match, className }) {
                       </Col>
                     </Row>
                   </div>
-                </Form>
-              </ModalBody>
-              <ModalFooter>
-                <Form>
+                </ModalBody>
+                <ModalFooter>
                   <Button
                     className="ml-1 my-1"
                     color="danger"
@@ -2425,8 +2421,8 @@ export default function UserProfile({ match, className }) {
                       'Enviar convite'
                     )}
                   </Button>
-                </Form>
-              </ModalFooter>
+                </ModalFooter>
+              </Form>
             </Modal>
           )}
         </Formik>

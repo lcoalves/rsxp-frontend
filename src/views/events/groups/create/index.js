@@ -50,7 +50,6 @@ import { css } from '@emotion/core';
 import { BounceLoader } from 'react-spinners';
 
 import { Creators as OrganizationActions } from '~/store/ducks/organization';
-import { Creators as OrganizatorActions } from '~/store/ducks/organizator';
 import { Creators as CepActions } from '~/store/ducks/cep';
 import { Creators as DefaultEventActions } from '~/store/ducks/defaultEvent';
 import { Creators as EventActions } from '~/store/ducks/event';
@@ -178,9 +177,6 @@ export default function GroupCreate({ match, className }) {
   const organization = useSelector(state => state.organization.data);
   const loadingOrganization = useSelector(state => state.organization.loading);
   const organizator = useSelector(state => state.organizator.data);
-  const loadingOrganizator = useSelector(
-    state => state.organizator.loadingSearch
-  );
   const loading = useSelector(state => state.organization.loading);
   const event_loading = useSelector(state => state.event.loading);
 
@@ -200,10 +196,6 @@ export default function GroupCreate({ match, className }) {
 
   function toggleModalChurch() {
     setModalChurch(!modalChurch);
-  }
-
-  function toggleModalOrganizator() {
-    setModalOrganizator(!modalOrganizator);
   }
 
   function handleSubmit(values) {
@@ -247,37 +239,11 @@ export default function GroupCreate({ match, className }) {
     }
   }
 
-  function handleSearchOrganizator(cpf, setFieldValue, values) {
-    const formattedCpf = cpf
-      .replace('.', '')
-      .replace('.', '')
-      .replace('-', '');
-
-    setFieldValue('cpf', formattedCpf);
-
-    if (formattedCpf.length === 11) {
-      dispatch(
-        OrganizatorActions.searchOrganizatorRequest(
-          'leader',
-          cpf,
-          values.default_event_id
-        )
-      );
-    }
-  }
-
   function confirmModalChurch(event, setFieldValue) {
     setFieldValue('organization_id', organization.id);
     setFieldValue('organization_name', organization.corporate_name);
 
     setModalChurch(false);
-  }
-
-  function confirmModalOrganizator(setFieldValue) {
-    setFieldValue('aux_organizator_id', organizator.id);
-    setFieldValue('aux_organizator_name', organizator.name);
-
-    setModalOrganizator(false);
   }
 
   function handleCep(cep, setFieldValue, values) {
@@ -326,23 +292,25 @@ export default function GroupCreate({ match, className }) {
   }
 
   useEffect(() => {
-    setInitialState({
-      ...initialState,
-      ['organizator_id']: userData.id,
-      ['organizator_name']: `${userData.name} (você)`,
-    });
+    if (!!userData.email) {
+      setInitialState({
+        ...initialState,
+        ['organizator_id']: userData.id,
+        ['organizator_name']: `${userData.name} (você)`,
+      });
 
-    const data = {
-      cmn_hierarchy_id: userData.cmn_hierarchy_id,
-      mu_hierarchy_id: userData.mu_hierarchy_id,
-      crown_hierarchy_id: userData.crown_hierarchy_id,
-      mp_hierarchy_id: userData.mp_hierarchy_id,
-      ffi_hierarchy_id: userData.ffi_hierarchy_id,
-      gfi_hierarchy_id: userData.gfi_hierarchy_id,
-      pg_hierarchy_id: userData.pg_hierarchy_id,
-    };
+      const data = {
+        cmn_hierarchy_id: userData.cmn_hierarchy_id,
+        mu_hierarchy_id: userData.mu_hierarchy_id,
+        crown_hierarchy_id: userData.crown_hierarchy_id,
+        mp_hierarchy_id: userData.mp_hierarchy_id,
+        ffi_hierarchy_id: userData.ffi_hierarchy_id,
+        gfi_hierarchy_id: userData.gfi_hierarchy_id,
+        pg_hierarchy_id: userData.pg_hierarchy_id,
+      };
 
-    dispatch(DefaultEventActions.organizatorEventRequest(data));
+      dispatch(DefaultEventActions.organizatorEventRequest(data));
+    }
   }, [userData]);
 
   useEffect(() => {
@@ -497,7 +465,7 @@ export default function GroupCreate({ match, className }) {
                               }
                               customInput={<DatepickerButton />}
                               minDate={subMonths(new Date(), 12)}
-                              calendarClassName="width-350"
+                              calendarClassName="width-328"
                               dateFormat="dd/MM/yyyy hh:mm aa"
                               showMonthDropdown
                               showYearDropdown
@@ -527,7 +495,7 @@ export default function GroupCreate({ match, className }) {
                       {!!values.initial_date && (
                         <Col xl="3" lg="4" md="4" sm="12">
                           <FormGroup>
-                            <Label for="end_date">Formatura</Label>
+                            <Label for="end_date">Formatura (opcional)</Label>
                             <div className="position-relative has-icon-left">
                               <Datepicker
                                 name="end_date"
@@ -539,7 +507,7 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 customInput={<DatepickerButton />}
                                 minDate={values.initial_date}
-                                calendarClassName="width-350"
+                                calendarClassName="width-328"
                                 dateFormat="dd/MM/yyyy hh:mm aa"
                                 showMonthDropdown
                                 showYearDropdown
@@ -641,36 +609,6 @@ export default function GroupCreate({ match, className }) {
                         </FormGroup>
                       </Col>
                     </Row>
-                    {!!values.default_event_id && (
-                      <Row className="align-items-center">
-                        <Col sm="12" md="12" lg="6" className="mb-2">
-                          <FormGroup>
-                            <Label for="aux_organizator_name">
-                              Nome do líder assistente (opcional)
-                            </Label>
-                            <Field
-                              readOnly
-                              type="text"
-                              placeholder="Pesquise o líder assistente"
-                              name="aux_organizator_name"
-                              id="aux_organizator_name"
-                              onClick={toggleModalOrganizator}
-                              className="form-control"
-                            />
-                          </FormGroup>
-                        </Col>
-                        <Col sm="6" md="6" lg="6">
-                          <Button
-                            className="mb-2"
-                            block
-                            color="success"
-                            onClick={toggleModalOrganizator}
-                          >
-                            Pesquisar líder auxiliar
-                          </Button>
-                        </Col>
-                      </Row>
-                    )}
 
                     <h4 className="form-section">
                       <i className="fa fa-home" size={20} color="#212529" />{' '}
@@ -1134,171 +1072,6 @@ export default function GroupCreate({ match, className }) {
                             />
                           ) : (
                             'Adicionar organização'
-                          )}
-                        </Button>
-                      </ModalFooter>
-                    </Modal>
-
-                    {/* MODAL PARA PESQUISA ORGANIZADOR */}
-                    <Modal
-                      isOpen={modalOrganizator}
-                      toggle={toggleModalOrganizator}
-                      className={className}
-                      size="md"
-                    >
-                      <ModalHeader toggle={toggleModalOrganizator}>
-                        Pesquisar por líder responsável
-                      </ModalHeader>
-                      <ModalBody>
-                        <Form>
-                          <Row>
-                            <Col lg="12" md="12" sm="12">
-                              <FormGroup>
-                                <Label for="cpf">
-                                  Digite o CPF do líder auxiliar
-                                </Label>
-                                <div className="position-relative has-icon-right">
-                                  <Field
-                                    name="cpf"
-                                    id="cpf"
-                                    className={`
-                                    form-control
-                                    ${errors.cpf && touched.cpf && 'is-invalid'}
-                                  `}
-                                    validate={validateCPF}
-                                    render={({ field }) => (
-                                      <CpfFormat
-                                        {...field}
-                                        id="cpf"
-                                        name="cpf"
-                                        className={`
-                                      form-control
-                                      ${errors.cpf &&
-                                        touched.cpf &&
-                                        'is-invalid'}
-                                    `}
-                                        value={values.cpf}
-                                        onValueChange={val =>
-                                          handleSearchOrganizator(
-                                            val.value,
-                                            setFieldValue,
-                                            values
-                                          )
-                                        }
-                                      />
-                                    )}
-                                  />
-                                  {errors.cpf && touched.cpf ? (
-                                    <div className="invalid-feedback">
-                                      {errors.cpf}
-                                    </div>
-                                  ) : null}
-                                  {loadingOrganizator && (
-                                    <div className="form-control-position">
-                                      <RefreshCw
-                                        size={16}
-                                        className="spinner"
-                                      />
-                                    </div>
-                                  )}
-                                </div>
-                              </FormGroup>
-                            </Col>
-                          </Row>
-                          <div>
-                            {organizator !== null && !!organizator.cpf && (
-                              <>
-                                <Col>
-                                  <Card>
-                                    <CardHeader className="text-center">
-                                      <img
-                                        src={
-                                          !!organizator.file
-                                            ? organizator.file.url
-                                            : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
-                                        }
-                                        alt="Brek"
-                                        width="150"
-                                        height="150"
-                                        className="rounded-circle gradient-mint"
-                                      />
-                                    </CardHeader>
-                                    <CardBody>
-                                      <h4 className="card-title text-center">
-                                        {organizator.name}
-                                      </h4>
-                                      <p className="category text-gray font-small-4 text-center">
-                                        {organizator.cpf}
-                                      </p>
-                                      <hr className="grey" />
-                                      <Row className="mb-1">
-                                        <Col
-                                          xs="6"
-                                          className="text-center text-truncate"
-                                        >
-                                          <Phone size={18} color="#212529" />
-                                          {!!organizator.phone ? (
-                                            <span className="ml-2">
-                                              {organizator.phone}
-                                            </span>
-                                          ) : (
-                                            <span className="ml-2">
-                                              Sem telefone
-                                            </span>
-                                          )}
-                                        </Col>
-                                        <Col
-                                          xs="6"
-                                          className="text-center text-truncate"
-                                        >
-                                          <Mail size={18} color="#212529" />
-                                          {!!organizator.email ? (
-                                            <span className="ml-2">
-                                              {organizator.email}
-                                            </span>
-                                          ) : (
-                                            <span className="ml-2">
-                                              Sem email
-                                            </span>
-                                          )}
-                                        </Col>
-                                      </Row>
-                                    </CardBody>
-                                  </Card>
-                                </Col>
-                              </>
-                            )}
-                          </div>
-                        </Form>
-                      </ModalBody>
-                      <ModalFooter>
-                        <Button
-                          className="ml-1 my-1"
-                          color="danger"
-                          onClick={toggleModalOrganizator}
-                        >
-                          Cancelar
-                        </Button>{' '}
-                        <Button
-                          disabled={organizator !== null ? false : true}
-                          className={`${
-                            organizator !== null
-                              ? 'ml-1 my-1 btn-success'
-                              : 'btn-secundary ml-1 my-1'
-                          }`}
-                          onClick={() => confirmModalOrganizator(setFieldValue)}
-                        >
-                          {loading ? (
-                            <BounceLoader
-                              size={23}
-                              color={'#fff'}
-                              css={css`
-                                display: block;
-                                margin: 0 auto;
-                              `}
-                            />
-                          ) : (
-                            'Adicionar líder auxiliar'
                           )}
                         </Button>
                       </ModalFooter>

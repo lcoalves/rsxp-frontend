@@ -6,6 +6,10 @@ export const Types = {
   ADD_SUCCESS: 'ADD_INVITE_SUCCESS',
   ADD_FAILURE: 'ADD_INVITE_FAILURE',
 
+  CONFIRM_REQUEST: 'CONFIRM_INVITE_REQUEST',
+  CONFIRM_SUCCESS: 'CONFIRM_INVITE_SUCCESS',
+  CONFIRM_FAILURE: 'CONFIRM_INVITE_FAILURE',
+
   DELETE_REQUEST: 'DELETE_INVITE_REQUEST',
   DELETE_SUCCESS: 'DELETE_INVITE_SUCCESS',
   DELETE_FAILURE: 'DELETE_INVITE_FAILURE',
@@ -31,6 +35,22 @@ export default function invite(state = INITIAL_STATE, action) {
         loading: false,
       };
     case Types.ADD_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
+      };
+
+    // CASE ACEITAR CONVITE
+    case Types.CONFIRM_REQUEST:
+      return { ...state, loading: true };
+    case Types.CONFIRM_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.CONFIRM_FAILURE:
       return {
         ...state,
         error: true,
@@ -63,7 +83,7 @@ export default function invite(state = INITIAL_STATE, action) {
  */
 export const Creators = {
   // INVITE REQUEST
-  confirmInviteRequest: (event_id, name, email) => ({
+  inviteRequest: (event_id, name, email) => ({
     type: Types.ADD_REQUEST,
     payload: {
       event_id,
@@ -71,11 +91,25 @@ export const Creators = {
       email,
     },
   }),
-  confirmInviteSuccess: () => ({
+  inviteSuccess: () => ({
     type: Types.ADD_SUCCESS,
   }),
-  confirmInviteFailure: () => ({
+  inviteFailure: () => ({
     type: Types.ADD_FAILURE,
+  }),
+
+  // INVITE CONFIRMATION
+  confirmInviteRequest: data => ({
+    type: Types.CONFIRM_REQUEST,
+    payload: {
+      data,
+    },
+  }),
+  confirmInviteSuccess: () => ({
+    type: Types.CONFIRM_SUCCESS,
+  }),
+  confirmInviteFailure: () => ({
+    type: Types.CONFIRM_FAILURE,
   }),
 
   // DELETAR CONVITE
