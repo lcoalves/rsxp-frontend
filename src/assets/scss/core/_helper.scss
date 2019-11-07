@@ -928,3 +928,47 @@
 .react-datepicker-wrapper {
   display: block !important;
 }
+
+.shipping-selected {
+  // height-75 d-flex flex-row justify-content-around align-items-center rounded
+
+  height: 75px;
+  display: flex;
+  flex: row;
+  justify-content: space-around;
+  align-items: center;
+  border-radius: 5px !important;
+  color: #000;
+
+  &:hover {
+    background-color: rgba(#ccc, 0.5);
+  }
+
+  &:active {
+    background-color: rgba(#ccc, 0.5) !important;
+    outline: 0 !important;
+    outline-offset: 0 !important;
+    background-image: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+  }
+
+  &:focus {
+    outline: 0 !important;
+    outline-offset: 0 !important;
+    background-image: none !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+  }
+}
+
+.shipping-selected-active {
+  background-color: transparent !important;
+  border-left: solid 5px #0cc27e !important;
+
+  > label > svg {
+    @media screen and (min-width: 768px) {
+      margin-right: 30px;
+    }
+  }
+}
