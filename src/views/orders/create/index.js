@@ -406,8 +406,6 @@ export default function GroupCreate({ match, className }) {
                   </Table>
 
                   <h4 className="form-section mt-3">Endereço</h4>
-                  {console.tron.log(values)}
-                  {console.tron.log(shippingAddress)}
                   <Row>
                     <Col sm="6">
                       <FormGroup>

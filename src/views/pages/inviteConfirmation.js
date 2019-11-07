@@ -102,7 +102,6 @@ export default function Login({ match }) {
       assistant: false,
     };
 
-    console.tron.log(data);
     dispatch(InviteActions.confirmInviteRequest(data));
   }
 
