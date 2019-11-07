@@ -322,7 +322,7 @@ export default function GroupCreate({ match, className }) {
         ['city']: cepData.localidade,
         ['street']: cepData.logradouro !== '' ? cepData.logradouro : '',
         ['neighborhood']: cepData.bairro !== '' ? cepData.bairro : '',
-        ['complement']: cepData.complemento !== '' ? cepData.bairro : '',
+        ['complement']: cepData.complemento !== '' ? cepData.complemento : '',
       });
     }
   }, [cepData]);
