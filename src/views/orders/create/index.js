@@ -1,10 +1,26 @@
-import React, { useState, useEffect, Fragment, Component } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  Fragment,
+  Component,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik, Field, Form, FieldArray, useFormik } from 'formik';
 import NumberFormat from 'react-number-format';
 import { Datepicker } from 'react-formik-ui';
 
-import { Map, RefreshCw, Edit, Navigation, Plus, X } from 'react-feather';
+import classNames from 'classnames';
+
+import {
+  Map,
+  RefreshCw,
+  Edit,
+  Navigation,
+  Plus,
+  X,
+  Check,
+} from 'react-feather';
 
 import { validateCPF } from '~/services/validateCPF';
 import { validateCNPJ } from '~/services/validateCNPJ';
@@ -29,6 +45,7 @@ import {
   ModalHeader,
   ModalBody,
   Table,
+  ButtonGroup,
 } from 'reactstrap';
 
 import { css } from '@emotion/core';
@@ -40,11 +57,17 @@ import { Creators as CepActions } from '~/store/ducks/cep';
 import { Creators as DefaultEventActions } from '~/store/ducks/defaultEvent';
 import { Creators as EventActions } from '~/store/ducks/event';
 
-const formDetails = Yup.object().shape({
-  organizator_name: Yup.string().required('O líder é obrigatório'),
-  organization_name: Yup.string().required('A Igreja é obrigatória'),
-  initial_date: Yup.string().required('A data inicial é obrigatória'),
-  default_event_id: Yup.string().required('Tipo do grupo é obrigatório'),
+const formOrder = Yup.object().shape({
+  shipping_address: Yup.object().shape({
+    type: Yup.string().required('O tipo é obrigatório'),
+    cep: Yup.string().required('O CEP é obrigatório'),
+    uf: Yup.string().required('O estado é obrigatório'),
+    city: Yup.string().required('A cidade é obrigatória'),
+    street: Yup.string().required('A rua é obrigatória'),
+    street_number: Yup.string().required('O número da rua é obrigatório'),
+    neighborhood: Yup.string().required('O bairro é obrigatório'),
+    receiver: Yup.string().required('O recebedor é obrigatório'),
+  }),
 });
 
 class CpfFormat extends Component {
@@ -114,29 +137,51 @@ class CepFormat extends Component {
 }
 
 export default function GroupCreate({ match, className }) {
+  const user_id = localStorage.getItem('@dashboard/user');
+
+  const [shippingSelected, setShippingSelected] = useState(null);
   const [dataProducts, setDataProducts] = useState([]);
   const [kit, setKit] = useState({
     default_event_id: '',
     products: [],
   });
-
   const [modalAddMaterial, setModalAddMaterial] = useState(false);
-  const [orders, setOrders] = useState([
+  const [shippingAddress, setShippingAddress] = useState({
+    type: '',
+    cep: '',
+    uf: '',
+    city: '',
+    street: '',
+    street_number: '',
+    neighborhood: '',
+    complement: '',
+    receiver: '',
+  });
+  const [defaultSelected, setDefaultSelected] = useState(null);
+  const [cepState, setCepState] = useState('');
+  const [addresses, setAddresses] = useState([
     {
-      default_event_id: '',
-      products: [
-        {
-          id: null,
-          quantity: 0,
-        },
-      ],
+      id: null,
+      entity_id: parseInt(user_id),
+      type: '',
+      other_type_name: '',
+      cep: '',
+      country: 'Brasil',
+      uf: '',
+      city: '',
+      street: '',
+      street_number: '',
+      neighborhood: '',
+      complement: '',
+      receiver: '',
     },
   ]);
-  const [defaultSelected, setDefaultSelected] = useState(null);
+  const [copyCep, setCopyCep] = useState({});
 
   const data = useSelector(state => state.profile.data);
   const defaultData = useSelector(state => state.defaultEvent.data);
   const loading = useSelector(state => state.order.loading);
+  const cepData = useSelector(state => state.cep.data);
   const cepLoading = useSelector(state => state.cep.loading);
 
   const dispatch = useDispatch();
@@ -173,21 +218,27 @@ export default function GroupCreate({ match, className }) {
 
   function handleAddMaterial(values) {
     const products = values.products.filter(product => product.quantity > 0);
-    const auxDataProducts = dataProducts;
-
-    console.tron.log(auxDataProducts);
+    let auxDataProducts = dataProducts;
+    let auxIndex = 0;
+    let verify = false;
 
     if (auxDataProducts.length > 0) {
       products.map(product => {
         auxDataProducts.forEach((dataProduct, index) => {
-          if (product.id === auxDataProducts.id) {
+          if (product.id === dataProduct.id) {
+            auxIndex = auxIndex + 1;
+            verify = true;
             auxDataProducts[index] = product;
-            console.tron.log(auxDataProducts);
-          } else {
-            setDataProducts([...dataProducts, product]);
           }
         });
+        !verify && auxDataProducts.push(product);
+
+        verify = false;
       });
+
+      if (auxIndex > 0) {
+        setDataProducts(auxDataProducts);
+      }
     } else {
       setDataProducts([...dataProducts, ...products]);
     }
@@ -195,7 +246,93 @@ export default function GroupCreate({ match, className }) {
     setModalAddMaterial(false);
   }
 
-  function handleAddOrder() {}
+  function handleCep(cep, setFieldValue, values) {
+    const formattedCep = cep.replace('-', '');
+
+    setCepState(formattedCep);
+    setFieldValue('cep', formattedCep);
+
+    if (values.type === 'other') {
+      if (cep.length === 8) {
+        setShippingAddress(values);
+
+        dispatch(CepActions.cepRequest(cep, 0));
+      }
+    }
+  }
+
+  function handleChangeAddressType(event, setFieldValue) {
+    const { name, value } = event.target;
+
+    setFieldValue(name, value);
+
+    if (value !== 'other' && value !== '') {
+      const address = addresses.find(address => address.id === parseInt(value));
+
+      setFieldValue('cep', address.cep);
+      setFieldValue('uf', address.uf);
+      setFieldValue('city', address.city);
+      setFieldValue('street', address.street);
+      setFieldValue('street_number', address.street_number);
+      setFieldValue('neighborhood', address.neighborhood);
+      setFieldValue('complement', address.complement);
+      setFieldValue('receiver', address.receiver);
+    } else {
+      setFieldValue('cep', '');
+      setFieldValue('uf', '');
+      setFieldValue('city', '');
+      setFieldValue('street', '');
+      setFieldValue('street_number', '');
+      setFieldValue('neighborhood', '');
+      setFieldValue('complement', '');
+      setFieldValue('receiver', '');
+    }
+  }
+
+  function handleShipppingSelected(selected) {
+    setShippingSelected(selected);
+  }
+
+  function handleAddOrder(values) {}
+
+  useEffect(() => {
+    if (!!cepData.cep) {
+      const copyAddress = shippingAddress;
+      copyAddress.type = 'other';
+      copyAddress.cep = cepData.cep.replace('-', '');
+      copyAddress.uf = cepData.uf;
+      copyAddress.city = cepData.localidade;
+      copyAddress.street =
+        cepData.logradouro !== '' ? cepData.logradouro : copyAddress.street;
+      copyAddress.neighborhood =
+        cepData.bairro !== '' ? cepData.bairro : copyAddress.neighborhood;
+      copyAddress.complement =
+        cepData.complemento !== ''
+          ? cepData.complemento
+          : copyAddress.complement;
+
+      setShippingAddress({ ...shippingAddress, copyAddress });
+      // setShippingAddress(...shippingAddress);
+    }
+  }, [cepData]);
+
+  useEffect(() => {
+    if (data.addresses && data.addresses.length > 0) {
+      setAddresses(data.addresses);
+    }
+  }, [data]);
+
+  const totalPrice = useMemo(() => {
+    let total = 0;
+    if (dataProducts.length > 0) {
+      dataProducts.map(product => {
+        total = total + product.unit_price * product.quantity;
+      });
+    }
+    return total;
+  }, [dataProducts.length, dataProducts.map(product => product.quantity)]);
+
+  useEffect(() => {}, [shippingAddress.cep]);
 
   useEffect(() => {
     const userData = {
@@ -219,14 +356,13 @@ export default function GroupCreate({ match, className }) {
           <CardBody className="d-flex flex-column justify-content-center">
             <Formik
               enableReinitialize
-              initialValues={{
-                orders,
-              }}
+              initialValues={shippingAddress}
+              validationSchema={formOrder}
               onSubmit={values => handleAddOrder(values)}
             >
               {({ errors, touched, values, handleChange, setFieldValue }) => (
                 <Form>
-                  <h4 className="form-section">Adicionar material</h4>
+                  <h4 className="form-section">Materiais</h4>
                   <Button
                     className="mb-2"
                     color="success"
@@ -235,13 +371,14 @@ export default function GroupCreate({ match, className }) {
                     Adicionar material
                   </Button>
 
-                  <Table striped>
+                  <Table striped responsive>
                     <thead>
                       <tr>
                         <th>ID</th>
                         <th>Nome produto</th>
                         <th>Preço</th>
                         <th>Quantidade</th>
+                        <th>Remover</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -249,160 +386,398 @@ export default function GroupCreate({ match, className }) {
                         <tr>
                           <th scope="row">{product.id}</th>
                           <td>{product.name}</td>
-                          <td>{product.unit_price}</td>
+                          <td>R$ {product.unit_price}</td>
                           <td>{product.quantity}</td>
+                          <td>
+                            <Button>X</Button>
+                          </td>
                         </tr>
                       ))}
+                      {dataProducts.length > 0 && (
+                        <tr>
+                          <th></th>
+                          <td></td>
+                          <td></td>
+                          <th scope="row">Subtotal</th>
+                          <th>R$ {totalPrice}</th>
+                        </tr>
+                      )}
                     </tbody>
                   </Table>
 
-                  <h4 className="form-section">Endereço</h4>
-                  <Row>
-                    <Col sm="3">
-                      <FormGroup>
-                        <Label for="uf">Estado</Label>
-                        <Field
-                          readOnly
-                          type="text"
-                          id="uf"
-                          name="uf"
-                          className="form-control"
-                        />
-                      </FormGroup>
-                    </Col>
-                    <Col sm="6">
-                      <FormGroup>
-                        <Label for="city">Cidade</Label>
-                        <Field
-                          type="text"
-                          disabled={cepLoading}
-                          id="city"
-                          name="city"
-                          className={`
-                            form-control
-                            ${errors.city && touched.city && 'is-invalid'}
-                          `}
-                        />
-                        {errors.city && touched.city ? (
-                          <div className="invalid-feedback">{errors.city}</div>
-                        ) : null}
-                      </FormGroup>
-                    </Col>
-                  </Row>
+                  <h4 className="form-section mt-3">Endereço</h4>
+                  {console.tron.log(values)}
+                  {console.tron.log(shippingAddress)}
                   <Row>
                     <Col sm="6">
                       <FormGroup>
-                        <Label for="street">Rua</Label>
+                        <Label for="type">Tipo endereço</Label>
                         <div className="position-relative has-icon-left">
                           <Field
-                            type="text"
-                            disabled={cepLoading}
-                            id="street"
-                            name="street"
+                            type="select"
+                            component="select"
+                            id="type"
+                            name="type"
                             className={`
                               form-control
-                              ${errors.street && touched.street && 'is-invalid'}
-                            `}
-                          />
-                          {errors.street && touched.street ? (
-                            <div className="invalid-feedback">
-                              {errors.street}
-                            </div>
-                          ) : null}
-                          <div className="form-control-position">
-                            <i className="fa fa-road" />
-                          </div>
-                        </div>
-                      </FormGroup>
-                    </Col>
-                    <Col sm="2">
-                      <FormGroup>
-                        <Label for="street_number">Número</Label>
-                        <div className="position-relative has-icon-left">
-                          <Field
-                            type="text"
-                            id="street_number"
-                            name="street_number"
-                            className={`
-                              form-control
-                              ${errors.street_number &&
-                                touched.street_number &&
+                              ${errors.shipping_address &&
+                                errors.type &&
+                                touched.shipping_address &&
+                                touched.type &&
                                 'is-invalid'}
                             `}
-                          />
-                          {errors.street_number && touched.street_number ? (
+                            onChange={event =>
+                              handleChangeAddressType(event, setFieldValue)
+                            }
+                          >
+                            <option value="" defaultValue="" disabled="">
+                              Selecione uma opção
+                            </option>
+                            {addresses.length > 0 &&
+                              addresses.map((address, index) => (
+                                <option key={index} value={address.id}>
+                                  {address.type === 'home' && 'Casa'}
+                                  {address.type === 'work' && 'Trabalho'}
+                                  {address.type === 'other' &&
+                                    address.other_type_name}
+                                  {`: ${address.cep}, ${address.street}, ${address.street_number}`}
+                                </option>
+                              ))}
+                            {/* <option key="home" value="home">
+                              Casa
+                            </option>
+                            <option key="work" value="work">
+                              Trabalho
+                            </option> */}
+                            <option key="other" value="other">
+                              Novo endereço
+                            </option>
+                          </Field>
+                          {errors.shipping_address &&
+                          errors.type &&
+                          touched.shipping_address &&
+                          touched.type ? (
                             <div className="invalid-feedback">
-                              {errors.street_number}
+                              {errors.type}
                             </div>
                           ) : null}
                           <div className="form-control-position">
-                            <Navigation size={14} color="#212529" />
-                          </div>
-                        </div>
-                      </FormGroup>
-                    </Col>
-                    <Col sm="4">
-                      <FormGroup>
-                        <Label for="neighborhood">Bairro</Label>
-                        <div className="position-relative has-icon-left">
-                          <Field
-                            type="text"
-                            disabled={cepLoading}
-                            id="neighborhood"
-                            name="neighborhood"
-                            className={`
-                                        form-control
-                                        ${errors.neighborhood &&
-                                          touched.neighborhood &&
-                                          'is-invalid'}
-                                      `}
-                          />
-                          {errors.neighborhood && touched.neighborhood ? (
-                            <div className="invalid-feedback">
-                              {errors.neighborhood}
-                            </div>
-                          ) : null}
-                          <div className="form-control-position">
-                            <i className="fa fa-map-signs" />
+                            <Map size={14} color="#212529" />
                           </div>
                         </div>
                       </FormGroup>
                     </Col>
                   </Row>
-                  <Row>
-                    <Col sm="12" md="6" lg="6">
-                      <FormGroup>
-                        <Label for="complement">Complemento</Label>
-                        <div className="position-relative has-icon-left">
-                          <Field
-                            type="text"
-                            id="complement"
-                            name="complement"
-                            className="form-control"
-                          />
-                          <div className="form-control-position">
-                            <Edit size={14} color="#212529" />
-                          </div>
-                        </div>
-                      </FormGroup>
-                    </Col>
-                    <Col sm="12" md="6" lg="6">
-                      <FormGroup>
-                        <Label for="receiver">Recebedor</Label>
-                        <div className="position-relative has-icon-left">
-                          <Field
-                            type="text"
-                            id="receiver"
-                            name="receiver"
-                            className="form-control"
-                          />
-                          <div className="form-control-position">
-                            <Edit size={14} color="#212529" />
-                          </div>
-                        </div>
-                      </FormGroup>
-                    </Col>
-                  </Row>
+
+                  {!!values.type && (
+                    <>
+                      <Row>
+                        <Col sm="3">
+                          <FormGroup>
+                            <Label for="cep">CEP</Label>
+                            <div className="position-relative has-icon-right">
+                              <CepFormat
+                                autoComplete="cep"
+                                id="cep"
+                                name="cep"
+                                placeholder="Ex: 17580-000"
+                                value={values.cep}
+                                disabled={
+                                  values.type !== 'other' ? true : false
+                                }
+                                className={`
+                                  form-control
+                                  ${errors.shipping_address &&
+                                    errors.cep &&
+                                    touched.shipping_address &&
+                                    touched.cep &&
+                                    'is-invalid'}
+                                `}
+                                onValueChange={val =>
+                                  handleCep(val.value, setFieldValue, values)
+                                }
+                              />
+                              {errors.shipping_address &&
+                              errors.cep &&
+                              touched.shipping_address &&
+                              touched.cep ? (
+                                <div className="invalid-feedback">
+                                  {errors.cep}
+                                </div>
+                              ) : null}
+                              {cepLoading && (
+                                <div className="form-control-position">
+                                  <RefreshCw
+                                    size={14}
+                                    color="#212529"
+                                    className="spinner"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </FormGroup>
+                        </Col>
+                        <Col sm="3">
+                          <FormGroup>
+                            <Label for="uf">Estado</Label>
+                            <Field
+                              readOnly
+                              type="text"
+                              id="uf"
+                              name="uf"
+                              className="form-control"
+                            />
+                          </FormGroup>
+                        </Col>
+                        <Col sm="6">
+                          <FormGroup>
+                            <Label for="city">Cidade</Label>
+                            <Field
+                              type="text"
+                              disabled={cepLoading}
+                              id="city"
+                              name="city"
+                              disabled={values.type !== 'other' ? true : false}
+                              className={`
+                                form-control
+                                ${errors.shipping_address &&
+                                  errors.city &&
+                                  touched.shipping_address &&
+                                  touched.city &&
+                                  'is-invalid'}
+                              `}
+                            />
+                            {errors.shipping_address &&
+                            errors.city &&
+                            touched.shipping_address &&
+                            touched.city ? (
+                              <div className="invalid-feedback">
+                                {errors.city}
+                              </div>
+                            ) : null}
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col sm="6">
+                          <FormGroup>
+                            <Label for="street">Rua</Label>
+                            <div className="position-relative has-icon-left">
+                              <Field
+                                type="text"
+                                id="street"
+                                name="street"
+                                disabled={
+                                  values.type !== 'other' ? true : false
+                                }
+                                className={`
+                                  form-control
+                                  ${errors.shipping_address &&
+                                    errors.street &&
+                                    touched.shipping_address &&
+                                    touched.street &&
+                                    'is-invalid'}
+                                `}
+                              />
+                              {errors.shipping_address &&
+                              errors.street &&
+                              touched.shipping_address &&
+                              touched.street ? (
+                                <div className="invalid-feedback">
+                                  {errors.street}
+                                </div>
+                              ) : null}
+                              <div className="form-control-position">
+                                <i className="fa fa-road" />
+                              </div>
+                            </div>
+                          </FormGroup>
+                        </Col>
+                        <Col sm="2">
+                          <FormGroup>
+                            <Label for="street_number">Número</Label>
+                            <div className="position-relative has-icon-left">
+                              <Field
+                                type="text"
+                                id="street_number"
+                                name="street_number"
+                                disabled={
+                                  values.type !== 'other' ? true : false
+                                }
+                                className={`
+                                  form-control
+                                  ${errors.shipping_address &&
+                                    errors.street_number &&
+                                    touched.shipping_address &&
+                                    touched.street_number &&
+                                    'is-invalid'}
+                                `}
+                              />
+                              {errors.shipping_address &&
+                              errors.street_number &&
+                              touched.shipping_address &&
+                              touched.street_number ? (
+                                <div className="invalid-feedback">
+                                  {errors.street_number}
+                                </div>
+                              ) : null}
+                              <div className="form-control-position">
+                                <Navigation size={14} color="#212529" />
+                              </div>
+                            </div>
+                          </FormGroup>
+                        </Col>
+                        <Col sm="4">
+                          <FormGroup>
+                            <Label for="neighborhood">Bairro</Label>
+                            <div className="position-relative has-icon-left">
+                              <Field
+                                type="text"
+                                id="neighborhood"
+                                name="neighborhood"
+                                disabled={
+                                  values.type !== 'other' ? true : false
+                                }
+                                className={`
+                                  form-control
+                                  ${errors.shipping_address &&
+                                    errors.neighborhood &&
+                                    touched.shipping_address &&
+                                    touched.neighborhood &&
+                                    'is-invalid'}
+                                `}
+                              />
+                              {errors.shipping_address &&
+                              errors.neighborhood &&
+                              touched.shipping_address &&
+                              touched.neighborhood ? (
+                                <div className="invalid-feedback">
+                                  {errors.neighborhood}
+                                </div>
+                              ) : null}
+                              <div className="form-control-position">
+                                <i className="fa fa-map-signs" />
+                              </div>
+                            </div>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col sm="12" md="6" lg="6">
+                          <FormGroup>
+                            <Label for="complement">Complemento</Label>
+                            <div className="position-relative has-icon-left">
+                              <Field
+                                type="text"
+                                id="complement"
+                                name="complement"
+                                disabled={
+                                  values.type !== 'other' ? true : false
+                                }
+                                className="form-control"
+                              />
+                              <div className="form-control-position">
+                                <Edit size={14} color="#212529" />
+                              </div>
+                            </div>
+                          </FormGroup>
+                        </Col>
+                        <Col sm="12" md="6" lg="6">
+                          <FormGroup>
+                            <Label for="receiver">Recebedor</Label>
+                            <div className="position-relative has-icon-left">
+                              <Field
+                                type="text"
+                                id="receiver"
+                                name="receiver"
+                                disabled={
+                                  values.type !== 'other' ? true : false
+                                }
+                                className={`
+                                  form-control
+                                  ${errors.shipping_address &&
+                                    errors.receiver &&
+                                    touched.shipping_address &&
+                                    touched.receiver &&
+                                    'is-invalid'}
+                                `}
+                              />
+                              {errors.shipping_address &&
+                              errors.receiver &&
+                              touched.shipping_address &&
+                              touched.receiver ? (
+                                <div className="invalid-feedback">
+                                  {errors.receiver}
+                                </div>
+                              ) : null}
+                              <div className="form-control-position">
+                                <Edit size={14} color="#212529" />
+                              </div>
+                            </div>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </>
+                  )}
+
+                  {/* {dataProducts.length > 0 && !!values.type && (
+                    <> */}
+                  <h4 className="form-section mt-3">Opções de envio</h4>
+                  {/* teste radio button */}
+                  <FormGroup className="mb-0">
+                    <ButtonGroup className="d-flex flex-column">
+                      <Button
+                        outline
+                        className={`shipping-selected ${shippingSelected ===
+                          1 && 'shipping-selected-active'}`}
+                        onClick={() => handleShipppingSelected(1)}
+                        active={shippingSelected === 1}
+                      >
+                        <Label className="mb-0 black">
+                          {shippingSelected === 1 && (
+                            <Check size={24} color="#0cc27e" />
+                          )}
+                          Frete Normal (PAC)
+                        </Label>
+                        <Label className="mb-0 text-success">
+                          Frete Grátis
+                        </Label>
+                      </Button>
+                      <Button
+                        outline
+                        className={`shipping-selected ${shippingSelected ===
+                          2 && 'shipping-selected-active'}`}
+                        onClick={() => handleShipppingSelected(2)}
+                        active={shippingSelected === 2}
+                      >
+                        <Label className="mb-0 black">
+                          {shippingSelected === 2 && (
+                            <Check size={24} color="#0cc27e" />
+                          )}
+                          Frete Expresso (SEDEX)
+                        </Label>
+                        <Label className="mb-0">R$ 21,90</Label>
+                      </Button>
+                      <Button
+                        outline
+                        className={`shipping-selected ${shippingSelected ===
+                          3 && 'shipping-selected-active'}`}
+                        onClick={() => handleShipppingSelected(3)}
+                        active={shippingSelected === 3}
+                      >
+                        <Label className="mb-0 black">
+                          {shippingSelected === 3 && (
+                            <Check size={24} color="#0cc27e" />
+                          )}
+                          Frete aereo (azul)
+                        </Label>
+                        <Label className="mb-0">R$ 40,00</Label>
+                      </Button>
+                    </ButtonGroup>
+                  </FormGroup>
+                  {/* </>
+                  )} */}
+
                   <ModalFooter>
                     {loading ? (
                       <Button
@@ -489,7 +864,7 @@ export default function GroupCreate({ match, className }) {
                   {values.products &&
                     values.products.length > 0 &&
                     values.products.map((product, index) => (
-                      <Row key={index} className="justify-content-between">
+                      <Row key={index} className="justify-content-between pt-2">
                         <Col sm="6" md="6" lg="6">
                           <Label>{product.name}</Label>
                         </Col>

@@ -2090,37 +2090,35 @@ export default function UserProfile({ match, className }) {
             )}
           </ModalBody>
           <ModalFooter>
-            <Form>
-              <Button
-                className="ml-1 my-1"
-                color="danger"
-                onClick={toggleModalSearchParticipant}
-              >
-                Cancelar
-              </Button>{' '}
-              <Button
-                className={`${
-                  participantData !== null
-                    ? 'ml-1 my-1 btn-success'
-                    : 'btn-secundary ml-1 my-1'
-                }`}
-                onClick={confirmModalSearchParticipant}
-                disabled={participantData !== null ? false : true}
-              >
-                {participant_loading ? (
-                  <BounceLoader
-                    size={23}
-                    color={'#fff'}
-                    css={css`
-                      display: block;
-                      margin: 0 auto;
-                    `}
-                  />
-                ) : (
-                  'Adicionar participante'
-                )}
-              </Button>
-            </Form>
+            <Button
+              className="ml-1 my-1"
+              color="danger"
+              onClick={toggleModalSearchParticipant}
+            >
+              Cancelar
+            </Button>{' '}
+            <Button
+              className={`${
+                participantData !== null
+                  ? 'ml-1 my-1 btn-success'
+                  : 'btn-secundary ml-1 my-1'
+              }`}
+              onClick={confirmModalSearchParticipant}
+              disabled={participantData !== null ? false : true}
+            >
+              {participant_loading ? (
+                <BounceLoader
+                  size={23}
+                  color={'#fff'}
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
+              ) : (
+                'Adicionar participante'
+              )}
+            </Button>
           </ModalFooter>
         </Modal>
 
@@ -2288,33 +2286,31 @@ export default function UserProfile({ match, className }) {
                   </div>
                 </ModalBody>
                 <ModalFooter>
-                  <Form>
-                    <Button
-                      className="ml-1 my-1"
-                      color="danger"
-                      onClick={toggleModalAddParticipant}
-                    >
-                      Cancelar
-                    </Button>{' '}
-                    <Button
-                      className="ml-1 my-1 btn-success"
-                      type="submit"
-                      //onClick={() => confirmModalAddParticipant(values)}
-                    >
-                      {participant_loading ? (
-                        <BounceLoader
-                          size={23}
-                          color={'#fff'}
-                          css={css`
-                            display: block;
-                            margin: 0 auto;
-                          `}
-                        />
-                      ) : (
-                        'Cadastrar participante'
-                      )}
-                    </Button>
-                  </Form>
+                  <Button
+                    className="ml-1 my-1"
+                    color="danger"
+                    onClick={toggleModalAddParticipant}
+                  >
+                    Cancelar
+                  </Button>{' '}
+                  <Button
+                    className="ml-1 my-1 btn-success"
+                    type="submit"
+                    //onClick={() => confirmModalAddParticipant(values)}
+                  >
+                    {participant_loading ? (
+                      <BounceLoader
+                        size={23}
+                        color={'#fff'}
+                        css={css`
+                          display: block;
+                          margin: 0 auto;
+                        `}
+                      />
+                    ) : (
+                      'Cadastrar participante'
+                    )}
+                  </Button>
                 </ModalFooter>
               </Form>
             )}
