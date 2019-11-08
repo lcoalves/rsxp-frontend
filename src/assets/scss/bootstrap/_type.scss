@@ -99,6 +99,10 @@ h2.title{
 }
 .font-medium-2{
   font-size: 1.2rem !important;
+
+  @media screen and (max-width: 425px) {
+    font-size: 0.8rem !important;
+  }
 }
 .font-medium-3{
   font-size: 1.3rem !important;

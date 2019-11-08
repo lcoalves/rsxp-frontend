@@ -52,6 +52,7 @@ import { css } from '@emotion/core';
 import { BounceLoader } from 'react-spinners';
 
 import { Creators as OrganizationActions } from '~/store/ducks/organization';
+import { Creators as ShippingActions } from '~/store/ducks/shipping';
 import { Creators as OrganizatorActions } from '~/store/ducks/organizator';
 import { Creators as CepActions } from '~/store/ducks/cep';
 import { Creators as DefaultEventActions } from '~/store/ducks/defaultEvent';
@@ -183,10 +184,12 @@ export default function GroupCreate({ match, className }) {
   const loading = useSelector(state => state.order.loading);
   const cepData = useSelector(state => state.cep.data);
   const cepLoading = useSelector(state => state.cep.loading);
+  const shippingOptionsData = useSelector(state => state.shipping.data);
 
   const dispatch = useDispatch();
 
   function toggleModalAddMaterial() {
+
     setModalAddMaterial(!modalAddMaterial);
   }
 
@@ -208,8 +211,14 @@ export default function GroupCreate({ match, className }) {
           return {
             id: product.id,
             name: product.name,
-            unit_price: product.unit_price,
-            quantity: 0,
+            cost_of_goods: product.unit_price,
+            quantity: '',
+            weight: product.weight,
+            width: product.width,
+            height: product.height,
+            length: product.length,
+            sku_id: 1,
+            product_category: 'Geral'
           };
         }),
       });
@@ -219,43 +228,62 @@ export default function GroupCreate({ match, className }) {
   function handleAddMaterial(values) {
     const products = values.products.filter(product => product.quantity > 0);
     let auxDataProducts = dataProducts;
-    let auxIndex = 0;
     let verify = false;
 
     if (auxDataProducts.length > 0) {
       products.map(product => {
         auxDataProducts.forEach((dataProduct, index) => {
           if (product.id === dataProduct.id) {
-            auxIndex = auxIndex + 1;
             verify = true;
             auxDataProducts[index] = product;
           }
         });
-        !verify && auxDataProducts.push(product);
+
+        if(!verify) {
+          auxDataProducts.push(product)
+          // setDataProducts([...auxDataProducts, product])
+        }
 
         verify = false;
       });
 
-      if (auxIndex > 0) {
-        setDataProducts(auxDataProducts);
+      setDataProducts(auxDataProducts);
+
+      if (cepState.length === 8) {
+        dispatch(ShippingActions.shippingOptionsRequest(cepState, auxDataProducts));
       }
     } else {
       setDataProducts([...dataProducts, ...products]);
+
+      if (cepState.length === 8) {
+        dispatch(ShippingActions.shippingOptionsRequest(cepState, products));
+      }
     }
 
     setModalAddMaterial(false);
+    setKit({
+    default_event_id: '',
+    products: [],
+  })
+  }
+
+  function handleRemoveMaterial(id) {
+    const auxDataProducts = dataProducts.filter(product => product.id !== id)
+
+    setDataProducts(auxDataProducts);
+
+    if (cepState.length === 8) {
+        dispatch(ShippingActions.shippingOptionsRequest(cepState, auxDataProducts));
+    }
   }
 
   function handleCep(cep, setFieldValue, values) {
     const formattedCep = cep.replace('-', '');
-
     setCepState(formattedCep);
     setFieldValue('cep', formattedCep);
 
     if (values.type === 'other') {
       if (cep.length === 8) {
-        setShippingAddress(values);
-
         dispatch(CepActions.cepRequest(cep, 0));
       }
     }
@@ -269,6 +297,7 @@ export default function GroupCreate({ match, className }) {
     if (value !== 'other' && value !== '') {
       const address = addresses.find(address => address.id === parseInt(value));
 
+      setCepState(address.cep);
       setFieldValue('cep', address.cep);
       setFieldValue('uf', address.uf);
       setFieldValue('city', address.city);
@@ -277,6 +306,10 @@ export default function GroupCreate({ match, className }) {
       setFieldValue('neighborhood', address.neighborhood);
       setFieldValue('complement', address.complement);
       setFieldValue('receiver', address.receiver);
+
+      if (dataProducts.length > 0) {
+        dispatch(ShippingActions.shippingOptionsRequest(address.cep, dataProducts));
+      }
     } else {
       setFieldValue('cep', '');
       setFieldValue('uf', '');
@@ -313,6 +346,10 @@ export default function GroupCreate({ match, className }) {
 
       setShippingAddress({ ...shippingAddress, copyAddress });
       // setShippingAddress(...shippingAddress);
+
+      if (dataProducts.length > 0) {
+        dispatch(ShippingActions.shippingOptionsRequest(cepState, dataProducts));
+      }
     }
   }, [cepData]);
 
@@ -326,13 +363,21 @@ export default function GroupCreate({ match, className }) {
     let total = 0;
     if (dataProducts.length > 0) {
       dataProducts.map(product => {
-        total = total + product.unit_price * product.quantity;
+        total = total + product.cost_of_goods * product.quantity;
       });
     }
     return total;
   }, [dataProducts.length, dataProducts.map(product => product.quantity)]);
 
-  useEffect(() => {}, [shippingAddress.cep]);
+  // useEffect(() => {
+  //   if (cepState.length === 8 && dataProducts.length > 0) {
+  //     dispatch(ShippingActions.shippingOptionsRequest(cepState, dataProducts));
+  //   }
+  // }, [
+  //   cepState.length,
+  //   dataProducts.length,
+  //   //dataProducts.map(product => product.quantity),
+  // ]);
 
   useEffect(() => {
     const userData = {
@@ -376,8 +421,9 @@ export default function GroupCreate({ match, className }) {
                       <tr>
                         <th>ID</th>
                         <th>Nome produto</th>
-                        <th>Preço</th>
+                        <th>Valor unitário</th>
                         <th>Quantidade</th>
+                        <th>Total</th>
                         <th>Remover</th>
                       </tr>
                     </thead>
@@ -386,10 +432,20 @@ export default function GroupCreate({ match, className }) {
                         <tr>
                           <th scope="row">{product.id}</th>
                           <td>{product.name}</td>
-                          <td>R$ {product.unit_price}</td>
+                          <td>R$ {product.cost_of_goods}</td>
                           <td>{product.quantity}</td>
+                          <td>R$ {product.quantity * product.cost_of_goods}</td>
                           <td>
-                            <Button>X</Button>
+                            <div
+                              onClick={() =>
+                                handleRemoveMaterial(product.id)
+                              }
+                            >
+                              <X
+                                color="#ff3232"
+                                className="fonticon-wrap height-25 width-25"
+                              />
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -400,6 +456,7 @@ export default function GroupCreate({ match, className }) {
                           <td></td>
                           <th scope="row">Subtotal</th>
                           <th>R$ {totalPrice}</th>
+                          <th></th>
                         </tr>
                       )}
                     </tbody>
@@ -718,63 +775,38 @@ export default function GroupCreate({ match, className }) {
                     </>
                   )}
 
-                  {/* {dataProducts.length > 0 && !!values.type && (
-                    <> */}
-                  <h4 className="form-section mt-3">Opções de envio</h4>
-                  {/* teste radio button */}
-                  <FormGroup className="mb-0">
-                    <ButtonGroup className="d-flex flex-column">
-                      <Button
-                        outline
-                        className={`shipping-selected ${shippingSelected ===
-                          1 && 'shipping-selected-active'}`}
-                        onClick={() => handleShipppingSelected(1)}
-                        active={shippingSelected === 1}
-                      >
-                        <Label className="mb-0 black">
-                          {shippingSelected === 1 && (
-                            <Check size={24} color="#0cc27e" />
-                          )}
-                          Frete Normal (PAC)
-                        </Label>
-                        <Label className="mb-0 text-success">
-                          Frete Grátis
-                        </Label>
-                      </Button>
-                      <Button
-                        outline
-                        className={`shipping-selected ${shippingSelected ===
-                          2 && 'shipping-selected-active'}`}
-                        onClick={() => handleShipppingSelected(2)}
-                        active={shippingSelected === 2}
-                      >
-                        <Label className="mb-0 black">
-                          {shippingSelected === 2 && (
-                            <Check size={24} color="#0cc27e" />
-                          )}
-                          Frete Expresso (SEDEX)
-                        </Label>
-                        <Label className="mb-0">R$ 21,90</Label>
-                      </Button>
-                      <Button
-                        outline
-                        className={`shipping-selected ${shippingSelected ===
-                          3 && 'shipping-selected-active'}`}
-                        onClick={() => handleShipppingSelected(3)}
-                        active={shippingSelected === 3}
-                      >
-                        <Label className="mb-0 black">
-                          {shippingSelected === 3 && (
-                            <Check size={24} color="#0cc27e" />
-                          )}
-                          Frete aereo (azul)
-                        </Label>
-                        <Label className="mb-0">R$ 40,00</Label>
-                      </Button>
-                    </ButtonGroup>
-                  </FormGroup>
-                  {/* </>
-                  )} */}
+                  {shippingOptionsData !== null && (
+                    <>
+                    <h4 className="form-section mt-3">Opções de envio</h4>
+                    <FormGroup className="mb-0">
+                      <ButtonGroup className="d-flex flex-column">
+                        {shippingOptionsData.map((shippingOption, index) => (
+                          <Button
+                            key={index}
+                            outline
+                            className={`shipping-selected ${shippingSelected ===
+                              index && 'shipping-selected-active'}`}
+                            onClick={() => handleShipppingSelected(index)}
+                            active={shippingSelected === index}
+                          >
+                            <Label className="mb-0 black font-medium-2">
+                              {shippingSelected === index && (
+                                <Check size={24} color="#0cc27e" />
+                              )}
+                              {shippingOption.description}
+                            </Label>
+                            <Label className="mb-0 black">
+                              até {shippingOption.delivery_estimate_business_days} dias uteis
+                            </Label>
+                            <Label className="mb-0 text-success font-medium-2">
+                              R$ {shippingOption.final_shipping_cost}
+                            </Label>
+                          </Button>
+                          ))}
+                      </ButtonGroup>
+                    </FormGroup>
+                    </>
+                  )}
 
                   <ModalFooter>
                     {loading ? (
@@ -821,7 +853,10 @@ export default function GroupCreate({ match, className }) {
             enableReinitialize
             initialValues={kit}
             // validationSchema={formItemSchema}
-            onSubmit={values => handleAddMaterial(values)}
+            onSubmit={(values, { resetForm }) => {
+              handleAddMaterial(values)
+              resetForm();
+            }}
           >
             {({ errors, touched, handleChange, values, setFieldValue }) => (
               <Form className="pt-2">
@@ -867,11 +902,12 @@ export default function GroupCreate({ match, className }) {
                           <Label>{product.name}</Label>
                         </Col>
                         <Col sm="6" md="6" lg="4">
-                          <Label>R$ {product.unit_price}</Label>
+                          <Label>R$ {product.cost_of_goods}</Label>
                         </Col>
                         <Col sm="12" md="12" lg="2">
                           <Field
                             type="number"
+                            placeholder="0"
                             name={`products[${index}].quantity`}
                             className="form-control"
                           ></Field>
