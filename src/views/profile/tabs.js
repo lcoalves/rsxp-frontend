@@ -383,6 +383,7 @@ export default function TabsBorderBottom() {
               apply={file => apply(file)}
               isBack={true}
               text="Atualizar foto"
+              className="rounded-circle"
             />
           </div>
         )}
