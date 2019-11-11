@@ -882,39 +882,41 @@ function* shippingOptions(action) {
 
     const headers = {
       'Content-Type': 'application/json',
-      'api-key': '1273704cf48278e8e198c13059267033a16a636c878dc8f6b21f069d9e3aa97d'
-    }
-    
+      'api-key':
+        '1273704cf48278e8e198c13059267033a16a636c878dc8f6b21f069d9e3aa97d',
+    };
+
     const response = yield call(
       axios.post,
       'https://api.intelipost.com.br/api/v1/quote_by_product',
       {
-        "origin_zip_code": '17580000',
-        "destination_zip_code": cep,
+        origin_zip_code: '17580000',
+        destination_zip_code: cep,
         products,
       },
       {
-        headers
+        headers,
       }
     );
 
-    console.tron.log(response.data)
-    
     if (response.data.status === 'ERROR') {
       yield put(ShippingActions.shippingOptionsFailure());
       toastr.warning('Aviso!', 'Erro na cotação');
     } else {
-      yield put(ShippingActions.shippingOptionsSuccess(response.data.content.delivery_options));
+      yield put(
+        ShippingActions.shippingOptionsSuccess(
+          response.data.content.delivery_options
+        )
+      );
     }
   } catch (err) {
-    console.tron.log(err.response.data)
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
       yield put(ShippingActions.shippingOptionsFailure());
     } else {
       err.response.data.messages.map(message => {
         toastr.error('Falha na cotação!', message.text);
-      })
+      });
       yield put(ShippingActions.shippingOptionsFailure());
     }
   }
