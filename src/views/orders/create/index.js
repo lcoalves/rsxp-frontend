@@ -790,10 +790,14 @@ export default function GroupCreate({ match, className }) {
 
                   {shippingOptionsData !== null && (
                     <>
+<<<<<<< HEAD
                       <h4 className="form-section mt-3">
                         <Truck size={20} color="#212529" /> Opções de envio
                         (escolha uma das opções abaixo):
                       </h4>
+=======
+                      <h4 className="form-section mt-3">Opções de envio</h4>
+>>>>>>> 38dfb04cf5c78b4d2bf2b6722b945fa6539f859d
                       <FormGroup className="mb-0">
                         <ButtonGroup className="d-flex flex-column">
                           {shippingOptionsData.map((shippingOption, index) => (
@@ -812,10 +816,16 @@ export default function GroupCreate({ match, className }) {
                                 {shippingOption.description}
                               </Label>
                               <Label className="mb-0 black">
+<<<<<<< HEAD
                                 {shippingOption.delivery_estimate_business_days <=
                                 1
                                   ? `até ${shippingOption.delivery_estimate_business_days} dia útil`
                                   : `até ${shippingOption.delivery_estimate_business_days} dias úteis`}
+=======
+                                até{' '}
+                                {shippingOption.delivery_estimate_business_days}{' '}
+                                dias uteis
+>>>>>>> 38dfb04cf5c78b4d2bf2b6722b945fa6539f859d
                               </Label>
                               <Label className="mb-0 text-success font-medium-2">
                                 R$ {shippingOption.final_shipping_cost}
@@ -824,6 +834,7 @@ export default function GroupCreate({ match, className }) {
                           ))}
                         </ButtonGroup>
                       </FormGroup>
+<<<<<<< HEAD
                     </>
                   )}
 
@@ -861,6 +872,35 @@ export default function GroupCreate({ match, className }) {
                       </Button>
                     )}
                   </ModalFooter>
+=======
+                    </>
+                  )}
+
+                  <div className="form-actions right">
+                    <FormGroup>
+                      {loading ? (
+                        <Button disabled color="secondary">
+                          <BounceLoader
+                            size={23}
+                            color={'#fff'}
+                            css={css`
+                              display: block;
+                              margin: 0 auto;
+                            `}
+                          />
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          color="success"
+                          className="btn-default btn-raised"
+                        >
+                          Criar novo pedido
+                        </Button>
+                      )}
+                    </FormGroup>
+                  </div>
+>>>>>>> 38dfb04cf5c78b4d2bf2b6722b945fa6539f859d
                 </Form>
               )}
             </Formik>

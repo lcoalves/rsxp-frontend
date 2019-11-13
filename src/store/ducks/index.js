@@ -33,6 +33,7 @@ import organizator from './organizator';
 import participant from './participant';
 import order from './order';
 import shipping from './shipping';
+import ministery from './ministery';
 
 import { reducer as toastrReducer } from 'react-redux-toastr';
 
@@ -66,5 +67,6 @@ export default combineReducers({
   participant,
   order,
   shipping,
+  ministery,
   router: connectRouter(history),
 });
