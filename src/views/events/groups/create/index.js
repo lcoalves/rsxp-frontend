@@ -292,21 +292,23 @@ export default function GroupCreate({ match, className }) {
   }
 
   useEffect(() => {
-    if (!!userData.email) {
+    if (!!userData.email && !!userData.cpf) {
       setInitialState({
         ...initialState,
         ['organizator_id']: userData.id,
-        ['organizator_name']: `${userData.name} (você)`,
+        ['organizator_name']: !!userData.name
+          ? `${userData.name} (você)`
+          : 'Falha, recarregue a página',
       });
 
       const data = {
-        cmn_hierarchy_id: userData.cmn_hierarchy_id,
-        mu_hierarchy_id: userData.mu_hierarchy_id,
-        crown_hierarchy_id: userData.crown_hierarchy_id,
-        mp_hierarchy_id: userData.mp_hierarchy_id,
-        ffi_hierarchy_id: userData.ffi_hierarchy_id,
-        gfi_hierarchy_id: userData.gfi_hierarchy_id,
-        pg_hierarchy_id: userData.pg_hierarchy_id,
+        cmn_hierarchy_id: userData.cmn_hierarchy_id || 0,
+        mu_hierarchy_id: userData.mu_hierarchy_id || 0,
+        crown_hierarchy_id: userData.crown_hierarchy_id || 0,
+        mp_hierarchy_id: userData.mp_hierarchy_id || 0,
+        ffi_hierarchy_id: userData.ffi_hierarchy_id || 0,
+        gfi_hierarchy_id: userData.gfi_hierarchy_id || 0,
+        pg_hierarchy_id: userData.pg_hierarchy_id || 0,
       };
 
       dispatch(DefaultEventActions.organizatorEventRequest(data));
@@ -451,7 +453,7 @@ export default function GroupCreate({ match, className }) {
                       </Col>
                     </Row> */}
                     <Row>
-                      <Col xl="3" lg="4" md="4" sm="12">
+                      <Col xl="4" lg="5" md="5" sm="12">
                         <FormGroup>
                           <Label for="initial_date">Data Inicial</Label>
                           <div className="position-relative has-icon-left">
@@ -465,7 +467,8 @@ export default function GroupCreate({ match, className }) {
                               }
                               customInput={<DatepickerButton />}
                               minDate={subMonths(new Date(), 12)}
-                              calendarClassName="width-328"
+                              withPortal
+                              fixedHeight
                               dateFormat="dd/MM/yyyy hh:mm aa"
                               showMonthDropdown
                               showYearDropdown
@@ -493,7 +496,7 @@ export default function GroupCreate({ match, className }) {
                         </FormGroup>
                       </Col>
                       {!!values.initial_date && (
-                        <Col xl="3" lg="4" md="4" sm="12">
+                        <Col xl="4" lg="5" md="5" sm="12">
                           <FormGroup>
                             <Label for="end_date">Formatura (opcional)</Label>
                             <div className="position-relative has-icon-left">
@@ -507,7 +510,8 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 customInput={<DatepickerButton />}
                                 minDate={values.initial_date}
-                                calendarClassName="width-328"
+                                withPortal
+                                fixedHeight
                                 dateFormat="dd/MM/yyyy hh:mm aa"
                                 showMonthDropdown
                                 showYearDropdown

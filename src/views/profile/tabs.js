@@ -936,7 +936,7 @@ export default function TabsBorderBottom() {
                                 )}
                               </Row>
                               <Row>
-                                <Col sm="4">
+                                <Col sm="12" md="12" lg="12" xl="4">
                                   <FormGroup>
                                     <Label for={type}>Tipo endereço</Label>
                                     <div className="position-relative has-icon-left">
@@ -982,7 +982,7 @@ export default function TabsBorderBottom() {
                                   </FormGroup>
                                 </Col>
                                 {address.type === 'other' && (
-                                  <Col sm="8">
+                                  <Col sm="12" md="12" lg="12" xl="8">
                                     <FormGroup>
                                       <Label for={other_type_name}>
                                         Apelido do endereço
@@ -1010,7 +1010,7 @@ export default function TabsBorderBottom() {
                                 )}
                               </Row>
                               <Row>
-                                <Col sm="3">
+                                <Col sm="12" md="6" lg="6" xl="3">
                                   <FormGroup>
                                     <Label for={cep}>CEP</Label>
                                     <div className="position-relative has-icon-right">
@@ -1052,7 +1052,7 @@ export default function TabsBorderBottom() {
                                     </div>
                                   </FormGroup>
                                 </Col>
-                                <Col sm="3">
+                                <Col sm="12" md="6" lg="6" xl="3">
                                   <FormGroup>
                                     <Label for={`addresses.${index}.uf`}>
                                       Estado
@@ -1066,7 +1066,7 @@ export default function TabsBorderBottom() {
                                     />
                                   </FormGroup>
                                 </Col>
-                                <Col sm="6">
+                                <Col sm="12" md="12" lg="12" xl="6">
                                   <FormGroup>
                                     <Label for={city}>Cidade</Label>
                                     <Field
@@ -1090,7 +1090,7 @@ export default function TabsBorderBottom() {
                                 </Col>
                               </Row>
                               <Row>
-                                <Col sm="6">
+                                <Col sm="12" md="12" lg="12" xl="6">
                                   <FormGroup>
                                     <Label for={street}>Rua</Label>
                                     <div className="position-relative has-icon-left">
@@ -1117,7 +1117,7 @@ export default function TabsBorderBottom() {
                                     </div>
                                   </FormGroup>
                                 </Col>
-                                <Col sm="2">
+                                <Col sm="12" md="4" lg="12" xl="6">
                                   <FormGroup>
                                     <Label for={street_number}>Número</Label>
                                     <div className="position-relative has-icon-left">
@@ -1144,7 +1144,7 @@ export default function TabsBorderBottom() {
                                     </div>
                                   </FormGroup>
                                 </Col>
-                                <Col sm="4">
+                                <Col sm="12" md="8" lg="12" xl="12">
                                   <FormGroup>
                                     <Label for={neighborhood}>Bairro</Label>
                                     <div className="position-relative has-icon-left">
@@ -1174,7 +1174,7 @@ export default function TabsBorderBottom() {
                                 </Col>
                               </Row>
                               <Row>
-                                <Col sm="12" md="6" lg="6">
+                                <Col sm="12" md="6" lg="12" xl="6">
                                   <FormGroup>
                                     <Label
                                       for={`addresses.${index}.complement`}
@@ -1194,7 +1194,7 @@ export default function TabsBorderBottom() {
                                     </div>
                                   </FormGroup>
                                 </Col>
-                                <Col sm="12" md="6" lg="6">
+                                <Col sm="12" md="6" lg="12" xl="6">
                                   <FormGroup>
                                     <Label for={receiver}>Recebedor</Label>
                                     <div className="position-relative has-icon-left">
@@ -1285,22 +1285,22 @@ export default function TabsBorderBottom() {
 
         {/* ---------------------ABA DE REDES SOCIAIS ------------------------ */}
         <TabPane tabId="3">
-          <Row>
-            <Col sm="12" md="12" lg="12">
-              <Formik
-                enableReinitialize
-                initialValues={social_network}
-                onSubmit={values => handleUpdateSocialNetwork(values)}
-              >
-                {() => (
-                  <Form>
-                    <div className="form-body">
+          <Formik
+            enableReinitialize
+            initialValues={social_network}
+            onSubmit={values => handleUpdateSocialNetwork(values)}
+          >
+            {() => (
+              <Form>
+                <div className="form-body">
+                  <Row>
+                    <Col sm="12" md="12" lg="12" xl="12">
                       <FormGroup>
                         <Label for="facebook">Facebook</Label>
                         <div className="input-group">
                           <div className="has-icon-left input-group-prepend">
                             <span className="pl-4 input-group-text">
-                              https://www.facebook.com/
+                              facebook.com/
                             </span>
                             <div className="form-control-position">
                               <Facebook size={14} color="#212529" />
@@ -1314,12 +1314,14 @@ export default function TabsBorderBottom() {
                           />
                         </div>
                       </FormGroup>
+                    </Col>
+                    <Col sm="12" md="12" lg="12" xl="12">
                       <FormGroup>
                         <Label for="instagram">Instagram</Label>
                         <div className="input-group">
                           <div className="has-icon-left input-group-prepend">
                             <span className="pl-4 input-group-text">
-                              https://www.instagram.com/
+                              instagram.com/
                             </span>
                             <div className="form-control-position">
                               <Instagram size={14} color="#212529" />
@@ -1333,12 +1335,14 @@ export default function TabsBorderBottom() {
                           />
                         </div>
                       </FormGroup>
+                    </Col>
+                    <Col sm="12" md="12" lg="12" xl="12">
                       <FormGroup>
                         <Label for="linkedin">Linkedin</Label>
                         <div className="input-group">
                           <div className="has-icon-left input-group-prepend">
                             <span className="pl-4 input-group-text">
-                              https://www.linkedin.com/in/
+                              linkedin.com/in/
                             </span>
                             <div className="form-control-position">
                               <Linkedin size={14} color="#212529" />
@@ -1352,38 +1356,38 @@ export default function TabsBorderBottom() {
                           />
                         </div>
                       </FormGroup>
-                    </div>
-                    <div className="form-actions right" />
+                    </Col>
+                  </Row>
+                </div>
+                <div className="form-actions right" />
 
-                    {loading ? (
-                      <Button
-                        disabled
-                        color="secondary"
-                        className="btn-default btn-raised"
-                      >
-                        <BounceLoader
-                          size={23}
-                          color={'#fff'}
-                          css={css`
-                            display: block;
-                            margin: 0 auto;
-                          `}
-                        />
-                      </Button>
-                    ) : (
-                      <Button
-                        type="submit"
-                        color="success"
-                        className="btn-default btn-raised"
-                      >
-                        Atualizar redes sociais
-                      </Button>
-                    )}
-                  </Form>
+                {loading ? (
+                  <Button
+                    disabled
+                    color="secondary"
+                    className="btn-default btn-raised"
+                  >
+                    <BounceLoader
+                      size={23}
+                      color={'#fff'}
+                      css={css`
+                        display: block;
+                        margin: 0 auto;
+                      `}
+                    />
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    color="success"
+                    className="btn-default btn-raised"
+                  >
+                    Atualizar redes sociais
+                  </Button>
                 )}
-              </Formik>
-            </Col>
-          </Row>
+              </Form>
+            )}
+          </Formik>
         </TabPane>
 
         {/* ---------------- ABA DE HISTORICO ------------------ */}
