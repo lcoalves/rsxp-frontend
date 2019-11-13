@@ -189,7 +189,6 @@ export default function GroupCreate({ match, className }) {
   const dispatch = useDispatch();
 
   function toggleModalAddMaterial() {
-
     setModalAddMaterial(!modalAddMaterial);
   }
 
@@ -218,7 +217,7 @@ export default function GroupCreate({ match, className }) {
             height: product.height,
             length: product.length,
             sku_id: 1,
-            product_category: 'Geral'
+            product_category: 'Geral',
           };
         }),
       });
@@ -239,8 +238,8 @@ export default function GroupCreate({ match, className }) {
           }
         });
 
-        if(!verify) {
-          auxDataProducts.push(product)
+        if (!verify) {
+          auxDataProducts.push(product);
           // setDataProducts([...auxDataProducts, product])
         }
 
@@ -250,7 +249,9 @@ export default function GroupCreate({ match, className }) {
       setDataProducts(auxDataProducts);
 
       if (cepState.length === 8) {
-        dispatch(ShippingActions.shippingOptionsRequest(cepState, auxDataProducts));
+        dispatch(
+          ShippingActions.shippingOptionsRequest(cepState, auxDataProducts)
+        );
       }
     } else {
       setDataProducts([...dataProducts, ...products]);
@@ -262,18 +263,20 @@ export default function GroupCreate({ match, className }) {
 
     setModalAddMaterial(false);
     setKit({
-    default_event_id: '',
-    products: [],
-  })
+      default_event_id: '',
+      products: [],
+    });
   }
 
   function handleRemoveMaterial(id) {
-    const auxDataProducts = dataProducts.filter(product => product.id !== id)
+    const auxDataProducts = dataProducts.filter(product => product.id !== id);
 
     setDataProducts(auxDataProducts);
 
     if (cepState.length === 8) {
-        dispatch(ShippingActions.shippingOptionsRequest(cepState, auxDataProducts));
+      dispatch(
+        ShippingActions.shippingOptionsRequest(cepState, auxDataProducts)
+      );
     }
   }
 
@@ -308,7 +311,9 @@ export default function GroupCreate({ match, className }) {
       setFieldValue('receiver', address.receiver);
 
       if (dataProducts.length > 0) {
-        dispatch(ShippingActions.shippingOptionsRequest(address.cep, dataProducts));
+        dispatch(
+          ShippingActions.shippingOptionsRequest(address.cep, dataProducts)
+        );
       }
     } else {
       setFieldValue('cep', '');
@@ -348,7 +353,9 @@ export default function GroupCreate({ match, className }) {
       // setShippingAddress(...shippingAddress);
 
       if (dataProducts.length > 0) {
-        dispatch(ShippingActions.shippingOptionsRequest(cepState, dataProducts));
+        dispatch(
+          ShippingActions.shippingOptionsRequest(cepState, dataProducts)
+        );
       }
     }
   }, [cepData]);
@@ -437,9 +444,7 @@ export default function GroupCreate({ match, className }) {
                           <td>R$ {product.quantity * product.cost_of_goods}</td>
                           <td>
                             <div
-                              onClick={() =>
-                                handleRemoveMaterial(product.id)
-                              }
+                              onClick={() => handleRemoveMaterial(product.id)}
                             >
                               <X
                                 color="#ff3232"
@@ -777,63 +782,63 @@ export default function GroupCreate({ match, className }) {
 
                   {shippingOptionsData !== null && (
                     <>
-                    <h4 className="form-section mt-3">Opções de envio</h4>
-                    <FormGroup className="mb-0">
-                      <ButtonGroup className="d-flex flex-column">
-                        {shippingOptionsData.map((shippingOption, index) => (
-                          <Button
-                            key={index}
-                            outline
-                            className={`shipping-selected ${shippingSelected ===
-                              index && 'shipping-selected-active'}`}
-                            onClick={() => handleShipppingSelected(index)}
-                            active={shippingSelected === index}
-                          >
-                            <Label className="mb-0 black font-medium-2">
-                              {shippingSelected === index && (
-                                <Check size={24} color="#0cc27e" />
-                              )}
-                              {shippingOption.description}
-                            </Label>
-                            <Label className="mb-0 black">
-                              até {shippingOption.delivery_estimate_business_days} dias uteis
-                            </Label>
-                            <Label className="mb-0 text-success font-medium-2">
-                              R$ {shippingOption.final_shipping_cost}
-                            </Label>
-                          </Button>
+                      <h4 className="form-section mt-3">Opções de envio</h4>
+                      <FormGroup className="mb-0">
+                        <ButtonGroup className="d-flex flex-column">
+                          {shippingOptionsData.map((shippingOption, index) => (
+                            <Button
+                              key={index}
+                              outline
+                              className={`shipping-selected ${shippingSelected ===
+                                index && 'shipping-selected-active'}`}
+                              onClick={() => handleShipppingSelected(index)}
+                              active={shippingSelected === index}
+                            >
+                              <Label className="mb-0 black font-medium-2">
+                                {shippingSelected === index && (
+                                  <Check size={24} color="#0cc27e" />
+                                )}
+                                {shippingOption.description}
+                              </Label>
+                              <Label className="mb-0 black">
+                                até{' '}
+                                {shippingOption.delivery_estimate_business_days}{' '}
+                                dias uteis
+                              </Label>
+                              <Label className="mb-0 text-success font-medium-2">
+                                R$ {shippingOption.final_shipping_cost}
+                              </Label>
+                            </Button>
                           ))}
-                      </ButtonGroup>
-                    </FormGroup>
+                        </ButtonGroup>
+                      </FormGroup>
                     </>
                   )}
 
-                  <ModalFooter>
-                    {loading ? (
-                      <Button
-                        disabled
-                        block
-                        className="ml-1 my-1 btn-secondary"
-                      >
-                        <BounceLoader
-                          size={23}
-                          color={'#fff'}
-                          css={css`
-                            display: block;
-                            margin: 0 auto;
-                          `}
-                        />
-                      </Button>
-                    ) : (
-                      <Button
-                        type="submit"
-                        block
-                        className="ml-1 my-1 btn-success"
-                      >
-                        Criar novo pedido
-                      </Button>
-                    )}
-                  </ModalFooter>
+                  <div className="form-actions right">
+                    <FormGroup>
+                      {loading ? (
+                        <Button disabled color="secondary">
+                          <BounceLoader
+                            size={23}
+                            color={'#fff'}
+                            css={css`
+                              display: block;
+                              margin: 0 auto;
+                            `}
+                          />
+                        </Button>
+                      ) : (
+                        <Button
+                          type="submit"
+                          color="success"
+                          className="btn-default btn-raised"
+                        >
+                          Criar novo pedido
+                        </Button>
+                      )}
+                    </FormGroup>
+                  </div>
                 </Form>
               )}
             </Formik>
@@ -854,7 +859,7 @@ export default function GroupCreate({ match, className }) {
             initialValues={kit}
             // validationSchema={formItemSchema}
             onSubmit={(values, { resetForm }) => {
-              handleAddMaterial(values)
+              handleAddMaterial(values);
               resetForm();
             }}
           >

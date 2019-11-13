@@ -109,6 +109,11 @@ import {
   Types as OrderTypes,
 } from '~/store/ducks/order';
 
+import {
+  Creators as MinisteryActions,
+  Types as MinisteryTypes,
+} from '~/store/ducks/ministery';
+
 function* signup(action) {
   try {
     const { entity_company, name, email, cpf_cnpj, password } = action.payload;
@@ -882,39 +887,41 @@ function* shippingOptions(action) {
 
     const headers = {
       'Content-Type': 'application/json',
-      'api-key': '1273704cf48278e8e198c13059267033a16a636c878dc8f6b21f069d9e3aa97d'
-    }
-    
+      'api-key':
+        '1273704cf48278e8e198c13059267033a16a636c878dc8f6b21f069d9e3aa97d',
+    };
+
     const response = yield call(
       axios.post,
       'https://api.intelipost.com.br/api/v1/quote_by_product',
       {
-        "origin_zip_code": '17580000',
-        "destination_zip_code": cep,
+        origin_zip_code: '17580000',
+        destination_zip_code: cep,
         products,
       },
       {
-        headers
+        headers,
       }
     );
 
-    console.tron.log(response.data)
-    
     if (response.data.status === 'ERROR') {
       yield put(ShippingActions.shippingOptionsFailure());
       toastr.warning('Aviso!', 'Erro na cotação');
     } else {
-      yield put(ShippingActions.shippingOptionsSuccess(response.data.content.delivery_options));
+      yield put(
+        ShippingActions.shippingOptionsSuccess(
+          response.data.content.delivery_options
+        )
+      );
     }
   } catch (err) {
-    console.tron.log(err.response.data)
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
       yield put(ShippingActions.shippingOptionsFailure());
     } else {
       err.response.data.messages.map(message => {
         toastr.error('Falha na cotação!', message.text);
-      })
+      });
       yield put(ShippingActions.shippingOptionsFailure());
     }
   }
@@ -1153,6 +1160,56 @@ function* addOrder(action) {}
 
 function* deleteOrder(action) {}
 
+function* allMinistery() {
+  try {
+    const response = yield call(api.get, '/ministery');
+
+    yield put(MinisteryActions.allMinisterySuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(MinisteryActions.allMinisteryFailure());
+  }
+}
+
+function* ministery(action) {
+  try {
+    const { id } = action.payload;
+
+    const response = yield call(api.get, `/ministery/${id}`);
+
+    yield put(MinisteryActions.ministerySuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(MinisteryActions.ministeryFailure());
+  }
+}
+
+function* editMinistery(action) {
+  try {
+    const { id, editData } = action.payload;
+
+    const name = editData.name;
+    const email = editData.email;
+    const phone = editData.phone;
+
+    yield call(api.put, `/ministery/${id}`, {
+      name,
+      email,
+      phone,
+    });
+
+    yield put(MinisteryActions.editMinisterySuccess());
+    // toastr.confirm('Ministério atualizado com sucesso.', {
+    //   onOk: () => push('/admin/ministerios'),
+    //   disableCancel: true,
+    // });
+    toastr.success('Ministério atualizado com sucesso!');
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(MinisteryActions.editMinisteryFailure());
+  }
+}
+
 //CUSTOMIZAÇÕES DO TEMA
 function* customizerBgImage(action) {
   try {
@@ -1295,6 +1352,10 @@ export default function* rootSaga() {
     takeLatest(OrderTypes.ALL_REQUEST, allOrders),
     takeLatest(OrderTypes.ADD_REQUEST, addOrder),
     takeLatest(OrderTypes.DELETE_REQUEST, deleteOrder),
+
+    takeLatest(MinisteryTypes.ALL_REQUEST, allMinistery),
+    takeLatest(MinisteryTypes.REQUEST, ministery),
+    takeLatest(MinisteryTypes.EDIT_REQUEST, editMinistery),
 
     takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),
 

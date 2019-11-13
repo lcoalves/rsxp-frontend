@@ -93,6 +93,32 @@ const LazyInviteConfirmation = lazy(() =>
 const LazyMaintainance = lazy(() => import('../views/pages/maintainance'));
 const LazyLockScreen = lazy(() => import('../views/pages/lockScreen'));
 
+// ADMIN PAGES
+const LazyAdminMinistery = lazy(() => import('~/views/admin/ministery/index'));
+const LazyAdminEditMinistery = lazy(() =>
+  import('../views/admin/ministery/edit')
+);
+
+// const LazyAdminCertificate = lazy(() => import('../views/admin/certificate'));
+// const LazyAdminEditCertificate = lazy(() => import('../views/admin/certificate/edit'));
+// const LazyAdminCreateCertificate = lazy(() => import('../views/admin/certificate/create'));
+
+// const LazyAdminProduct = lazy(() => import('../views/admin/product'));
+// const LazyAdminEditProduct = lazy(() => import('../views/admin/product/edit'));
+// const LazyAdminCreateProduct = lazy(() => import('../views/admin/product/create'));
+
+// const LazyAdminKit = lazy(() => import('../views/admin/kit'));
+// const LazyAdminEditKit = lazy(() => import('../views/admin/kit/edit'));
+// const LazyAdminCreateKit = lazy(() => import('../views/admin/kit/create'));
+
+// const LazyAdminDefaultEvent = lazy(() => import('../views/admin/defaultEvent'));
+// const LazyAdminEditDefaultEvent = lazy(() => import('../views/admin/defaultEvent/edit'));
+// const LazyAdminCreateDefaultEvent = lazy(() => import('../views/admin/defaultEvent/create'));
+
+// const LazyAdminLesson = lazy(() => import('../views/admin/lesson'));
+// const LazyAdminEditLesson = lazy(() => import('../views/admin/lesson/edit'));
+// const LazyAdminCreateLesson = lazy(() => import('../views/admin/lesson/create'));
+
 // Error Pages
 const LazyErrorPage = lazy(() => import('../views/pages/error'));
 
@@ -520,6 +546,72 @@ class Router extends Component {
             )}
           />
 
+          {/* -------- TELAS ADMINISTRATIVAS ---------- */}
+          {/* <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/eventos"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminDefaultEvent {...matchprops} />
+              </Suspense>
+            )}
+          />
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/licoes"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminLesson {...matchprops} />
+              </Suspense>
+            )}
+          /> */}
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/ministerios"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminMinistery {...matchprops} />
+              </Suspense>
+            )}
+          />
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/ministerios/:ministery_id/editar"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminEditMinistery {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          {/* <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/certificados"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminCertificate {...matchprops} />
+              </Suspense>
+            )}
+          />
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/produtos"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminProduct {...matchprops} />
+              </Suspense>
+            )}
+          />
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/kits"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminKit {...matchprops} />
+              </Suspense>
+            )}
+          /> */}
+
           <ErrorLayoutRoute
             exact
             path="/error"
@@ -534,62 +626,6 @@ class Router extends Component {
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyErrorPage {...matchprops} />
-              </Suspense>
-            )}
-          />
-
-          {/* -------- TELAS ADMINISTRATIVAS ---------- */}
-          <ProtectedMainLayoutRoutes
-            exact
-            path="/admin/eventos"
-            render={matchprops => (
-              <Suspense fallback={<Spinner />}>
-                <LazyHome {...matchprops} />
-              </Suspense>
-            )}
-          />
-          <ProtectedMainLayoutRoutes
-            exact
-            path="/admin/licoes"
-            render={matchprops => (
-              <Suspense fallback={<Spinner />}>
-                <LazyHome {...matchprops} />
-              </Suspense>
-            )}
-          />
-          <ProtectedMainLayoutRoutes
-            exact
-            path="/admin/ministerios"
-            render={matchprops => (
-              <Suspense fallback={<Spinner />}>
-                <LazyHome {...matchprops} />
-              </Suspense>
-            )}
-          />
-          <ProtectedMainLayoutRoutes
-            exact
-            path="/admin/certificados"
-            render={matchprops => (
-              <Suspense fallback={<Spinner />}>
-                <LazyHome {...matchprops} />
-              </Suspense>
-            )}
-          />
-          <ProtectedMainLayoutRoutes
-            exact
-            path="/admin/produtos"
-            render={matchprops => (
-              <Suspense fallback={<Spinner />}>
-                <LazyHome {...matchprops} />
-              </Suspense>
-            )}
-          />
-          <ProtectedMainLayoutRoutes
-            exact
-            path="/admin/kits"
-            render={matchprops => (
-              <Suspense fallback={<Spinner />}>
-                <LazyHome {...matchprops} />
               </Suspense>
             )}
           />
