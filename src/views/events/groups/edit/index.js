@@ -2072,10 +2072,7 @@ export default function UserProfile({ match, className }) {
             </Formik>
             {participantError && (
               <>
-                <p className="text-danger p-3">
-                  Nenhum participante encontrado com esse cpf na nossa base de
-                  dados
-                </p>
+                <p className="text-danger p-3">{participant_data}</p>
                 <Row className="justify-content-between p-3">
                   <Button color="success" onClick={toggleModalAddParticipant}>
                     <i className="fa fa-plus" /> Cadastrar novo participante

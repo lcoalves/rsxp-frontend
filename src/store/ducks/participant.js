@@ -97,6 +97,7 @@ export default function participant(state = INITIAL_STATE, action) {
         ...state,
         error: true,
         loadingSearch: false,
+        data: action.payload.data,
       };
 
     // MUDAR PARTICIPANTE DESISTENTE / NAO DESISTENTE
@@ -210,8 +211,11 @@ export const Creators = {
     },
   }),
 
-  searchParticipantFailure: () => ({
+  searchParticipantFailure: data => ({
     type: Types.SEARCH_FAILURE,
+    payload: {
+      data,
+    },
   }),
 
   // SET PARTICIPANTE DESISTENTE/NAO DESISTENTE

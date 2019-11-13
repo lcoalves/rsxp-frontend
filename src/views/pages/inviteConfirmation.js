@@ -14,6 +14,8 @@ import { ptBR } from 'date-fns/locale';
 import { css } from '@emotion/core';
 import { BounceLoader } from 'react-spinners';
 
+import history from '~/app/history';
+
 import { validateCPF } from '~/services/validateCPF';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -111,7 +113,11 @@ export default function Login({ match }) {
         invite => invite.id === parseInt(match.params.id)
       );
 
-      setInvite(invite);
+      if (invite === undefined) {
+        history.push(`/evento/${event.id}/convite/expirado`);
+      } else {
+        setInvite(invite);
+      }
     }
   }, [event]);
 
@@ -243,25 +249,82 @@ export default function Login({ match }) {
                               </div>
                             </Col>
 
-                            {!!values.cpf && participant !== null && (
-                              <Col sm="12" className="mt-2">
-                                <Label>Nome</Label>
-                                <div className="position-relative has-icon-left">
-                                  <Field
-                                    readOnly
-                                    type="text"
-                                    name="name"
-                                    id="name"
-                                    value={participant.name}
-                                    className="new-form-padding form-control"
-                                    autoComplete="off"
-                                  />
-                                  <div className="new-form-control-position">
-                                    <User size={14} color="#212529" />
+                            {!!values.cpf &&
+                              participant !== null &&
+                              typeof participant === 'object' && (
+                                <Col sm="12" className="mt-2">
+                                  <Label>Nome</Label>
+                                  <div className="position-relative has-icon-left">
+                                    <Field
+                                      readOnly
+                                      type="text"
+                                      name="name"
+                                      id="name"
+                                      value={participant.name}
+                                      className="new-form-padding form-control"
+                                      autoComplete="off"
+                                    />
+                                    <div className="new-form-control-position">
+                                      <User size={14} color="#212529" />
+                                    </div>
                                   </div>
-                                </div>
-                              </Col>
-                            )}
+                                </Col>
+                              )}
+
+                            {!!values.cpf &&
+                              participant !== null &&
+                              typeof participant === 'string' && (
+                                <>
+                                  <Label className="font-small-3 text-center text-dark text-bold-400 text-uppercase mt-3 mx-auto">
+                                    Complete seu cadastro
+                                  </Label>
+                                  <Col sm="12" className="mt-2">
+                                    <Label>Nome</Label>
+                                    <div className="position-relative has-icon-left">
+                                      <Field
+                                        type="text"
+                                        name="name"
+                                        id="name"
+                                        className="new-form-padding form-control"
+                                        autoComplete="off"
+                                      />
+                                      <div className="new-form-control-position">
+                                        <User size={14} color="#212529" />
+                                      </div>
+                                    </div>
+                                  </Col>
+                                  <Col sm="12" className="mt-2">
+                                    <Label>Email</Label>
+                                    <div className="position-relative has-icon-left">
+                                      <Field
+                                        type="email"
+                                        name="email"
+                                        id="email"
+                                        className="new-form-padding form-control"
+                                        autoComplete="off"
+                                      />
+                                      <div className="new-form-control-position">
+                                        <User size={14} color="#212529" />
+                                      </div>
+                                    </div>
+                                  </Col>
+                                  <Col sm="12" className="mt-2">
+                                    <Label>Sexo</Label>
+                                    <div className="position-relative has-icon-left">
+                                      <Field
+                                        type="text"
+                                        name="sex"
+                                        id="sex"
+                                        className="new-form-padding form-control"
+                                        autoComplete="off"
+                                      />
+                                      <div className="new-form-control-position">
+                                        <User size={14} color="#212529" />
+                                      </div>
+                                    </div>
+                                  </Col>
+                                </>
+                              )}
                           </Row>
                         </FormGroup>
                         <FormGroup>

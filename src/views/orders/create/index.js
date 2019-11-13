@@ -14,12 +14,16 @@ import classNames from 'classnames';
 
 import {
   Map,
+  MapPin,
   RefreshCw,
   Edit,
   Navigation,
   Plus,
   X,
   Check,
+  Box,
+  Truck,
+  DollarSign,
 } from 'react-feather';
 
 import { validateCPF } from '~/services/validateCPF';
@@ -189,7 +193,6 @@ export default function GroupCreate({ match, className }) {
   const dispatch = useDispatch();
 
   function toggleModalAddMaterial() {
-
     setModalAddMaterial(!modalAddMaterial);
   }
 
@@ -218,7 +221,7 @@ export default function GroupCreate({ match, className }) {
             height: product.height,
             length: product.length,
             sku_id: 1,
-            product_category: 'Geral'
+            product_category: 'Geral',
           };
         }),
       });
@@ -239,8 +242,8 @@ export default function GroupCreate({ match, className }) {
           }
         });
 
-        if(!verify) {
-          auxDataProducts.push(product)
+        if (!verify) {
+          auxDataProducts.push(product);
           // setDataProducts([...auxDataProducts, product])
         }
 
@@ -250,7 +253,9 @@ export default function GroupCreate({ match, className }) {
       setDataProducts(auxDataProducts);
 
       if (cepState.length === 8) {
-        dispatch(ShippingActions.shippingOptionsRequest(cepState, auxDataProducts));
+        dispatch(
+          ShippingActions.shippingOptionsRequest(cepState, auxDataProducts)
+        );
       }
     } else {
       setDataProducts([...dataProducts, ...products]);
@@ -262,18 +267,20 @@ export default function GroupCreate({ match, className }) {
 
     setModalAddMaterial(false);
     setKit({
-    default_event_id: '',
-    products: [],
-  })
+      default_event_id: '',
+      products: [],
+    });
   }
 
   function handleRemoveMaterial(id) {
-    const auxDataProducts = dataProducts.filter(product => product.id !== id)
+    const auxDataProducts = dataProducts.filter(product => product.id !== id);
 
     setDataProducts(auxDataProducts);
 
     if (cepState.length === 8) {
-        dispatch(ShippingActions.shippingOptionsRequest(cepState, auxDataProducts));
+      dispatch(
+        ShippingActions.shippingOptionsRequest(cepState, auxDataProducts)
+      );
     }
   }
 
@@ -308,7 +315,9 @@ export default function GroupCreate({ match, className }) {
       setFieldValue('receiver', address.receiver);
 
       if (dataProducts.length > 0) {
-        dispatch(ShippingActions.shippingOptionsRequest(address.cep, dataProducts));
+        dispatch(
+          ShippingActions.shippingOptionsRequest(address.cep, dataProducts)
+        );
       }
     } else {
       setFieldValue('cep', '');
@@ -348,7 +357,9 @@ export default function GroupCreate({ match, className }) {
       // setShippingAddress(...shippingAddress);
 
       if (dataProducts.length > 0) {
-        dispatch(ShippingActions.shippingOptionsRequest(cepState, dataProducts));
+        dispatch(
+          ShippingActions.shippingOptionsRequest(cepState, dataProducts)
+        );
       }
     }
   }, [cepData]);
@@ -407,7 +418,9 @@ export default function GroupCreate({ match, className }) {
             >
               {({ errors, touched, values, handleChange, setFieldValue }) => (
                 <Form>
-                  <h4 className="form-section">Materiais</h4>
+                  <h4 className="form-section">
+                    <Box size={20} color="#212529" /> Materiais
+                  </h4>
                   <Button
                     className="mb-2"
                     color="success"
@@ -437,9 +450,7 @@ export default function GroupCreate({ match, className }) {
                           <td>R$ {product.quantity * product.cost_of_goods}</td>
                           <td>
                             <div
-                              onClick={() =>
-                                handleRemoveMaterial(product.id)
-                              }
+                              onClick={() => handleRemoveMaterial(product.id)}
                             >
                               <X
                                 color="#ff3232"
@@ -462,7 +473,9 @@ export default function GroupCreate({ match, className }) {
                     </tbody>
                   </Table>
 
-                  <h4 className="form-section mt-3">Endereço</h4>
+                  <h4 className="form-section mt-3">
+                    <MapPin size={20} color="#212529" /> Endereço de entrega
+                  </h4>
                   <Row>
                     <Col sm="6">
                       <FormGroup>
@@ -527,7 +540,7 @@ export default function GroupCreate({ match, className }) {
                   {!!values.type && (
                     <>
                       <Row>
-                        <Col sm="3">
+                        <Col sm="12" md="3" lg="3" xl="3">
                           <FormGroup>
                             <Label for="cep">CEP</Label>
                             <div className="position-relative has-icon-right">
@@ -572,7 +585,7 @@ export default function GroupCreate({ match, className }) {
                             </div>
                           </FormGroup>
                         </Col>
-                        <Col sm="3">
+                        <Col sm="12" md="3" lg="3" xl="3">
                           <FormGroup>
                             <Label for="uf">Estado</Label>
                             <Field
@@ -584,7 +597,7 @@ export default function GroupCreate({ match, className }) {
                             />
                           </FormGroup>
                         </Col>
-                        <Col sm="6">
+                        <Col sm="12" md="12" lg="6" xl="6">
                           <FormGroup>
                             <Label for="city">Cidade</Label>
                             <Field
@@ -614,7 +627,7 @@ export default function GroupCreate({ match, className }) {
                         </Col>
                       </Row>
                       <Row>
-                        <Col sm="6">
+                        <Col sm="12" md="12" lg="8" xl="6">
                           <FormGroup>
                             <Label for="street">Rua</Label>
                             <div className="position-relative has-icon-left">
@@ -648,7 +661,7 @@ export default function GroupCreate({ match, className }) {
                             </div>
                           </FormGroup>
                         </Col>
-                        <Col sm="2">
+                        <Col sm="12" md="12" lg="4" xl="2">
                           <FormGroup>
                             <Label for="street_number">Número</Label>
                             <div className="position-relative has-icon-left">
@@ -682,7 +695,7 @@ export default function GroupCreate({ match, className }) {
                             </div>
                           </FormGroup>
                         </Col>
-                        <Col sm="4">
+                        <Col sm="12" md="12" lg="12" xl="4">
                           <FormGroup>
                             <Label for="neighborhood">Bairro</Label>
                             <div className="position-relative has-icon-left">
@@ -718,7 +731,7 @@ export default function GroupCreate({ match, className }) {
                         </Col>
                       </Row>
                       <Row>
-                        <Col sm="12" md="6" lg="6">
+                        <Col sm="12" md="6" lg="6" xl="6">
                           <FormGroup>
                             <Label for="complement">Complemento</Label>
                             <div className="position-relative has-icon-left">
@@ -737,7 +750,7 @@ export default function GroupCreate({ match, className }) {
                             </div>
                           </FormGroup>
                         </Col>
-                        <Col sm="12" md="6" lg="6">
+                        <Col sm="12" md="6" lg="6" xl="6">
                           <FormGroup>
                             <Label for="receiver">Recebedor</Label>
                             <div className="position-relative has-icon-left">
@@ -777,34 +790,48 @@ export default function GroupCreate({ match, className }) {
 
                   {shippingOptionsData !== null && (
                     <>
-                    <h4 className="form-section mt-3">Opções de envio</h4>
-                    <FormGroup className="mb-0">
-                      <ButtonGroup className="d-flex flex-column">
-                        {shippingOptionsData.map((shippingOption, index) => (
-                          <Button
-                            key={index}
-                            outline
-                            className={`shipping-selected ${shippingSelected ===
-                              index && 'shipping-selected-active'}`}
-                            onClick={() => handleShipppingSelected(index)}
-                            active={shippingSelected === index}
-                          >
-                            <Label className="mb-0 black font-medium-2">
-                              {shippingSelected === index && (
-                                <Check size={24} color="#0cc27e" />
-                              )}
-                              {shippingOption.description}
-                            </Label>
-                            <Label className="mb-0 black">
-                              até {shippingOption.delivery_estimate_business_days} dias uteis
-                            </Label>
-                            <Label className="mb-0 text-success font-medium-2">
-                              R$ {shippingOption.final_shipping_cost}
-                            </Label>
-                          </Button>
+                      <h4 className="form-section mt-3">
+                        <Truck size={20} color="#212529" /> Opções de envio
+                        (escolha uma das opções abaixo):
+                      </h4>
+                      <FormGroup className="mb-0">
+                        <ButtonGroup className="d-flex flex-column">
+                          {shippingOptionsData.map((shippingOption, index) => (
+                            <Button
+                              key={index}
+                              outline
+                              className={`shipping-selected ${shippingSelected ===
+                                index && 'shipping-selected-active'}`}
+                              onClick={() => handleShipppingSelected(index)}
+                              active={shippingSelected === index}
+                            >
+                              <Label className="mb-0 black font-medium-2">
+                                {shippingSelected === index && (
+                                  <Check size={24} color="#0cc27e" />
+                                )}
+                                {shippingOption.description}
+                              </Label>
+                              <Label className="mb-0 black">
+                                {shippingOption.delivery_estimate_business_days <=
+                                1
+                                  ? `até ${shippingOption.delivery_estimate_business_days} dia útil`
+                                  : `até ${shippingOption.delivery_estimate_business_days} dias úteis`}
+                              </Label>
+                              <Label className="mb-0 text-success font-medium-2">
+                                R$ {shippingOption.final_shipping_cost}
+                              </Label>
+                            </Button>
                           ))}
-                      </ButtonGroup>
-                    </FormGroup>
+                        </ButtonGroup>
+                      </FormGroup>
+                    </>
+                  )}
+
+                  {shippingSelected !== null && (
+                    <>
+                      <h4 className="form-section mt-3">
+                        <DollarSign size={20} color="#212529" /> Pagamento
+                      </h4>
                     </>
                   )}
 
@@ -830,7 +857,7 @@ export default function GroupCreate({ match, className }) {
                         block
                         className="ml-1 my-1 btn-success"
                       >
-                        Criar novo pedido
+                        Criar solicitação de materiais
                       </Button>
                     )}
                   </ModalFooter>
@@ -854,7 +881,7 @@ export default function GroupCreate({ match, className }) {
             initialValues={kit}
             // validationSchema={formItemSchema}
             onSubmit={(values, { resetForm }) => {
-              handleAddMaterial(values)
+              handleAddMaterial(values);
               resetForm();
             }}
           >

@@ -485,12 +485,12 @@ function* confirmInvite(action) {
       yield call(api.delete, `/invite/${invite_id}`);
       yield put(InviteActions.deleteInviteSuccess());
 
+      yield put(InviteActions.confirmInviteSuccess());
+
       yield put(
         push(`/evento/${event_id}/convite/${invite_id}/confirmacao/sucesso`)
       );
     }
-
-    yield put(InviteActions.confirmInviteSuccess());
   } catch (err) {
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
@@ -834,7 +834,9 @@ function* searchParticipant(action) {
     yield put(ParticipantActions.searchParticipantSuccess(response.data));
 
     if (response.data.error) {
-      yield put(ParticipantActions.searchParticipantFailure());
+      yield put(
+        ParticipantActions.searchParticipantFailure(response.data.error.message)
+      );
       toastr.warning(response.data.error.title, response.data.error.message);
     }
   } catch (err) {
@@ -846,7 +848,11 @@ function* searchParticipant(action) {
         err.response.data.error.title,
         err.response.data.error.message
       );
-      yield put(ParticipantActions.searchParticipantFailure());
+      yield put(
+        ParticipantActions.searchParticipantFailure(
+          err.response.data.error.message
+        )
+      );
     }
   }
 }

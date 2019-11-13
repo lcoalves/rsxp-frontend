@@ -37,7 +37,7 @@ export default function Groups() {
                         color="success"
                         className="btn-raised mb-0 font-small-3"
                       >
-                        <i className="fa fa-plus" /> Criar novo pedido
+                        <i className="fa fa-plus" /> Solicitar material
                       </Button>{' '}
                     </Link>
                   </div>
