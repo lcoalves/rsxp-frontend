@@ -109,6 +109,11 @@ import {
   Types as OrderTypes,
 } from '~/store/ducks/order';
 
+import {
+  Creators as MinisteryActions,
+  Types as MinisteryTypes,
+} from '~/store/ducks/ministery';
+
 function* signup(action) {
   try {
     const { entity_company, name, email, cpf_cnpj, password } = action.payload;
@@ -1155,6 +1160,56 @@ function* addOrder(action) {}
 
 function* deleteOrder(action) {}
 
+function* allMinistery() {
+  try {
+    const response = yield call(api.get, '/ministery');
+
+    yield put(MinisteryActions.allMinisterySuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(MinisteryActions.allMinisteryFailure());
+  }
+}
+
+function* ministery(action) {
+  try {
+    const { id } = action.payload;
+
+    const response = yield call(api.get, `/ministery/${id}`);
+
+    yield put(MinisteryActions.ministerySuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(MinisteryActions.ministeryFailure());
+  }
+}
+
+function* editMinistery(action) {
+  try {
+    const { id, editData } = action.payload;
+
+    const name = editData.name;
+    const email = editData.email;
+    const phone = editData.phone;
+
+    yield call(api.put, `/ministery/${id}`, {
+      name,
+      email,
+      phone,
+    });
+
+    yield put(MinisteryActions.editMinisterySuccess());
+    // toastr.confirm('Ministério atualizado com sucesso.', {
+    //   onOk: () => push('/admin/ministerios'),
+    //   disableCancel: true,
+    // });
+    toastr.success('Ministério atualizado com sucesso!');
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(MinisteryActions.editMinisteryFailure());
+  }
+}
+
 //CUSTOMIZAÇÕES DO TEMA
 function* customizerBgImage(action) {
   try {
@@ -1297,6 +1352,10 @@ export default function* rootSaga() {
     takeLatest(OrderTypes.ALL_REQUEST, allOrders),
     takeLatest(OrderTypes.ADD_REQUEST, addOrder),
     takeLatest(OrderTypes.DELETE_REQUEST, deleteOrder),
+
+    takeLatest(MinisteryTypes.ALL_REQUEST, allMinistery),
+    takeLatest(MinisteryTypes.REQUEST, ministery),
+    takeLatest(MinisteryTypes.EDIT_REQUEST, editMinistery),
 
     takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),
 
