@@ -330,7 +330,8 @@ export default function GroupCreate({ match, className }) {
   }, [cepData]);
 
   return (
-    defaultData !== null && (
+    defaultData !== null &&
+    userData !== {} && (
       <Fragment>
         <ContentHeader>Criar Grupo</ContentHeader>
         <Card>
@@ -597,6 +598,7 @@ export default function GroupCreate({ match, className }) {
                             type="text"
                             name="organizator_name"
                             id="organizator_name"
+                            value={`${userData.name} (você)`}
                             className={`
                               form-control
                               ${errors.organizator_name &&

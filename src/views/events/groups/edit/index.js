@@ -2465,6 +2465,8 @@ export default function UserProfile({ match, className }) {
                             }
                             customInput={<DatepickerButton />}
                             minDate={subMonths(new Date(), 12)}
+                            withPortal
+                            fixedHeight
                             showMonthDropdown
                             showYearDropdown
                             dropdownMode="select"

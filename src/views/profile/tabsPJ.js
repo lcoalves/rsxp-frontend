@@ -406,6 +406,8 @@ export default function TabsBorderBottom() {
                                       setFieldValue('foundation', date)
                                     }
                                     customInput={<DatepickerButton />}
+                                    withPortal
+                                    fixedHeight
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode="select"

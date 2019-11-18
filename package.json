@@ -30,6 +30,7 @@
     "neal-react": "^0.2.5",
     "pagarme": "^4.5.1",
     "payment": "^2.3.0",
+    "payu": "^0.0.1",
     "prismjs": "^1.17.1",
     "randomstring": "^1.1.5",
     "rc-slider": "^8.6.1",

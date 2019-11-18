@@ -5,6 +5,7 @@ import { push } from 'connected-react-router';
 
 import axios from 'axios';
 import api from '~/services/api';
+import apiPayu from '~/services/apiPayu';
 
 import {
   Creators as CustomizerActions,
@@ -1162,7 +1163,28 @@ function* order(action) {}
 
 function* allOrders(action) {}
 
-function* addOrder(action) {}
+function* addOrder(action) {
+  try {
+    const { data } = action.payload;
+
+    // yield call(apiPayu.post, '')
+
+    yield call(api.post, '/order', data);
+
+    yield put(OrderActions.addOrderSuccess());
+
+    yield put(push('/pedidos'));
+    toastr.success('Sucesso!', `A solicitação de material foi adicionada.`);
+  } catch (err) {
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(ResetPasswordActions.resetPasswordFailure());
+    } else {
+      toastr.error(err.response.data.title, err.response.data.message);
+      yield put(ResetPasswordActions.resetPasswordFailure());
+    }
+  }
+}
 
 function* deleteOrder(action) {}
 
