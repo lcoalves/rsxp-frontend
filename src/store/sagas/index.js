@@ -80,6 +80,11 @@ import {
 } from '~/store/ducks/checkout';
 
 import {
+  Creators as LessonReportActions,
+  Types as LessonReportTypes,
+} from '~/store/ducks/lessonReport';
+
+import {
   Creators as LessonActions,
   Types as LessonTypes,
 } from '~/store/ducks/lesson';
@@ -962,23 +967,23 @@ function* cep(action) {
   }
 }
 
-function* certificate(action) {
-  try {
-    const { data } = action.payload;
+// function* certificate(action) {
+//   try {
+//     const { data } = action.payload;
 
-    yield put(CertificateActions.certificateSuccess(data));
+//     yield put(CertificateActions.certificateSuccess(data));
 
-    yield put(push(`/eventos/grupo/${data.event_id}/certificados`));
-  } catch (err) {
-    if (err.message === 'Network Error') {
-      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
-      yield put(CertificateActions.certificateFailure());
-    } else {
-      toastr.error('Falha!', 'Tente novamente');
-      yield put(CertificateActions.certificateFailure());
-    }
-  }
-}
+//     yield put(push(`/eventos/grupo/${data.event_id}/certificados`));
+//   } catch (err) {
+//     if (err.message === 'Network Error') {
+//       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+//       yield put(CertificateActions.certificateFailure());
+//     } else {
+//       toastr.error('Falha!', 'Tente novamente');
+//       yield put(CertificateActions.certificateFailure());
+//     }
+//   }
+// }
 
 function* checkoutLogin(action) {
   try {
@@ -1076,25 +1081,25 @@ function* checkoutSignup(action) {
 
 function* checkoutPayment(action) {}
 
-function* lesson(action) {
+function* lessonReport(action) {
   try {
     const { id } = action.payload;
 
     const response = yield call(api.get, `/lesson_report/${id}`);
 
-    yield put(LessonActions.lessonSuccess(response.data));
+    yield put(LessonReportActions.lessonReportSuccess(response.data));
   } catch (err) {
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
-      yield put(LessonActions.lessonFailure());
+      yield put(LessonReportActions.lessonReportFailure());
     } else {
       toastr.error('Falha!', 'Tente novamente');
-      yield put(LessonActions.lessonFailure());
+      yield put(LessonReportActions.lessonReportFailure());
     }
   }
 }
 
-function* lessonEdit(action) {
+function* lessonReportEdit(action) {
   try {
     const { data } = action.payload;
 
@@ -1104,14 +1109,14 @@ function* lessonEdit(action) {
       data
     );
 
-    yield put(LessonActions.editLessonSuccess(response.data));
+    yield put(LessonReportActions.editLessonReportSuccess(response.data));
   } catch (err) {
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
-      yield put(LessonActions.editLessonFailure());
+      yield put(LessonReportActions.editLessonReportFailure());
     } else {
       toastr.error('Falha!', 'Tente novamente');
-      yield put(LessonActions.editLessonFailure());
+      yield put(LessonReportActions.editLessonReportFailure());
     }
   }
 }
@@ -1155,6 +1160,17 @@ function* organizatorEvent(action) {
       toastr.error('Falha!', 'Tente novamente');
       yield put(DefaultEventActions.organizatorEventFailure());
     }
+  }
+}
+
+function* allDefaultEvent() {
+  try {
+    const response = yield call(api.get, '/default_event');
+
+    yield put(DefaultEventActions.allDefaultEventSuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(DefaultEventActions.allDefaultEventFailure());
   }
 }
 
@@ -1209,10 +1225,117 @@ function* editMinistery(action) {
     //   onOk: () => push('/admin/ministerios'),
     //   disableCancel: true,
     // });
-    toastr.success('Ministério atualizado com sucesso!');
+    toastr.success('Sucesso!', 'Ministério atualizado com sucesso');
   } catch (err) {
     toastr.error('Falha!', 'Tente novamente');
     yield put(MinisteryActions.editMinisteryFailure());
+  }
+}
+
+function* allCertificate() {
+  try {
+    const response = yield call(api.get, '/layout_certificates');
+
+    yield put(CertificateActions.allCertificateSuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(CertificateActions.allCertificateFailure());
+  }
+}
+
+function* certificate() {}
+
+function* editCertificate() {}
+
+function* allLesson() {
+  try {
+    const response = yield call(api.get, '/lesson');
+
+    yield put(LessonActions.allLessonSuccess(response.data));
+
+    console.tron.log(response.data);
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(LessonActions.allLessonFailure());
+  }
+}
+
+function* lesson(action) {
+  try {
+    const { id } = action.payload;
+
+    const response = yield call(api.get, `/lesson/${id}`);
+
+    yield put(LessonActions.lessonSuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(LessonActions.lessonFailure());
+  }
+}
+
+function* editLesson(action) {
+  try {
+    const { id, editData } = action.payload;
+
+    const title = editData.title;
+    const description = editData.description;
+    const video_id = editData.video_id;
+    const img_url = editData.img_url;
+
+    yield call(api.put, `/lesson/${id}`, {
+      title,
+      description,
+      video_id,
+      img_url,
+    });
+
+    yield put(LessonActions.editLessonSuccess());
+    // toastr.confirm('Ministério atualizado com sucesso.', {
+    //   onOk: () => push('/admin/ministerios'),
+    //   disableCancel: true,
+    // });
+    toastr.success('Sucesso!', 'Lição atualizado com sucesso');
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente');
+    yield put(LessonActions.editLessonFailure());
+  }
+}
+
+function* addLesson(action) {
+  try {
+    const { data } = action.payload;
+
+    yield call(api.post, '/lesson', {
+      default_event_id: data.default_event_id,
+      title: data.title,
+      description: data.description,
+      video_id: data.video_id,
+      img_url: data.img_url,
+    });
+
+    yield put(LessonActions.addLessonSuccess());
+  } catch (err) {
+    toastr.error('Erro!', 'Ocorreu um erro');
+    yield put(LessonActions.addLessonFailure());
+  }
+}
+
+function* deleteLesson(action) {
+  try {
+    const { lesson_id } = action.payload;
+
+    yield call(api.delete, `/lesson/${lesson_id}`);
+
+    yield put(LessonActions.deleteLessonSuccess());
+    window.location.reload();
+  } catch (err) {
+    if (err.message === 'Network Error') {
+      toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
+      yield put(LessonActions.deleteLessonFailure());
+    } else {
+      toastr.error('Falha!', 'Houve um erro ao remover a lição.');
+      yield put(LessonActions.deleteLessonFailure());
+    }
   }
 }
 
@@ -1363,7 +1486,21 @@ export default function* rootSaga() {
     takeLatest(MinisteryTypes.REQUEST, ministery),
     takeLatest(MinisteryTypes.EDIT_REQUEST, editMinistery),
 
-    takeLatest(DefaultEventTypes.REQUEST, organizatorEvent),
+    takeLatest(CertificateTypes.ALL_REQUEST, allCertificate),
+    takeLatest(CertificateTypes.REQUEST, certificate),
+    takeLatest(CertificateTypes.EDIT_REQUEST, editCertificate),
+
+    takeLatest(LessonReportTypes.REQUEST, lessonReport),
+    takeLatest(LessonReportTypes.EDIT_REQUEST, lessonReportEdit),
+
+    takeLatest(LessonTypes.ALL_REQUEST, allLesson),
+    takeLatest(LessonTypes.REQUEST, lesson),
+    takeLatest(LessonTypes.EDIT_REQUEST, editLesson),
+    takeLatest(LessonTypes.ADD_REQUEST, addLesson),
+    takeLatest(LessonTypes.DELETE_REQUEST, deleteLesson),
+
+    takeLatest(DefaultEventTypes.ORGANIZATOR_EVENT_REQUEST, organizatorEvent),
+    takeLatest(DefaultEventTypes.ALL_REQUEST, allDefaultEvent),
 
     takeLatest(ShippingTypes.SHIPPING_REQUEST, shippingOptions),
 
@@ -1383,12 +1520,9 @@ export default function* rootSaga() {
     takeLatest(CustomizerTypes.SIDEBAR_SIZE_REQUEST, customizerSidebarSize),
     takeLatest(CustomizerTypes.LAYOUT_REQUEST, customizerLayout),
     takeLatest(SearchChurchTypes.REQUEST, searchChurch),
-    takeLatest(CertificateTypes.REQUEST, certificate),
     takeLatest(CheckoutTypes.CHECKOUT_LOGIN_REQUEST, checkoutLogin),
     takeLatest(CheckoutTypes.CHECKOUT_SIGNUP_REQUEST, checkoutSignup),
     takeLatest(CheckoutTypes.CHECKOUT_REQUEST, checkoutPayment),
-    takeLatest(LessonTypes.REQUEST, lesson),
-    takeLatest(LessonTypes.EDIT_REQUEST, lessonEdit),
     takeLatest(SiteEventTypes.REQUEST, siteEvent),
     takeLatest(AvatarTypes.REQUEST, avatar),
   ]);

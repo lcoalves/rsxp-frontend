@@ -2,9 +2,13 @@
  * Action Types
  */
 export const Types = {
-  REQUEST: 'ORGANIZATOR_EVENT_REQUEST',
-  SUCCESS: 'ORGANIZATOR_EVENT_SUCCESS',
-  FAILURE: 'ORGANIZATOR_EVENT_FAILURE',
+  ALL_REQUEST: 'ALL_DEFAULT_EVENT_REQUEST',
+  ALL_SUCCESS: 'ALL_DEFAULT_EVENT_SUCCESS',
+  ALL_FAILURE: 'ALL_DEFAULT_EVENT_FAILURE',
+
+  ORGANIZATOR_EVENT_REQUEST: 'ORGANIZATOR_EVENT_REQUEST',
+  ORGANIZATOR_EVENT_SUCCESS: 'ORGANIZATOR_EVENT_SUCCESS',
+  ORGANIZATOR_EVENT_FAILURE: 'ORGANIZATOR_EVENT_FAILURE',
 };
 
 /**
@@ -14,21 +18,39 @@ const INITIAL_STATE = {
   loading: false,
   error: false,
   data: null,
+  allData: [],
 };
 
 export default function defaultEvent(state = INITIAL_STATE, action) {
   switch (action.type) {
     // CASE CARREGAR A TABELA DE TODOS OS EVENTOS
-    case Types.REQUEST:
+    case Types.ORGANIZATOR_EVENT_REQUEST:
       return { ...state, loading: true };
-    case Types.SUCCESS:
+    case Types.ORGANIZATOR_EVENT_SUCCESS:
       return {
         ...state,
         error: false,
         loading: false,
         data: action.payload.data,
       };
-    case Types.FAILURE:
+    case Types.ORGANIZATOR_EVENT_FAILURE:
+      return {
+        ...state,
+        error: true,
+        loading: false,
+      };
+
+    // CASE CARREGAR A TABELA DE TODOS OS EVENTOS
+    case Types.ALL_REQUEST:
+      return { ...state, loading: true };
+    case Types.ALL_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+        allData: action.payload.allData,
+      };
+    case Types.ALL_FAILURE:
       return {
         ...state,
         error: true,
@@ -46,20 +68,34 @@ export default function defaultEvent(state = INITIAL_STATE, action) {
 export const Creators = {
   // CREATORS PARA TODOS OS EVENTOS
   organizatorEventRequest: data => ({
-    type: Types.REQUEST,
+    type: Types.ORGANIZATOR_EVENT_REQUEST,
     payload: {
       data,
     },
   }),
 
   organizatorEventSuccess: data => ({
-    type: Types.SUCCESS,
+    type: Types.ORGANIZATOR_EVENT_SUCCESS,
     payload: {
       data,
     },
   }),
 
   organizatorEventFailure: () => ({
-    type: Types.FAILURE,
+    type: Types.ORGANIZATOR_EVENT_FAILURE,
+  }),
+
+  // CREATORS PARA TODOS OS EVENTOS
+  allDefaultEventRequest: () => ({
+    type: Types.ALL_REQUEST,
+  }),
+  allDefaultEventSuccess: allData => ({
+    type: Types.ALL_SUCCESS,
+    payload: {
+      allData,
+    },
+  }),
+  allDefaultEventFailure: () => ({
+    type: Types.ALL_FAILURE,
   }),
 };

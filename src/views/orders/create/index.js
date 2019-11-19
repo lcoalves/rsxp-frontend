@@ -501,7 +501,6 @@ export default function GroupCreate({ match, className }) {
                             <option value="" defaultValue="" disabled="">
                               Selecione uma opção
                             </option>
-                            {console.tron.log(addresses)}
                             {addresses.length > 0 &&
                               addresses.map((address, index) => (
                                 <option key={index} value={address.id}>

@@ -116,6 +116,18 @@ export default function event(state = INITIAL_STATE, action) {
         loading: false,
       };
 
+    // DELETAR UM EVENTO
+    case Types.DELETE_REQUEST:
+      return { ...state, loading: true };
+    case Types.DELETE_SUCCESS:
+      return {
+        ...state,
+        error: false,
+        loading: false,
+      };
+    case Types.DELETE_FAILURE:
+      return { ...state, error: true, loading: false };
+
     default:
       return state;
   }
@@ -176,11 +188,9 @@ export const Creators = {
       data,
     },
   }),
-
   addEventSuccess: () => ({
     type: Types.ADD_SUCCESS,
   }),
-
   addEventFailure: () => ({
     type: Types.ADD_FAILURE,
   }),
