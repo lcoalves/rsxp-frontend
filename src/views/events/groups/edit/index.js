@@ -7,12 +7,15 @@ import NumberFormat from 'react-number-format';
 import { Link, Redirect, withRouter } from 'react-router-dom';
 import { Formik, Field, Form, FieldArray } from 'formik';
 import { Datepicker } from 'react-formik-ui';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 import { subHours, parseISO, format, subMonths } from 'date-fns';
 import pt from 'date-fns/locale/pt';
 import { toastr } from 'react-redux-toastr';
 import * as Yup from 'yup';
 import randomstring from 'randomstring';
-import { PDFDownloadLink } from '@react-pdf/renderer';
+import { PDFDownloadLink, BlobProvider } from '@react-pdf/renderer';
 
 import { validateCPF } from '~/services/validateCPF';
 
@@ -32,14 +35,14 @@ import {
   NavLink,
   Row,
   Col,
-  Input,
   Button,
   FormGroup,
   Card,
   CardHeader,
   CardBody,
   Label,
-  CardTitle,
+  Input,
+  Form as ReactForm,
   UncontrolledDropdown,
   DropdownToggle,
   DropdownMenu,
@@ -50,7 +53,6 @@ import {
   ModalBody,
   ModalFooter,
   Badge,
-  CustomInput,
 } from 'reactstrap';
 
 import {
@@ -168,9 +170,17 @@ export default function UserProfile({ match, className }) {
   const [modalSearchParticipant, setModalSearchParticipant] = useState(false);
   const [modalAddParticipant, setModalAddParticipant] = useState(false);
   const [modalInvite, setModalInvite] = useState(false);
+
   const [modalCertificate, setModalCertificate] = useState(false);
+  const [checkBackground, setCheckBackground] = useState(false);
+  const [checkAll, setCheckAll] = useState(false);
+  const [certificateDate, setCertificateDate] = useState(new Date());
+
   const [invites, setInvites] = useState([]);
   const [certificateParticipants, setCertificateParticipants] = useState([]);
+  const [certificateParticipantsAux, setCertificateParticipantsAux] = useState(
+    []
+  );
   const [productsKit, setProductsKit] = useState([]);
   const [assistants, setAssistants] = useState([]);
   const [organizatorType, setOrganizatorType] = useState(null);
@@ -178,6 +188,8 @@ export default function UserProfile({ match, className }) {
   const [participantData, setParticipantData] = useState(false);
   const [participantError, setParticipantError] = useState(null);
   const [pdfButton, setPdfButton] = useState(null);
+  const [loadingPdf, setLoadingPdf] = useState(false);
+
   const [downloadDisable, setDownloadDisable] = useState(true);
 
   const loading = useSelector(state => state.organizator.loadingSearch);
@@ -315,6 +327,9 @@ export default function UserProfile({ match, className }) {
 
   function toggleModalCertificate() {
     setPdfButton(null);
+    setCheckAll(false);
+    setCheckBackground(false);
+    setCertificateParticipantsAux(certificateParticipants);
     setModalCertificate(!modalCertificate);
   }
 
@@ -427,7 +442,7 @@ export default function UserProfile({ match, className }) {
       dispatch(
         OrganizatorActions.searchOrganizatorRequest(
           organizator_type,
-          cpf,
+          formattedCpf,
           default_event_id
         )
       );
@@ -515,6 +530,87 @@ export default function UserProfile({ match, className }) {
     setModalInvite(false);
   }
 
+  function handleCheckAll(e) {
+    const { checked } = e.target;
+    const participantsAux = [];
+    setCheckAll(checked);
+
+    if (checked === true) {
+      certificateParticipantsAux.map((participant, index) => {
+        participantsAux.push({
+          id: participant.id,
+          name: participant.name,
+          checked: true,
+        });
+
+        document.getElementsByClassName('childCheck')[index].checked = true;
+      });
+      setCertificateParticipantsAux(participantsAux);
+    }
+
+    if (checked === false) {
+      certificateParticipantsAux.map((participant, index) => {
+        participantsAux.push({
+          id: participant.id,
+          name: participant.name,
+          checked: false,
+        });
+
+        document.getElementsByClassName('childCheck')[index].checked = false;
+      });
+      setCertificateParticipantsAux(participantsAux);
+    }
+  }
+
+  function handleChangeChild(e, indexParticipant) {
+    const { checked } = e.target;
+    let participantAux = certificateParticipantsAux;
+
+    participantAux[indexParticipant].checked = checked;
+    setCertificateParticipantsAux(participantAux);
+  }
+
+  function handleChangeParticipantName(e, indexParticipant) {
+    const { value } = e.target;
+    let participantAux = certificateParticipantsAux;
+
+    participantAux[indexParticipant].name = value;
+    setCertificateParticipantsAux(participantAux);
+  }
+
+  function handleCreateDownloadLink() {
+    setLoadingPdf(true);
+
+    const toSend = {
+      event_id: event_data.id,
+      date: format(certificateDate, "dd 'de' MMMM 'de' yyyy", { locale: pt }),
+      city: event_data.city,
+      uf: event_data.uf,
+      layout_certificado: event_data.defaultEvent.layoutCertificate,
+      checkBackground: checkBackground,
+      imgBackground: event_data.defaultEvent.img_certificate_url,
+    };
+
+    const participants = [];
+    certificateParticipantsAux.map(participant => {
+      if (participant.checked === true && !!participant.name) {
+        participants.push(participant.name);
+      }
+      return;
+    });
+
+    if (participants.length === 0) {
+      toastr.warning('Aviso!', 'Mínimo de um nome para impressão');
+      setPdfButton(null);
+      setLoadingPdf(false);
+    } else {
+      toSend.participants = participants;
+
+      setPdfButton(toSend);
+      setLoadingPdf(false);
+    }
+  }
+
   function handleCheck(setFieldValue) {
     const participants = document.getElementsByClassName('childCheck').length;
 
@@ -537,38 +633,6 @@ export default function UserProfile({ match, className }) {
 
   function handleChangeName(e, setFieldValue, id) {
     setFieldValue(`selected.${id}.name`, e.target.value);
-  }
-
-  function handleCertificate(values) {
-    setPdfButton(null);
-
-    const dateValues = subHours(values.certificateDate, 1);
-
-    const toSend = {
-      event_id: event_data.id,
-      date: format(dateValues, "dd 'de' MMMM 'de' yyyy", { locale: pt }),
-      city: event_data.city,
-      uf: event_data.uf,
-      layout_certificado: event_data.defaultEvent.layoutCertificate,
-      checkBackground: values.checkBackground,
-      imgBackground: event_data.defaultEvent.img_certificate_url,
-    };
-
-    const participants = [];
-    values.selected.map(participant => {
-      if (participant.checked === true && !!participant.name) {
-        participants.push(participant.name);
-      }
-      return;
-    });
-
-    if (participants.length === 0) {
-      toastr.warning('Aviso!', 'Mínimo de um nome para impressão');
-    } else {
-      toSend.participants = participants;
-
-      setPdfButton(toSend);
-    }
   }
 
   function amountCalc(event, setFieldValue) {
@@ -601,7 +665,7 @@ export default function UserProfile({ match, className }) {
           participants.push({
             id: participant.id,
             name: participant.name,
-            isChecked: false,
+            checked: false,
           });
           if (participant.pivot.assistant) {
             assistantsData.push(participant);
@@ -609,6 +673,7 @@ export default function UserProfile({ match, className }) {
         });
 
         setCertificateParticipants(participants);
+        setCertificateParticipantsAux(participants);
         setAssistants(assistantsData);
       }
 
@@ -1561,7 +1626,6 @@ export default function UserProfile({ match, className }) {
                 cpf: '',
               }}
               validationSchema={formOrganizator}
-              onSubmit={values => handleSearchOrganizator(values)}
             >
               {({ errors, touched, values, setFieldValue }) => (
                 <Form>
@@ -1764,36 +1828,46 @@ export default function UserProfile({ match, className }) {
                 cpf: '',
               }}
               validationSchema={formOrganizator}
-              onSubmit={values => handleSearchOrganizator(values)}
             >
-              {({ errors, touched }) => (
+              {({ values, setFieldValue, errors, touched }) => (
                 <Form>
                   <div className="form-body">
                     <Row className="d-flex flex-row f">
-                      <Col sm="12" md="12" lg="10" className="mb-2">
+                      <Col sm="12" md="12" lg="12" className="mb-2">
                         <Field
-                          type="text"
-                          placeholder="Digite o CPF do líder"
                           name="cpf"
                           id="cpf"
                           className={`
-                                    form-control
-                                    ${errors.cpf && touched.cpf && 'is-invalid'}
-                                  `}
+                                form-control
+                                ${errors.cpf && touched.cpf && 'is-invalid'}
+                              `}
                           validate={validateCPF}
+                          render={({ field }) => (
+                            <CpfFormat
+                              {...field}
+                              id="cpf"
+                              name="cpf"
+                              placeholder="digite aqui o CPF"
+                              className={`
+                                      form-control
+                                      ${errors.cpf &&
+                                        touched.cpf &&
+                                        'is-invalid'}
+                                    `}
+                              value={values.cpf}
+                              onValueChange={val =>
+                                handleSearchOrganizator(
+                                  val.value,
+                                  setFieldValue,
+                                  values
+                                )
+                              }
+                            />
+                          )}
                         />
                         {errors.cpf && touched.cpf ? (
                           <div className="invalid-feedback">{errors.cpf}</div>
                         ) : null}
-                      </Col>
-                      <Col sm="12" md="12" lg="2">
-                        <Button
-                          className="rounded-right width-100-per"
-                          type="submit"
-                          color="success"
-                        >
-                          <Search size={22} color="#fff" />
-                        </Button>
                       </Col>
                     </Row>
                   </div>
@@ -1848,38 +1922,36 @@ export default function UserProfile({ match, className }) {
             </Formik>
           </ModalBody>
           <ModalFooter>
-            <Form>
-              <Button
-                className="ml-1 my-1"
-                color="danger"
-                onClick={toggleModalChangeOrganizator}
-              >
-                Cancelar
-              </Button>{' '}
-              <Button
-                className={`${
-                  leaderData !== null
-                    ? 'ml-1 my-1 btn-success'
-                    : 'btn-secundary ml-1 my-1'
-                }`}
-                // color="success"
-                onClick={confirmModalChangeOrganizator}
-                disabled={leaderData !== null ? false : true}
-              >
-                {loading ? (
-                  <BounceLoader
-                    size={23}
-                    color={'#fff'}
-                    css={css`
-                      display: block;
-                      margin: 0 auto;
-                    `}
-                  />
-                ) : (
-                  'Trocar organizador'
-                )}
-              </Button>
-            </Form>
+            <Button
+              className="ml-1 my-1"
+              color="danger"
+              onClick={toggleModalChangeOrganizator}
+            >
+              Cancelar
+            </Button>{' '}
+            <Button
+              className={`${
+                leaderData !== null
+                  ? 'ml-1 my-1 btn-success'
+                  : 'btn-secundary ml-1 my-1'
+              }`}
+              // color="success"
+              onClick={confirmModalChangeOrganizator}
+              disabled={leaderData !== null ? false : true}
+            >
+              {loading ? (
+                <BounceLoader
+                  size={23}
+                  color={'#fff'}
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
+              ) : (
+                'Trocar organizador'
+              )}
+            </Button>
           </ModalFooter>
         </Modal>
 
@@ -2424,180 +2496,150 @@ export default function UserProfile({ match, className }) {
           )}
         </Formik>
 
-        {/* MODAL PARA IMPRIMIR CERTIFICADOS */}
         <Modal
           isOpen={modalCertificate}
           toggle={toggleModalCertificate}
           className={className}
           size="md"
         >
-          <Formik
-            initialValues={{
-              checkBackground: false,
-              selected: certificateParticipants,
-              certificateDate: new Date(),
-              // DATA FICTICIA DO FINAL DO EVENTO !!MUDAR QUANDO OS EVENTOS ESTIVEREM CRIADOS
-            }}
-            onSubmit={values => handleCertificate(values)}
-          >
-            {({ errors, touched, handleChange, values, setFieldValue }) => (
-              <Form>
-                <ModalHeader toggle={toggleModalCertificate}>
-                  Emitir certificados
-                  <Certificate />
-                </ModalHeader>
-
-                <ModalBody>
-                  <Row>
-                    <Col>
-                      <Label className="mb-0">Data da formatura</Label>
-                    </Col>
-                    <Col>
-                      <FormGroup>
-                        <div className="position-relative has-icon-left">
-                          <Datepicker
-                            name="certificateDate"
-                            id="certificateDate"
-                            locale={pt}
-                            selected={values.certificateDate}
-                            onChange={date =>
-                              setFieldValue('certificateDate', date)
-                            }
-                            customInput={<DatepickerButton />}
-                            minDate={subMonths(new Date(), 12)}
-                            showMonthDropdown
-                            showYearDropdown
-                            dropdownMode="select"
-                            className={`
-                              form-control
-                              ${errors.certificateDate &&
-                                touched.certificateDate &&
-                                'is-invalid'}
-                            `}
-                          />
-                          {errors.certificateDate && touched.certificateDate ? (
-                            <div className="invalid-feedback">
-                              {errors.certificateDate}
-                            </div>
-                          ) : null}
-                          <div className="form-control-position">
-                            <Calendar size={14} color="#212529" />
-                          </div>
-                        </div>
-                      </FormGroup>
-                    </Col>
-                  </Row>
-                  <Row>
-                    <Col>
-                      <Field
-                        type="checkbox"
-                        className="ml-0"
-                        id="checkBackground"
-                        name="checkBackground"
-                        onClick={() => {}}
-                      />
-                      <Label for="checkBackground" className="pl-3">
-                        Certificado com imagem de fundo
-                      </Label>
-                    </Col>
-                  </Row>
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th>
-                          <Field
-                            type="checkbox"
-                            className="ml-0"
-                            id="checkAll"
-                            onClick={() => handleCheck(setFieldValue)}
-                          />
-                          <Label for="checkAll" className="pl-3">
-                            Todos
-                          </Label>
-                        </th>
-                        <th>Nome para impressão</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <FieldArray
-                        name="selected"
-                        render={arrayHelpers => (
-                          <>
-                            {values.selected.map((selected, index) => (
-                              <tr key={selected.id}>
-                                <td>
-                                  <Field
-                                    type="checkbox"
-                                    className="ml-0 childCheck"
-                                    id={`selected.${index}.checked`}
-                                    name={`selected.${index}.checked`}
-                                    onClick={e =>
-                                      handleCheckChild(e, setFieldValue, index)
-                                    }
-                                  />
-                                </td>
-                                <td>
-                                  <Field
-                                    type="text"
-                                    id={`selected.${index}.name`}
-                                    name={`selected.${index}.name`}
-                                    className="form-control"
-                                    onChange={e =>
-                                      handleChangeName(e, setFieldValue, index)
-                                    }
-                                  />
-                                </td>
-                              </tr>
-                            ))}
-                          </>
-                        )}
-                      />
-                    </tbody>
-                  </Table>
-                </ModalBody>
-                <ModalFooter>
-                  <Row>
-                    {pdfButton !== null && (
-                      <Button
-                        onClick={
-                          downloadDisable ? toggleModalCertificate : () => {}
-                        }
-                        color="success"
-                        disabled={downloadDisable}
-                      >
-                        <PDFDownloadLink
-                          className="text-white"
-                          document={
-                            <Certificate
-                              certificates={pdfButton}
-                              fileName="certificado.pdf"
-                            />
+          <ReactForm>
+            <ModalHeader toggle={toggleModalCertificate}>
+              Emitir certificados
+              <Certificate />
+            </ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col>
+                  <Label className="mb-0">Data da formatura</Label>
+                </Col>
+                <Col>
+                  <div className="position-relative has-icon-left">
+                    <DatePicker
+                      locale={pt}
+                      selected={certificateDate}
+                      onChange={date => setCertificateDate(date)}
+                      minDate={subMonths(new Date(), 12)}
+                      withPortal
+                      fixedHeight
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                      className="form-control"
+                    />
+                    <div className="form-control-position">
+                      <Calendar size={14} color="#212529" />
+                    </div>
+                  </div>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <Input
+                    onChange={e => setCheckBackground(e.target.checked)}
+                    type="checkbox"
+                    className="ml-0"
+                  />
+                  <Label for="checkBackground" className="pl-3">
+                    Certificado com imagem de fundo
+                  </Label>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <Input
+                    type="checkbox"
+                    className="ml-0"
+                    // id="checkAll"
+                    name="checkAll"
+                    defaultChecked={checkAll}
+                    onChange={e => handleCheckAll(e)}
+                  />
+                  <Label for="checkAll" className="pl-3">
+                    Todos
+                  </Label>
+                </Col>
+              </Row>
+              <Table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Nome para impressão</th>
+                  </tr>
+                </thead>
+                {/* {console.tron.log(certificateParticipantsAux)} */}
+                <tbody>
+                  {certificateParticipantsAux.map((selected, index) => (
+                    <tr key={selected.id}>
+                      <td>
+                        <Input
+                          type="checkbox"
+                          className="ml-0 childCheck"
+                          defaultChecked={
+                            certificateParticipantsAux[index].checked
                           }
+                          id={`selected.${index}.checked`}
+                          name={`selected.${index}.checked`}
+                          // onClick={e =>
+                          //   handleCheckChild(e, setFieldValue, index)
+                          // }
+                          onChange={e => handleChangeChild(e, index)}
+                        />
+                      </td>
+                      <td>
+                        <Input
+                          type="text"
+                          id={`selected.${index}.name`}
+                          name={`selected.${index}.name`}
+                          defaultValue={selected.name}
+                          className="form-control"
+                          onChange={e => handleChangeParticipantName(e, index)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </ModalBody>
+            <ModalFooter>
+              {pdfButton !== null && (
+                <BlobProvider
+                  document={<Certificate certificates={pdfButton} />}
+                >
+                  {({ url, loading, error }) => {
+                    return (
+                      <a href={url} download>
+                        <Button
+                          className="mr-2"
+                          color="success"
+                          onClick={() => {}}
                         >
-                          {({ blob, url, loading, error }) => {
-                            if (loading) {
-                              setDownloadDisable(true);
-                              return 'Carregando documento';
-                            } else {
-                              setDownloadDisable(false);
-                              return 'Baixe agora!';
-                            }
-                            // loading ?
-                            //   (setDownloadDisable(true) 'Carregando documento')
-                            // : (setDownloadDisable(false) 'Baixe agora!')
-                          }}
-                        </PDFDownloadLink>
-                      </Button>
-                    )}
-
-                    <Button type="submit" color="primary" className="mr-2">
-                      Gerar certificados
-                    </Button>
-                  </Row>
-                </ModalFooter>
-              </Form>
-            )}
-          </Formik>
+                          {loadingPdf ? (
+                            <BounceLoader
+                              size={23}
+                              color={'#fff'}
+                              css={css`
+                                display: block;
+                                margin: 0 auto;
+                              `}
+                            />
+                          ) : (
+                            'Download (PDF)'
+                          )}
+                        </Button>
+                      </a>
+                    );
+                  }}
+                </BlobProvider>
+              )}
+              <Button
+                color="primary"
+                onClick={() => handleCreateDownloadLink()}
+                className="mr-2"
+              >
+                Gerar certificados
+              </Button>
+            </ModalFooter>
+          </ReactForm>
         </Modal>
       </Fragment>
     )

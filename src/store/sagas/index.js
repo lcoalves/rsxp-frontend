@@ -1290,11 +1290,10 @@ function* editLesson(action) {
     });
 
     yield put(LessonActions.editLessonSuccess());
-    // toastr.confirm('Ministério atualizado com sucesso.', {
-    //   onOk: () => push('/admin/ministerios'),
-    //   disableCancel: true,
-    // });
-    toastr.success('Sucesso!', 'Lição atualizado com sucesso');
+    toastr.confirm('Lição alterada com sucesso.', {
+      onOk: yield put(push('/admin/licoes')),
+      disableCancel: true,
+    });
   } catch (err) {
     toastr.error('Falha!', 'Tente novamente');
     yield put(LessonActions.editLessonFailure());
@@ -1314,6 +1313,10 @@ function* addLesson(action) {
     });
 
     yield put(LessonActions.addLessonSuccess());
+    toastr.confirm('Lição alterada com sucesso.', {
+      onOk: yield put(push('/admin/licoes')),
+      disableCancel: true,
+    });
   } catch (err) {
     toastr.error('Erro!', 'Ocorreu um erro');
     yield put(LessonActions.addLessonFailure());
