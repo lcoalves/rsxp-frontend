@@ -20,7 +20,7 @@ import {
   Button,
 } from 'reactstrap';
 
-import { Creators as LessonActions } from '../../../../../store/ducks/lesson';
+import { Creators as LessonReportActions } from '../../../../../store/ducks/lessonReport';
 
 class CurrencyFormat extends Component {
   state = {
@@ -52,7 +52,7 @@ export default function Lesson({ match, className }) {
   const [presenceList, setPresenceList] = useState(null);
 
   const dispatch = useDispatch();
-  const data = useSelector(state => state.lesson.data);
+  const data = useSelector(state => state.lessonReport.data);
 
   function handleCheck(setFieldValue) {
     const participants = document.getElementsByClassName('childCheck').length;
@@ -95,7 +95,7 @@ export default function Lesson({ match, className }) {
       doubts: values.doubts,
     };
 
-    dispatch(LessonActions.editLessonRequest(payload));
+    dispatch(LessonReportActions.editLessonReportRequest(payload));
   }
 
   function handleBackLessons() {
@@ -124,7 +124,7 @@ export default function Lesson({ match, className }) {
   }, [data]);
 
   useEffect(() => {
-    dispatch(LessonActions.lessonRequest(match.params.lesson_id));
+    dispatch(LessonReportActions.lessonReportRequest(match.params.lesson_id));
   }, []);
 
   return (
@@ -149,7 +149,7 @@ export default function Lesson({ match, className }) {
                     selecteds: presenceList !== null ? presenceList : [],
                     offer: !!data.offer ? data.offer : '',
                     testimony: !!data.testimony ? data.testimony : '',
-                    doubts: data.doubts,
+                    doubts: !!data.doubts ? data.doubts : '',
                     // DATA FICTICIA DO FINAL DO EVENTO !!MUDAR QUANDO OS EVENTOS ESTIVEREM CRIADOS
                   }}
                   onSubmit={values => handleSubmit(values)}

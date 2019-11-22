@@ -99,7 +99,7 @@ const LazyAdminEditMinistery = lazy(() =>
   import('../views/admin/ministery/edit')
 );
 
-// const LazyAdminCertificate = lazy(() => import('../views/admin/certificate'));
+const LazyAdminCertificate = lazy(() => import('../views/admin/certificate'));
 // const LazyAdminEditCertificate = lazy(() => import('../views/admin/certificate/edit'));
 // const LazyAdminCreateCertificate = lazy(() => import('../views/admin/certificate/create'));
 
@@ -115,9 +115,11 @@ const LazyAdminEditMinistery = lazy(() =>
 // const LazyAdminEditDefaultEvent = lazy(() => import('../views/admin/defaultEvent/edit'));
 // const LazyAdminCreateDefaultEvent = lazy(() => import('../views/admin/defaultEvent/create'));
 
-// const LazyAdminLesson = lazy(() => import('../views/admin/lesson'));
-// const LazyAdminEditLesson = lazy(() => import('../views/admin/lesson/edit'));
-// const LazyAdminCreateLesson = lazy(() => import('../views/admin/lesson/create'));
+const LazyAdminLesson = lazy(() => import('../views/admin/lesson'));
+const LazyAdminEditLesson = lazy(() => import('../views/admin/lesson/edit'));
+const LazyAdminCreateLesson = lazy(() =>
+  import('../views/admin/lesson/create')
+);
 
 // Error Pages
 const LazyErrorPage = lazy(() => import('../views/pages/error'));
@@ -556,6 +558,8 @@ class Router extends Component {
               </Suspense>
             )}
           />
+            */}
+
           <ProtectedMainLayoutRoutes
             exact
             path="/admin/licoes"
@@ -564,7 +568,26 @@ class Router extends Component {
                 <LazyAdminLesson {...matchprops} />
               </Suspense>
             )}
-          /> */}
+          />
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/licoes/:lesson_id/editar"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminEditLesson {...matchprops} />
+              </Suspense>
+            )}
+          />
+          <ProtectedMainLayoutRoutes
+            exact
+            path="/admin/licoes/criar"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyAdminCreateLesson {...matchprops} />
+              </Suspense>
+            )}
+          />
+
           <ProtectedMainLayoutRoutes
             exact
             path="/admin/ministerios"
@@ -584,7 +607,7 @@ class Router extends Component {
             )}
           />
 
-          {/* <ProtectedMainLayoutRoutes
+          <ProtectedMainLayoutRoutes
             exact
             path="/admin/certificados"
             render={matchprops => (
@@ -593,6 +616,8 @@ class Router extends Component {
               </Suspense>
             )}
           />
+
+          {/*
           <ProtectedMainLayoutRoutes
             exact
             path="/admin/produtos"
