@@ -2566,7 +2566,6 @@ export default function UserProfile({ match, className }) {
                     <th>Nome para impressão</th>
                   </tr>
                 </thead>
-                {/* {console.tron.log(certificateParticipantsAux)} */}
                 <tbody>
                   {certificateParticipantsAux.map((selected, index) => (
                     <tr key={selected.id}>

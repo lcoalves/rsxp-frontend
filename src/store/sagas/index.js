@@ -1252,8 +1252,6 @@ function* allLesson() {
     const response = yield call(api.get, '/lesson');
 
     yield put(LessonActions.allLessonSuccess(response.data));
-
-    console.tron.log(response.data);
   } catch (err) {
     toastr.error('Falha!', 'Tente novamente');
     yield put(LessonActions.allLessonFailure());
