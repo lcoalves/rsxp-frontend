@@ -534,7 +534,7 @@ export default function GroupCreate({ match, className }) {
                     <Row>
                       <Col lg="8" md="12" sm="12">
                         <FormGroup>
-                          <Label for="default_event_id">Tipo de grupo</Label>
+                          <Label for="default_event_id">Curso</Label>
                           <Field
                             type="select"
                             component="select"

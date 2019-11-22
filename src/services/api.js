@@ -4,8 +4,8 @@ const api = axios.create({
   baseURL:
     process.env.NODE_ENV === 'development'
       ? 'http://172.16.3.26:3333'
-      : 'https://dashboard-eventos-backend.herokuapp.com',
-  timeout: 20000,
+      : 'https://apieventos.udf.org.br',
+  timeout: 30000,
 });
 
 api.interceptors.request.use(async config => {

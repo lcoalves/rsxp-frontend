@@ -1,5 +1,9 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
+import { Link } from 'react-router-dom';
+
+import { format, addDays } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 import history from '~/app/history';
 
@@ -9,6 +13,7 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Label,
 } from 'reactstrap';
 
 import { List } from 'react-feather';
@@ -39,11 +44,18 @@ export default function LeaderTableGroups({ data }) {
       }
     }
 
+    if (column === 'Link') {
+      const url = e.original.transactions[0].boleto_url;
+      window.open(url);
+
+      return;
+    }
+
     const id = e.original.id;
 
     localStorage.setItem('@dashboard/editGroupActiveTab', '1');
 
-    history.push(`/eventos/grupo/${id}/editar`);
+    history.push(`/pedido/${id}/editar`);
   }
 
   return (
@@ -78,40 +90,66 @@ export default function LeaderTableGroups({ data }) {
           ),
         },
         {
-          Header: 'Data do pedido',
+          Header: 'Solicitado em',
           id: 'created_at',
-          width: 100,
+          width: 130,
           accessor: d => d.created_at,
+          Cell: row =>
+            format(new Date(row.value), 'dd/MM/yyyy', {
+              locale: ptBR,
+            }),
         },
         {
-          Header: 'Valor',
-          id: 'shipping_cost',
-          accessor: d => d.shipping_cost,
-          width: 100,
+          Header: 'Recebe até',
+          id: 'delivery_estimate_days',
+          width: 130,
+          accessor: d => d.delivery_estimate_days,
+          Cell: row => {
+            const estimate_date = row.value + 1;
+
+            return format(
+              addDays(new Date(row.row.created_at), estimate_date),
+              'dd/MM/yyyy',
+              {
+                locale: ptBR,
+              }
+            );
+          },
         },
         {
-          Header: 'Frete',
+          Header: 'Envio',
           id: 'shipping_name',
           accessor: d => d.shipping_name,
+          width: 190,
+        },
+        {
+          Header: 'Valor total',
+          id: 'total',
+          accessor: d => d.total,
+          Cell: row => {
+            const currency = row.value.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            });
+
+            return currency;
+          },
           width: 170,
         },
         {
-          Header: 'Total',
-          id: 'shipping_name',
-          accessor: d => d.shipping_name,
-          width: 170,
-        },
-        {
-          Header: 'Pagamento',
-          id: 'payment_name',
-          accessor: d => d.payment_name,
+          Header: 'Link',
+          id: 'boleto_url',
+          accessor: d => d.transactions[0].boleto_url,
+          Cell: instance => {
+            return <Label className="text-info">BAIXAR BOLETO</Label>;
+          },
           width: 150,
         },
         {
           Header: 'Status',
           id: 'status.name',
           accessor: d => d.status.name,
-          width: 150,
+          width: 190,
         },
         {
           Header: 'Ações',
@@ -127,8 +165,8 @@ export default function LeaderTableGroups({ data }) {
                   <List size={14} color={'#000'} />
                 </DropdownToggle>
                 <DropdownMenu className="overflow-visible">
-                  <DropdownItem onClick={() => {}}>Cancelar</DropdownItem>
                   <DropdownItem onClick={() => {}}>Editar</DropdownItem>
+                  <DropdownItem onClick={() => {}}>Cancelar</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             );

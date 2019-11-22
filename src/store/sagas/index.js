@@ -3,6 +3,9 @@ import { all, takeLatest, put, call } from 'redux-saga/effects';
 import { toastr } from 'react-redux-toastr';
 import { push } from 'connected-react-router';
 
+import { addDays } from 'date-fns';
+import md5 from 'md5';
+
 import axios from 'axios';
 import api from '~/services/api';
 import apiPayu from '~/services/apiPayu';
@@ -114,6 +117,12 @@ import {
   Creators as MinisteryActions,
   Types as MinisteryTypes,
 } from '~/store/ducks/ministery';
+
+const apiKey = process.env.REACT_APP_PAYU_API_KEY;
+const apiLogin = process.env.REACT_APP_PAYU_API_LOGIN;
+const publicKey = process.env.REACT_APP_PAYU_PUBLIC_KEY;
+const merchantId = process.env.REACT_APP_PAYU_MERCHANT_ID;
+const accountId = process.env.REACT_APP_PAYU_ACCOUNT_ID;
 
 function* signup(action) {
   try {
@@ -1166,22 +1175,78 @@ function* allOrders(action) {}
 function* addOrder(action) {
   try {
     const { data } = action.payload;
+    const { user, shipping_address } = data;
+    const currentDate = new Date();
+    const referenceCode = `udf_user_${user.id}_address_${shipping_address.cep}_date_${currentDate}`;
 
-    // yield call(apiPayu.post, '')
+    const signature = `${apiKey}~${merchantId}~${referenceCode}~${data.order_details.amount}~BRL`;
+    const signatureHash = md5(signature);
 
-    yield call(api.post, '/order', data);
+    data.payu = {
+      language: 'pt',
+      command: 'SUBMIT_TRANSACTION',
+      merchant: {
+        apiKey,
+        apiLogin,
+      },
+      transaction: {
+        order: {
+          accountId,
+          referenceCode,
+          description: 'Solicitação de material',
+          language: 'pt',
+          signature: signatureHash,
+          notifyUrl: 'http://apieventos.udf.org.br/payment_confirmation',
+          additionalValues: {
+            TX_VALUE: {
+              value: data.order_details.amount,
+              currency: 'BRL',
+            },
+          },
+          buyer: {
+            fullName: user.name,
+            emailAddress: user.email,
+            dniNumber: user.cpf,
+            cnpj: user.cpf,
+            shippingAddress: {
+              street1: shipping_address.street,
+              street2: shipping_address.street_number,
+              city: shipping_address.city,
+              state: shipping_address.uf,
+              country: 'BR',
+              postalCode: shipping_address.cep,
+            },
+          },
+        },
+        type: 'AUTHORIZATION_AND_CAPTURE',
+        paymentMethod: 'BOLETO_BANCARIO',
+        paymentCountry: 'BR',
+        expirationDate: addDays(currentDate, 30),
+        ipAddress: '127.0.0.1',
+      },
+      test: false,
+    };
+
+    const response = yield call(api.post, '/order', data);
 
     yield put(OrderActions.addOrderSuccess());
 
-    yield put(push('/pedidos'));
-    toastr.success('Sucesso!', `A solicitação de material foi adicionada.`);
+    toastr.confirm('Solicitação criada com sucesso.', {
+      onOk: yield put(push('/pedidos')),
+      disableCancel: true,
+    });
+    window.location.reload();
+
+    if (!!response.data.transactions.boleto_url) {
+      window.open(response.data.transactions.boleto_url);
+    }
   } catch (err) {
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
-      yield put(ResetPasswordActions.resetPasswordFailure());
+      yield put(OrderActions.addOrderFailure());
     } else {
       toastr.error(err.response.data.title, err.response.data.message);
-      yield put(ResetPasswordActions.resetPasswordFailure());
+      yield put(OrderActions.addOrderFailure());
     }
   }
 }

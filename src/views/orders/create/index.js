@@ -395,7 +395,7 @@ export default function GroupCreate({ match, className }) {
   function handleAddOrder(values) {
     const toSend = {
       user: data,
-      card,
+      card: paymentSelected === 1 ? card : null,
       products: dataProducts,
       shipping_address: values,
       shipping_option: shippingSelected,
@@ -413,7 +413,7 @@ export default function GroupCreate({ match, className }) {
 
   useEffect(() => {
     if (!!cepData.cep) {
-      const copyAddress = initialState.shipping_address;
+      const copyAddress = initialState;
       copyAddress.type = 'other';
       copyAddress.cep = cepData.cep.replace('-', '');
       copyAddress.uf = cepData.uf;
@@ -427,7 +427,7 @@ export default function GroupCreate({ match, className }) {
           ? cepData.complemento
           : copyAddress.complement;
 
-      setInitialState({ ...initialState, shipping_address: copyAddress });
+      setInitialState({ ...initialState, copyAddress });
       // setShippingAddress(...shippingAddress);
 
       if (dataProducts.length > 0) {
@@ -522,23 +522,15 @@ export default function GroupCreate({ match, className }) {
       setShippingSelected(null);
       setShippingOptions(null);
       setInitialState({
-        card: {
-          number: '',
-          name: '',
-          expiry: '',
-          cvc: '',
-        },
-        shipping_address: {
-          type: '',
-          cep: '',
-          uf: '',
-          city: '',
-          street: '',
-          street_number: '',
-          neighborhood: '',
-          complement: '',
-          receiver: '',
-        },
+        type: '',
+        cep: '',
+        uf: '',
+        city: '',
+        street: '',
+        street_number: '',
+        neighborhood: '',
+        complement: '',
+        receiver: '',
       });
     };
   }, []);
@@ -581,7 +573,7 @@ export default function GroupCreate({ match, className }) {
                     </thead>
                     <tbody>
                       {dataProducts.map(product => (
-                        <tr>
+                        <tr key={product.id}>
                           <th scope="row">{product.id}</th>
                           <td>{product.name}</td>
                           <td>
@@ -629,9 +621,9 @@ export default function GroupCreate({ match, className }) {
                             name="type"
                             className={`
                               form-control
-                              ${errors.shipping_address &&
+                              ${errors &&
                                 errors.type &&
-                                touched.shipping_address &&
+                                touched &&
                                 touched.type &&
                                 'is-invalid'}
                             `}
@@ -657,10 +649,7 @@ export default function GroupCreate({ match, className }) {
                               Novo endereço
                             </option>
                           </Field>
-                          {errors.shipping_address &&
-                          errors.type &&
-                          touched.shipping_address &&
-                          touched.type ? (
+                          {errors && errors.type && touched && touched.type ? (
                             <div className="invalid-feedback">
                               {errors.type}
                             </div>
@@ -691,9 +680,9 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 className={`
                                   form-control
-                                  ${errors.shipping_address &&
+                                  ${errors &&
                                     errors.cep &&
-                                    touched.shipping_address &&
+                                    touched &&
                                     touched.cep &&
                                     'is-invalid'}
                                 `}
@@ -701,9 +690,9 @@ export default function GroupCreate({ match, className }) {
                                   handleCep(val.value, setFieldValue, values)
                                 }
                               />
-                              {errors.shipping_address &&
+                              {errors &&
                               errors.cep &&
-                              touched.shipping_address &&
+                              touched &&
                               touched.cep ? (
                                 <div className="invalid-feedback">
                                   {errors.cep}
@@ -744,16 +733,16 @@ export default function GroupCreate({ match, className }) {
                               disabled={values.type !== 'other' ? true : false}
                               className={`
                                 form-control
-                                ${errors.shipping_address &&
+                                ${errors &&
                                   errors.city &&
-                                  touched.shipping_address &&
+                                  touched &&
                                   touched.city &&
                                   'is-invalid'}
                               `}
                             />
-                            {errors.shipping_address &&
+                            {errors &&
                             errors.city &&
-                            touched.shipping_address &&
+                            touched &&
                             touched.city ? (
                               <div className="invalid-feedback">
                                 {errors.city}
@@ -776,16 +765,16 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 className={`
                                   form-control
-                                  ${errors.shipping_address &&
+                                  ${errors &&
                                     errors.street &&
-                                    touched.shipping_address &&
+                                    touched &&
                                     touched.street &&
                                     'is-invalid'}
                                 `}
                               />
-                              {errors.shipping_address &&
+                              {errors &&
                               errors.street &&
-                              touched.shipping_address &&
+                              touched &&
                               touched.street ? (
                                 <div className="invalid-feedback">
                                   {errors.street}
@@ -810,16 +799,16 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 className={`
                                   form-control
-                                  ${errors.shipping_address &&
+                                  ${errors &&
                                     errors.street_number &&
-                                    touched.shipping_address &&
+                                    touched &&
                                     touched.street_number &&
                                     'is-invalid'}
                                 `}
                               />
-                              {errors.shipping_address &&
+                              {errors &&
                               errors.street_number &&
-                              touched.shipping_address &&
+                              touched &&
                               touched.street_number ? (
                                 <div className="invalid-feedback">
                                   {errors.street_number}
@@ -844,16 +833,16 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 className={`
                                   form-control
-                                  ${errors.shipping_address &&
+                                  ${errors &&
                                     errors.neighborhood &&
-                                    touched.shipping_address &&
+                                    touched &&
                                     touched.neighborhood &&
                                     'is-invalid'}
                                 `}
                               />
-                              {errors.shipping_address &&
+                              {errors &&
                               errors.neighborhood &&
-                              touched.shipping_address &&
+                              touched &&
                               touched.neighborhood ? (
                                 <div className="invalid-feedback">
                                   {errors.neighborhood}
@@ -899,16 +888,16 @@ export default function GroupCreate({ match, className }) {
                                 }
                                 className={`
                                   form-control
-                                  ${errors.shipping_address &&
+                                  ${errors &&
                                     errors.receiver &&
-                                    touched.shipping_address &&
+                                    touched &&
                                     touched.receiver &&
                                     'is-invalid'}
                                 `}
                               />
-                              {errors.shipping_address &&
+                              {errors &&
                               errors.receiver &&
-                              touched.shipping_address &&
+                              touched &&
                               touched.receiver ? (
                                 <div className="invalid-feedback">
                                   {errors.receiver}
@@ -982,10 +971,11 @@ export default function GroupCreate({ match, className }) {
                                   </Col>
                                   <Col>
                                     <Label className="mb-0 black">
-                                      {shippingOption.delivery_estimate_business_days <=
-                                      1
-                                        ? `até ${shippingOption.delivery_estimate_business_days} dia útil`
-                                        : `até ${shippingOption.delivery_estimate_business_days} dias úteis`}
+                                      1 +{' '}
+                                      {
+                                        shippingOption.delivery_estimate_business_days
+                                      }{' '}
+                                      dias úteis
                                     </Label>
                                   </Col>
                                   <Col className="text-right pr-5">
@@ -1016,7 +1006,7 @@ export default function GroupCreate({ match, className }) {
                         <List size={20} color="#212529" /> Resumo do pedido
                       </h4>
                       {dataProducts.map(product => (
-                        <p className="font-medium-2">
+                        <p key={product.id} className="font-medium-2">
                           <span className="black font-weight-bold">
                             {product.quantity} x{' '}
                           </span>
@@ -1085,7 +1075,7 @@ export default function GroupCreate({ match, className }) {
                       </h4>
                       <FormGroup className="mb-0">
                         <ButtonGroup className="d-flex flex-column">
-                          <Button
+                          {/* <Button
                             key={1}
                             outline
                             className={`shipping-selected ${paymentSelected !==
@@ -1109,7 +1099,7 @@ export default function GroupCreate({ match, className }) {
                                 className="ml-2"
                               />
                             </Label>
-                          </Button>
+                          </Button> */}
 
                           <Button
                             key={2}
@@ -1268,7 +1258,15 @@ export default function GroupCreate({ match, className }) {
                         />
                       </Button>
                     ) : (
-                      <Button type="submit" className="ml-1 my-1 btn-success">
+                      <Button
+                        disabled={paymentSelected !== null ? false : true}
+                        type="submit"
+                        className={
+                          paymentSelected !== null
+                            ? 'btn-success'
+                            : 'btn-secondary'
+                        }
+                      >
                         Criar solicitação de materiais
                       </Button>
                     )}
