@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import history from '../../app/history';
 
 import { Page, Image, Document, StyleSheet } from '@react-pdf/renderer';
 import {} from 'date-fns';
@@ -24,55 +25,47 @@ const styles = StyleSheet.create({
 });
 
 // Create Document Component
-export default function Certificate({ certificates }) {
+export default function Certificate({ match, certificates }) {
   return (
     <Document>
-      <Page orientation="landscape" size="A5">
-        {!!certificates &&
-          certificates.participants &&
-          certificates.participants.map((participant, index) => (
-            <>
-              {certificates.checkBackground && (
-                <Image
-                  src={certificates.imgBackground}
-                  style={styles.pageBackground}
-                />
-              )}
+      {!!certificates &&
+        certificates.participants.map(participant => (
+          <Page orientation="landscape" size="A5">
+            {certificates.checkBackground && (
+              <Image
+                src={certificates.imgBackground}
+                style={styles.pageBackground}
+              />
+            )}
 
-              <ContentView
-                key={index}
-                flex={1}
-                justify={certificates.layout_certificado.content_justify}
-                align={certificates.layout_certificado.content_align}
-              >
-                <NameView margin={certificates.layout_certificado.name_margin}>
-                  <NameText
-                    fontfamily={
-                      certificates.layout_certificado.name_font_family
-                    }
-                    fontsize={certificates.layout_certificado.name_font_size}
-                  >
-                    {participant}
-                  </NameText>
-                </NameView>
-                <EmissionDate
-                  margin={certificates.layout_certificado.emission_margin}
+            <ContentView
+              flex={1}
+              justify={certificates.layout_certificado.content_justify}
+              align={certificates.layout_certificado.content_align}
+            >
+              <NameView margin={certificates.layout_certificado.name_margin}>
+                <NameText
+                  fontfamily={certificates.layout_certificado.name_font_family}
+                  fontsize={certificates.layout_certificado.name_font_size}
                 >
-                  <EmissionText
-                    fontfamily={
-                      certificates.layout_certificado.emission_font_family
-                    }
-                    fontsize={
-                      certificates.layout_certificado.emission_font_size
-                    }
-                  >
-                    {certificates.city} - {certificates.uf}, {certificates.date}
-                  </EmissionText>
-                </EmissionDate>
-              </ContentView>
-            </>
-          ))}
-      </Page>
+                  {participant}
+                </NameText>
+              </NameView>
+              <EmissionDate
+                margin={certificates.layout_certificado.emission_margin}
+              >
+                <EmissionText
+                  fontfamily={
+                    certificates.layout_certificado.emission_font_family
+                  }
+                  fontsize={certificates.layout_certificado.emission_font_size}
+                >
+                  {certificates.city} - {certificates.uf}, {certificates.date}
+                </EmissionText>
+              </EmissionDate>
+            </ContentView>
+          </Page>
+        ))}
     </Document>
   );
 }

@@ -533,6 +533,8 @@ export default function UserProfile({ match, className }) {
   function handleCheckAll(e) {
     const { checked } = e.target;
     const participantsAux = [];
+
+    setPdfButton(null);
     setCheckAll(checked);
 
     if (checked === true) {
@@ -566,6 +568,8 @@ export default function UserProfile({ match, className }) {
     const { checked } = e.target;
     let participantAux = certificateParticipantsAux;
 
+    setPdfButton(null);
+
     participantAux[indexParticipant].checked = checked;
     setCertificateParticipantsAux(participantAux);
   }
@@ -573,6 +577,8 @@ export default function UserProfile({ match, className }) {
   function handleChangeParticipantName(e, indexParticipant) {
     const { value } = e.target;
     let participantAux = certificateParticipantsAux;
+
+    setPdfButton(null);
 
     participantAux[indexParticipant].name = value;
     setCertificateParticipantsAux(participantAux);
@@ -662,13 +668,15 @@ export default function UserProfile({ match, className }) {
       // CRIAR LISTA DE PARTICIPANTES PARA MOSTRAR NO MODAL DO CERTIFICADO
       if (event_data.participants && event_data.participants.length > 0) {
         event_data.participants.map(participant => {
-          participants.push({
-            id: participant.id,
-            name: participant.name,
-            checked: false,
-          });
-          if (participant.pivot.assistant) {
-            assistantsData.push(participant);
+          if (participant.pivot.is_quitter === false) {
+            participants.push({
+              id: participant.id,
+              name: participant.name,
+              checked: false,
+            });
+            if (participant.pivot.assistant) {
+              assistantsData.push(participant);
+            }
           }
         });
 
@@ -716,14 +724,15 @@ export default function UserProfile({ match, className }) {
                       <ChevronDown size={24} />
                     </DropdownToggle>
                     <DropdownMenu right>
-                      <DropdownItem
-                        disabled={
-                          event_data.status !== 'Finalizado' ? true : false
-                        }
-                        // onClick={}
-                      >
-                        <i className="fa fa-plus mr-2" /> Solicitar material
-                      </DropdownItem>
+                      <Link to="/pedidos/criar" className="p-0">
+                        <DropdownItem
+                          disabled={
+                            event_data.status !== 'Finalizado' ? false : true
+                          }
+                        >
+                          <i className="fa fa-plus mr-2" /> Solicitar material
+                        </DropdownItem>
+                      </Link>
                       )
                       {/* <DropdownItem>
                         <i className="fa fa-address-card mr-2" /> Emitir crachás
@@ -759,6 +768,7 @@ export default function UserProfile({ match, className }) {
                               tem pedido = nao, entao solicitar material
                             */}
                             <Button
+                              href="/pedidos/criar"
                               color="success"
                               className="btn-raised mr-3"
                               disabled={
@@ -766,7 +776,6 @@ export default function UserProfile({ match, className }) {
                                   ? false
                                   : true
                               }
-                              // onClick={}
                             >
                               <i className="fa fa-plus" /> Solicitar material
                             </Button>
@@ -2508,16 +2517,20 @@ export default function UserProfile({ match, className }) {
               <Certificate />
             </ModalHeader>
             <ModalBody>
-              <Row>
+              <Row className="mb-2">
                 <Col>
-                  <Label className="mb-0">Data da formatura</Label>
+                  <Label>Data da formatura</Label>
                 </Col>
                 <Col>
                   <div className="position-relative has-icon-left">
                     <DatePicker
                       locale={pt}
+                      dateFormat="dd/MM/yyyy"
                       selected={certificateDate}
-                      onChange={date => setCertificateDate(date)}
+                      onChange={date => {
+                        setCertificateDate(date);
+                        setPdfButton(null);
+                      }}
                       minDate={subMonths(new Date(), 12)}
                       withPortal
                       fixedHeight
@@ -2535,7 +2548,10 @@ export default function UserProfile({ match, className }) {
               <Row>
                 <Col>
                   <Input
-                    onChange={e => setCheckBackground(e.target.checked)}
+                    onChange={e => {
+                      setCheckBackground(e.target.checked);
+                      setPdfButton(null);
+                    }}
                     type="checkbox"
                     className="ml-0"
                   />
