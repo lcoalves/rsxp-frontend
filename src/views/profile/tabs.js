@@ -84,7 +84,7 @@ const addressSchema = Yup.object().shape({
       street: Yup.string().required('A rua é obrigatória.'),
       street_number: Yup.string().required('O número é obrigatório.'),
       neighborhood: Yup.string().required('A bairro é obrigatório.'),
-      receiver: Yup.string().required('O recebedor é obrigatório.'),
+      // receiver: Yup.string().required('O recebedor é obrigatório.'),
     })
   ),
 });
@@ -684,6 +684,8 @@ export default function TabsBorderBottom() {
                                   setFieldValue('birthday', date)
                                 }
                                 customInput={<DatepickerButton />}
+                                withPortal
+                                fixedHeight
                                 showMonthDropdown
                                 showYearDropdown
                                 dropdownMode="select"
