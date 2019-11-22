@@ -25,6 +25,7 @@ import cep from './cep';
 import certificate from './certificate';
 import checkout from './checkout';
 import lesson from './lesson';
+import lessonReport from './lessonReport';
 import siteEvent from './siteEvent';
 import defaultEvent from './defaultEvent';
 import organization from './organization';
@@ -59,6 +60,7 @@ export default combineReducers({
   certificate,
   checkout,
   lesson,
+  lessonReport,
   siteEvent,
   defaultEvent,
   organization,
