@@ -3,7 +3,7 @@ import axios from 'axios';
 const api = axios.create({
   baseURL:
     process.env.NODE_ENV === 'development'
-      ? 'http://172.16.0.188:3333'
+      ? 'http://172.16.3.26:3333'
       : 'https://dashboard-eventos-backend.herokuapp.com',
   timeout: 30000,
 });

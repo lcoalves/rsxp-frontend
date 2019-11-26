@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import {
   Form,
@@ -29,23 +28,14 @@ import {
   LogOut,
 } from 'react-feather';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { Creators as ProfileActions } from '~/store/ducks/profile';
-import { Creators as LoginActions } from '~/store/ducks/login';
-
-import NavbarSearch from '../../../components/search/Search';
+import { useSelector } from 'react-redux';
 import ReactCountryFlag from 'react-country-flag';
-
-import userImage2 from '~/assets/img/portrait/small/avatar-s-2.png';
-import userImage3 from '~/assets/img/portrait/small/avatar-s-3.png';
-import userImage4 from '~/assets/img/portrait/small/avatar-s-4.png';
+import { Creators as LoginActions } from '~/store/ducks/login';
 
 export default function ThemeNavbar({ toggleSidebarMenu }) {
   const [isOpen, setOpen] = useState(false);
 
   const user_type = localStorage.getItem('@dashboard/user_type');
-
-  const dispatch = useDispatch();
 
   const data = useSelector(state => state.profile.data);
 
@@ -57,14 +47,6 @@ export default function ThemeNavbar({ toggleSidebarMenu }) {
     setOpen(!isOpen);
   }
 
-  function handleLogout() {
-    dispatch(LoginActions.logoutRequest());
-  }
-
-  useEffect(() => {
-    dispatch(ProfileActions.profileRequest());
-  }, []);
-
   return (
     <Navbar className="navbar navbar-expand-lg navbar-light bg-faded">
       <div className="container-fluid px-0">
@@ -75,9 +57,7 @@ export default function ThemeNavbar({ toggleSidebarMenu }) {
             onClick={handleClick}
             data-toggle="collapse"
           />
-          <Form className="navbar-form mt-1 float-left" role="search">
-            <NavbarSearch />
-          </Form>
+          <Form className="navbar-form mt-1 float-left" role="search" />
           {/* <Moon size={20} color="#333" className="m-2 cursor-pointer"/> */}
           <MoreVertical
             className="mt-1 navbar-toggler black no-border float-right"
@@ -257,7 +237,7 @@ export default function ThemeNavbar({ toggleSidebarMenu }) {
 
               <UncontrolledDropdown nav inNavbar className="pr-1">
                 <DropdownToggle nav>
-                  {!!data.file ? (
+                  {data.file ? (
                     <img
                       src={data.file.url}
                       alt="logged-in-user"
@@ -313,7 +293,7 @@ export default function ThemeNavbar({ toggleSidebarMenu }) {
                       <Lock size={14} className="mr-1" /> Travar tela
                     </DropdownItem>
                   </Link> */}
-                  <DropdownItem onClick={handleLogout}>
+                  <DropdownItem>
                     <LogOut size={14} className="mr-1" /> Sair
                   </DropdownItem>
                 </DropdownMenu>

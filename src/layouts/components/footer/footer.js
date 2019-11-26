@@ -1,7 +1,7 @@
-import React from "react";
-import { ShoppingCart } from "react-feather";
+import React from 'react';
+import { ShoppingCart } from 'react-feather';
 
-import templateConfig from "../../../templateConfig";
+import templateConfig from '../../../templateConfig';
 
 const Footer = props => (
   <footer>
@@ -13,21 +13,21 @@ const Footer = props => (
         rel="noopener noreferrer"
       >
         <ShoppingCart size={14} />
-        {"  "}Buy Now
+        {'  '}Buy Now
       </a>
     ) : (
-      ""
+      ''
     )}
     <div className="container-fluid">
       <p className="text-center">
-        © 2019 Desenvolvido por <i className="ft-heart font-small-3" />
+        © 2019 Desenvolvido no <i className="ft-heart font-small-3" />
         <a
-          href="https://www.udf.org.br/"
+          href="https://rocketseat.com.br/experience"
           rel="noopener noreferrer"
           target="_blank"
         >
-          {" "}
-          Universidade da Família
+          {' '}
+          RSXP / Hackaton Shawee
         </a>
       </p>
     </div>

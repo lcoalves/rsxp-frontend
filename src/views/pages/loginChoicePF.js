@@ -13,7 +13,7 @@ import { BounceLoader } from 'react-spinners';
 import { useSelector, useDispatch } from 'react-redux';
 import { Creators as LoginActions } from '~/store/ducks/login';
 
-import logo from '~/assets/img/logo-big.png';
+import logo from '~/assets/img/logo.png';
 
 const formSchema = Yup.object().shape({
   email_cpf_cnpj: Yup.string().required('Esse campo é obrigatório'),
@@ -40,8 +40,7 @@ export default function Login() {
       error = 'O CPF é inválido';
 
     for (let index = 1; index <= 9; index++) {
-      sum =
-        sum +
+      sum +=
         parseInt(cpf.toString().substring(index - 1, index)) * (11 - index);
     }
 
@@ -54,8 +53,7 @@ export default function Login() {
     sum = 0;
 
     for (let index = 1; index <= 10; index++) {
-      sum =
-        sum +
+      sum +=
         parseInt(cpf.toString().substring(index - 1, index)) * (12 - index);
     }
 
@@ -117,7 +115,7 @@ export default function Login() {
           >
             <CardBody className="d-flex flex-column justify-content-center">
               <Label className="font-medium-3 text-dark text-bold-400 text-center text-uppercase">
-                Acesso Pessoa Física
+                Acesse aqui
               </Label>
 
               <Formik
@@ -220,9 +218,7 @@ export default function Login() {
                       <Col md="12">
                         <Button
                           disabled={
-                            !!values.email_cpf_cnpj && !!values.password
-                              ? false
-                              : true
+                            !(!!values.email_cpf_cnpj && !!values.password)
                           }
                           type="submit"
                           block
@@ -235,7 +231,7 @@ export default function Login() {
                           {loading ? (
                             <BounceLoader
                               size={23}
-                              color={'#fff'}
+                              color="#fff"
                               css={css`
                                 display: block;
                                 margin: 0 auto;

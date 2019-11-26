@@ -1,27 +1,27 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { Form, FormGroup, Label, Input } from "reactstrap";
-import { Link } from "react-router-dom";
-import { Settings } from "react-feather";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { Form, FormGroup, Label, Input } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import { Settings } from 'react-feather';
 
-import { FoldedContentConsumer } from "../../utility/context/toggleContentContext";
+import { FoldedContentConsumer } from '../../utility/context/toggleContentContext';
 
-import PerfectScrollbar from "react-perfect-scrollbar";
+import PerfectScrollbar from 'react-perfect-scrollbar';
 
-import { bindActionCreators } from "redux";
-import { connect } from "react-redux";
-import { Creators as CustomizerActions } from "../../store/ducks/customizer";
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import { Creators as CustomizerActions } from '../../store/ducks/customizer';
 
-import bgImg1 from "../../assets/img/sidebar-bg/01.jpg";
-import bgImg2 from "../../assets/img/sidebar-bg/02.jpg";
-import bgImg3 from "../../assets/img/sidebar-bg/03.jpg";
-import bgImg4 from "../../assets/img/sidebar-bg/04.jpg";
-import bgImg5 from "../../assets/img/sidebar-bg/05.jpg";
-import bgImg6 from "../../assets/img/sidebar-bg/06.jpg";
+import bgImg1 from '../../assets/img/sidebar-bg/01.jpg';
+import bgImg2 from '../../assets/img/sidebar-bg/02.jpg';
+import bgImg3 from '../../assets/img/sidebar-bg/03.jpg';
+import bgImg4 from '../../assets/img/sidebar-bg/04.jpg';
+import bgImg5 from '../../assets/img/sidebar-bg/05.jpg';
+import bgImg6 from '../../assets/img/sidebar-bg/06.jpg';
 
 const circleStyle = {
-  width: "20px",
-  height: "20px"
+  width: '20px',
+  height: '20px',
 };
 
 class Customizer extends Component {
@@ -32,16 +32,16 @@ class Customizer extends Component {
     sidebarBgColorRequest: PropTypes.func.isRequired,
     sidebarCollapsedRequest: PropTypes.func.isRequired,
     sidebarSizeRequest: PropTypes.func.isRequired,
-    changeLayoutRequest: PropTypes.func.isRequired
+    changeLayoutRequest: PropTypes.func.isRequired,
   };
 
   state = {
-    customizer: false
+    customizer: false,
   };
 
   toggleCustomizer = () => {
     this.setState({
-      customizer: !this.state.customizer
+      customizer: !this.state.customizer,
     });
   };
 
@@ -68,15 +68,15 @@ class Customizer extends Component {
             }
           >
             <Link to="/" className="customizer-close">
-              <i className="ft-x font-medium-3" />{" "}
-            </Link>{" "}
-            <span
+              <i className="ft-x font-medium-3" />{' '}
+            </Link>{' '}
+            {/* <span
               className="customizer-toggle bg-default"
               id="customizer-toggle-icon"
               onClick={this.toggleCustomizer}
             >
               <Settings size={18} className="white spinner" />
-            </span>
+            </span> */}
             <PerfectScrollbar>
               <div className="customizer-content p-3">
                 <h4 className="text-uppercase mb-0 text-bold-400">
@@ -95,7 +95,7 @@ class Customizer extends Component {
                         className="gradient-pomegranate d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("pomegranate")
+                          this.props.sidebarBgColorRequest('pomegranate')
                         }
                       />
                     </div>
@@ -104,7 +104,7 @@ class Customizer extends Component {
                         className="gradient-king-yna d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("king-yna")
+                          this.props.sidebarBgColorRequest('king-yna')
                         }
                       />
                     </div>
@@ -113,7 +113,7 @@ class Customizer extends Component {
                         className="gradient-ibiza-sunset d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("ibiza-sunset")
+                          this.props.sidebarBgColorRequest('ibiza-sunset')
                         }
                       />
                     </div>
@@ -122,7 +122,7 @@ class Customizer extends Component {
                         className="gradient-flickr d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("flickr")
+                          this.props.sidebarBgColorRequest('flickr')
                         }
                       />
                     </div>
@@ -131,7 +131,7 @@ class Customizer extends Component {
                         className="gradient-purple-bliss d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("purple-bliss")
+                          this.props.sidebarBgColorRequest('purple-bliss')
                         }
                       />
                     </div>
@@ -140,7 +140,7 @@ class Customizer extends Component {
                         className="gradient-man-of-steel d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("man-of-steel")
+                          this.props.sidebarBgColorRequest('man-of-steel')
                         }
                       />
                     </div>
@@ -149,7 +149,7 @@ class Customizer extends Component {
                         className="gradient-purple-love d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("purple-love")
+                          this.props.sidebarBgColorRequest('purple-love')
                         }
                       />
                     </div>
@@ -160,7 +160,7 @@ class Customizer extends Component {
                         className="bg-black d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("black")
+                          this.props.sidebarBgColorRequest('black')
                         }
                       />
                     </div>
@@ -169,7 +169,7 @@ class Customizer extends Component {
                         className="bg-grey d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("white")
+                          this.props.sidebarBgColorRequest('white')
                         }
                       />
                     </div>
@@ -177,7 +177,7 @@ class Customizer extends Component {
                       <span
                         className="bg-blue d-block rounded-circle"
                         style={circleStyle}
-                        onClick={() => this.props.sidebarBgColorRequest("blue")}
+                        onClick={() => this.props.sidebarBgColorRequest('blue')}
                       />
                     </div>
                     <div className="col">
@@ -185,7 +185,7 @@ class Customizer extends Component {
                         className="bg-purple d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("purple")
+                          this.props.sidebarBgColorRequest('purple')
                         }
                       />
                     </div>
@@ -193,7 +193,7 @@ class Customizer extends Component {
                       <span
                         className="bg-red d-block rounded-circle"
                         style={circleStyle}
-                        onClick={() => this.props.sidebarBgColorRequest("red")}
+                        onClick={() => this.props.sidebarBgColorRequest('red')}
                       />
                     </div>
                     <div className="col">
@@ -201,7 +201,7 @@ class Customizer extends Component {
                         className="bg-orange d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("orange")
+                          this.props.sidebarBgColorRequest('orange')
                         }
                       />
                     </div>
@@ -210,7 +210,7 @@ class Customizer extends Component {
                         className="bg-indigo d-block rounded-circle"
                         style={circleStyle}
                         onClick={() =>
-                          this.props.sidebarBgColorRequest("navy-blue")
+                          this.props.sidebarBgColorRequest('navy-blue')
                         }
                       />
                     </div>
@@ -285,12 +285,12 @@ class Customizer extends Component {
                             id="cz-bg-image-display"
                             onChange={e => {
                               if (e.target.checked === true) {
-                                this.handleLayout("layout-dark");
+                                this.handleLayout('layout-dark');
                               } else {
-                                this.handleLayout("layout-light");
+                                this.handleLayout('layout-light');
                               }
                             }}
-                          />{" "}
+                          />{' '}
                           Tema escuro
                         </Label>
                       </FormGroup>
@@ -348,7 +348,7 @@ class Customizer extends Component {
 }
 
 const mapStateToProps = state => ({
-  error: state.customizer.error
+  error: state.customizer.error,
 });
 
 const mapDispatchToProps = dispatch =>
