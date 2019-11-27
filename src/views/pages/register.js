@@ -59,8 +59,6 @@ export default function Register() {
   function handleSubmit(values) {
     const { username, email, phone, password } = values;
 
-    console.tron.log('oi');
-
     dispatch(SignupActions.signupRequest(username, email, phone, password));
   }
 

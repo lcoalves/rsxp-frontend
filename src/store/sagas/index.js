@@ -142,8 +142,6 @@ function* signup(action) {
       .replace(')', '')
       .replace('-', '');
 
-    console.tron.log(formattedPhone);
-
     yield call(api.post, '/users', {
       username,
       email,
@@ -156,7 +154,6 @@ function* signup(action) {
     yield put(push('/inicio'));
     toastr.success('Sucesso!', 'Cadastro realizado com sucesso.');
   } catch (err) {
-    console.tron.log(err.response);
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
       yield put(SignupActions.signupFailure());
