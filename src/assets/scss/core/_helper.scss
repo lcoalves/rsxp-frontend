@@ -830,6 +830,30 @@
   overflow-x: hidden;
 }
 
+.bg-static-pages-image-quiz2 {
+  background-image: url('https://cdn.pixabay.com/photo/2015/11/22/15/16/lightning-1056419_960_720.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+  overflow-x: hidden;
+}
+
+.bg-static-pages-image-quiz3 {
+  background-image: url('https://cdn.pixabay.com/photo/2017/03/20/21/00/server-2160321_960_720.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom;
+  overflow-x: hidden;
+}
+
+.bg-static-pages-result {
+  background-image: url("https://cdn.pixabay.com/photo/2014/05/02/21/50/home-office-336377_960_720.jpg");
+  height: 100vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .bg-static-pages-image-pj {
   background-image: url('https://i.imgur.com/YsRduUh.jpg');
   background-repeat: no-repeat;

@@ -1,16 +1,62 @@
 // import external modules
-import React from 'react';
+import React, { useState } from 'react';
 import { Motion, spring } from 'react-motion';
 import { Card, CardBody, Button, Label } from 'reactstrap';
-import { User, ArrowRightCircle } from 'react-feather';
 
 import history from '~/app/history';
 
 import logo from '~/assets/img/logo-big.png';
 
 export default function Login() {
-  function handleQuiz2() {
-    history.push('/quiz/2');
+  const quizzes = [
+    {
+      id: 1,
+      question: 'Questao 1',
+      answers: [
+        'Resposta 1',
+        'Resposta 2',
+        'Resposta 3'
+      ]
+    },
+    {
+      id: 2,
+      question: 'Questao 2',
+      answers: [
+        'Resposta 1',
+        'Resposta 2',
+        'Resposta 3'
+      ]
+    },
+    {
+      id: 3,
+      question: 'Questao 3',
+      answers: [
+        'Resposta 1',
+        'Resposta 2',
+        'Resposta 3'
+      ]
+    }
+  ];
+
+  const [result, setResult] = useState([]);
+
+  function handleQuiz2(values) {
+    const storageResult = localStorage.getItem('@result');
+
+    if(storageResult) {
+      const result = JSON.parse(storageResult)
+      result[0] = values;
+
+      localStorage.setItem('@result', JSON.stringify(result));
+
+      history.push('/quiz/2');
+    } else {
+      const result = [];
+      result.push(values);
+      localStorage.setItem('@result', JSON.stringify(result));
+      
+      history.push('/quiz/2');
+    }
   }
 
   return (
@@ -24,7 +70,7 @@ export default function Login() {
           Primeira pergunta
         </Label>
         <Label className="d-none d-lg-block fit width-700 font-medium-1">
-          Se alguem grita quéota, o que vc faz?
+          Primeira pergunta do quiz.
         </Label>
       </div>
       <Motion
@@ -48,12 +94,12 @@ export default function Login() {
                 type="submit"
                 color="default"
                 className="btn-default height-100 icon-light-hover font-medium-2"
-                onClick={() => handleQuiz2()}
+                onClick={() => handleQuiz2(0)}
               >
                 <div className="d-flex justify-content-around align-items-center">
                   <div>1</div>
                   <div>
-                    <h5 className="mb-0">Pergunta se a pessoa é doente</h5>
+                    <h5 className="mb-0">Resposta 1</h5>
                   </div>
                 </div>
               </Button>
@@ -62,7 +108,7 @@ export default function Login() {
                 type="submit"
                 color="default"
                 className="btn-default height-100 icon-light-hover font-medium-2"
-                onClick={() => handleQuiz2()}
+                onClick={() => handleQuiz2(1)}
               >
                 <div className="d-flex justify-content-around align-items-center">
                   <div>2</div>
@@ -76,12 +122,12 @@ export default function Login() {
                 type="submit"
                 color="default"
                 className="btn-default height-100 icon-light-hover font-medium-2"
-                onClick={() => handleQuiz2()}
+                onClick={() => handleQuiz2(2)}
               >
                 <div className="d-flex justify-content-around align-items-center">
                   <div>3</div>
                   <div>
-                    <h5 className="mb-0">Grita quéota junto</h5>
+                    <h5 className="mb-0">Resposta 3</h5>
                   </div>
                 </div>
               </Button>
