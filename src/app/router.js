@@ -8,8 +8,9 @@ import Spinner from '../components/spinner/spinner';
 
 // import internal(own) modules
 import MainLayoutRoutes from '../layouts/routes/mainRoutes';
-import ProtectedMainLayoutRoutes from '../layouts/routes/protectedMainRoutes';
+// import ProtectedMainLayoutRoutes from '../layouts/routes/protectedMainRoutes';
 import ProtectedLoginPage from '../layouts/routes/protectedLoginPage';
+import QuizPageRoutes from '../layouts/routes/quizPageRoutes';
 import FullPageLayout from '../layouts/routes/fullpageRoutes';
 import ErrorLayoutRoute from '../layouts/routes/errorRoutes';
 
@@ -17,6 +18,9 @@ const LazyUserProfile = lazy(() => import('../views/profile/index'));
 const LazyHome = lazy(() => import('../views/home/index'));
 
 const LazyQuiz1 = lazy(() => import('../views/quizzes/quiz1'));
+const LazyQuiz2 = lazy(() => import('../views/quizzes/quiz2'));
+const LazyQuiz3 = lazy(() => import('../views/quizzes/quiz3'));
+const LazyResult = lazy(() => import('../views/quizzes/result'));
 
 // Full Layout
 const LazyForgotPassword = lazy(() => import('../views/pages/forgotPassword'));
@@ -59,12 +63,43 @@ class Router extends Component {
             )}
           />
 
-          <ProtectedLoginPage
+          <QuizPageRoutes
             exact
             path="/quiz/1"
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyQuiz1 {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          <ProtectedLoginPage
+            exact
+            path="/quiz/2"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyQuiz2 {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          <ProtectedLoginPage
+            exact
+            path="/quiz/3"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyQuiz3 {...matchprops} />
+              </Suspense>
+            )}
+          />
+          
+
+          <FullPageLayout
+            exact
+            path="/resultados"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyResult {...matchprops} />
               </Suspense>
             )}
           />
