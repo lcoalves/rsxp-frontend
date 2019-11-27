@@ -914,26 +914,26 @@
 }
 
 .plyr--full-ui input[type='range'] {
-  color: #fc0;
+  color: #d65a31;
 }
 
 .plyr__control--overlaid {
-  background: rgba(#fc0, 0.8);
+  background: rgba(#d65a31, 0.8);
 }
 
 .plyr--video .plyr__control.plyr__tab-focus,
 .plyr--video .plyr__control:hover,
 .plyr--video .plyr__control[aria-expanded='true'] {
-  background: #fc0;
+  background: #d65a31;
 }
 
 .plyr__control.plyr__tab-focus {
-  box-shadow: 0 0 0 5px rgba(#fc0, 0.5);
+  box-shadow: 0 0 0 5px rgba(#d65a31, 0.5);
 }
 
 .plyr__menu__container
   .plyr__control[role='menuitemradio'][aria-checked='true']::before {
-  background: #fc0;
+  background: #d65a31;
 }
 
 .react-datepicker-wrapper {
@@ -982,4 +982,16 @@
 
 .react-datepicker__portal .react-datepicker-time__header {
   font-size: 1rem !important;
+}
+
+.card-hovered:hover {
+  display: inline-block;
+  vertical-align: middle;
+  -webkit-transform: perspective(1px) translateZ(0);
+  transform: perspective(1px) translateZ(0);
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0);
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+  -webkit-transition-property: box-shadow, transform;
+  transition-property: box-shadow, transform;
 }

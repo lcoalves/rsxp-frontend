@@ -19,7 +19,7 @@ import { Creators as SignupActions } from '~/store/ducks/signup';
 import logo from '~/assets/img/logo.png';
 
 const formSchema = Yup.object().shape({
-  name: Yup.string().required('O nome é obrigatório'),
+  username: Yup.string().required('O nome é obrigatório'),
   email: Yup.string()
     .email('Email inválido')
     .required('O email é obrigatório'),
@@ -57,18 +57,11 @@ export default function Register() {
   const dispatch = useDispatch();
 
   function handleSubmit(values) {
-    const { entity_company, name, email, phone, password, remember } = values;
+    const { username, email, phone, password } = values;
 
-    dispatch(
-      SignupActions.signupRequest(
-        entity_company,
-        name,
-        email,
-        phone,
-        password,
-        remember
-      )
-    );
+    console.tron.log('oi');
+
+    dispatch(SignupActions.signupRequest(username, email, phone, password));
   }
 
   return (
@@ -118,7 +111,7 @@ export default function Register() {
               <Formik
                 initialValues={{
                   entity_company: 'pf',
-                  name: '',
+                  username: '',
                   email: '',
                   phone: '',
                   password: '',
@@ -134,16 +127,20 @@ export default function Register() {
                         <Field
                           type="text"
                           placeholder="Enzo Oliveira"
-                          name="name"
-                          id="name"
+                          name="username"
+                          id="username"
                           className={`
                               form-control
                               new-form-padding
-                              ${errors.name && touched.name && 'is-invalid'}
+                              ${errors.username &&
+                                touched.username &&
+                                'is-invalid'}
                             `}
                         />
-                        {errors.name && touched.name ? (
-                          <div className="invalid-feedback">{errors.name}</div>
+                        {errors.username && touched.username ? (
+                          <div className="invalid-feedback">
+                            {errors.username}
+                          </div>
                         ) : null}
                         <div className="new-form-control-position">
                           <User size={14} color="#212529" />

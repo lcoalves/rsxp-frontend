@@ -21,6 +21,11 @@ import {
 } from '~/store/ducks/signup';
 
 import {
+  Creators as CourseActions,
+  Types as CourseTypes,
+} from '~/store/ducks/course';
+
+import {
   Creators as LoginActions,
   Types as LoginTypes,
 } from '~/store/ducks/login';
@@ -130,33 +135,28 @@ const accountId = process.env.REACT_APP_PAYU_ACCOUNT_ID;
 
 function* signup(action) {
   try {
-    const { entity_company, name, email, cpf_cnpj, password } = action.payload;
+    const { username, email, phone, password } = action.payload;
 
-    if (entity_company === 'pf') {
-      yield call(api.post, '/entity', {
-        name,
-        email,
-        cpf: cpf_cnpj,
-        password,
-      });
-    } else {
-      yield call(api.post, '/organization', {
-        corporate_name: name,
-        email,
-        cnpj: cpf_cnpj,
-        password,
-      });
-    }
+    const formattedPhone = phone
+      .replace('(', '')
+      .replace(')', '')
+      .replace('-', '');
+
+    console.tron.log(formattedPhone);
+
+    yield call(api.post, '/users', {
+      username,
+      email,
+      phone: formattedPhone,
+      password,
+    });
 
     yield put(SignupActions.signupSuccess());
 
-    if (entity_company === 'pf') {
-      yield put(push('/acesso-pf'));
-    } else {
-      yield put(push('/acesso-pj'));
-    }
+    yield put(push('/inicio'));
     toastr.success('Sucesso!', 'Cadastro realizado com sucesso.');
   } catch (err) {
+    console.tron.log(err.response);
     if (err.message === 'Network Error') {
       toastr.error('Falha!', 'Tente acessar novamente mais tarde.');
       yield put(SignupActions.signupFailure());
@@ -164,6 +164,17 @@ function* signup(action) {
       toastr.error('Falha!', 'Tente cadastrar novamente.');
       yield put(SignupActions.signupFailure());
     }
+  }
+}
+
+function* courses() {
+  try {
+    const response = yield call(api.get, '/courses');
+
+    yield put(CourseActions.courseSuccess(response.data));
+  } catch (err) {
+    toastr.error('Falha!', 'Tente novamente.');
+    yield put(CourseActions.courseFailure());
   }
 }
 
@@ -1534,6 +1545,7 @@ function* customizerLayout(action) {
 export default function* rootSaga() {
   yield all([
     takeLatest(SignupTypes.REQUEST, signup),
+    takeLatest(CourseTypes.REQUEST, courses),
     takeLatest(LoginTypes.REQUEST, login),
     takeLatest(ResetPasswordTypes.REQUEST, resetPassword),
     takeLatest(ResetPasswordTypes.CONFIRM_REQUEST, confirmResetPassword),
