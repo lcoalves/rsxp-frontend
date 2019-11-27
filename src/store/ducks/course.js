@@ -2,9 +2,9 @@
  * Action Types
  */
 export const Types = {
-  REQUEST: 'SIGNUP_REQUEST',
-  SUCCESS: 'SIGNUP_SUCCESS',
-  FAILURE: 'SIGNUP_FAILURE',
+  REQUEST: 'COURSE_REQUEST',
+  SUCCESS: 'COURSE_SUCCESS',
+  FAILURE: 'COURSE_FAILURE',
 };
 
 /**
@@ -13,9 +13,10 @@ export const Types = {
 const INITIAL_STATE = {
   loading: false,
   error: false,
+  data: null,
 };
 
-export default function signup(state = INITIAL_STATE, action) {
+export default function course(state = INITIAL_STATE, action) {
   switch (action.type) {
     case Types.REQUEST:
       return { ...state, loading: true };
@@ -24,6 +25,7 @@ export default function signup(state = INITIAL_STATE, action) {
         ...state,
         error: false,
         loading: false,
+        data: action.payload.data,
       };
     case Types.FAILURE:
       return {
@@ -40,21 +42,18 @@ export default function signup(state = INITIAL_STATE, action) {
  * Actions Creators
  */
 export const Creators = {
-  signupRequest: (username, email, phone, password) => ({
+  courseRequest: () => ({
     type: Types.REQUEST,
+  }),
+
+  courseSuccess: data => ({
+    type: Types.SUCCESS,
     payload: {
-      username,
-      email,
-      phone,
-      password,
+      data,
     },
   }),
 
-  signupSuccess: () => ({
-    type: Types.SUCCESS,
-  }),
-
-  signupFailure: () => ({
+  courseFailure: () => ({
     type: Types.FAILURE,
   }),
 };

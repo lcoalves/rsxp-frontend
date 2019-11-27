@@ -16,6 +16,7 @@ import ErrorLayoutRoute from '../layouts/routes/errorRoutes';
 
 const LazyUserProfile = lazy(() => import('../views/profile/index'));
 const LazyHome = lazy(() => import('../views/home/index'));
+const LazyLesson = lazy(() => import('../views/lesson/index'));
 
 const LazyQuiz1 = lazy(() => import('../views/quizzes/quiz1'));
 const LazyQuiz2 = lazy(() => import('../views/quizzes/quiz2'));
@@ -59,6 +60,16 @@ class Router extends Component {
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyHome {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          <MainLayoutRoutes
+            exact
+            path="/licao/:id"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyLesson {...matchprops} />
               </Suspense>
             )}
           />

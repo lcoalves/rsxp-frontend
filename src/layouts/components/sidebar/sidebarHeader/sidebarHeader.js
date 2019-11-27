@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import { X } from 'react-feather';
 // import internal(own) modules
 import { FoldedContentConsumer } from '../../../../utility/context/toggleContentContext';
-import Logo from '../../../../assets/img/logo.png';
+import Logo from '../../../../assets/img/favicon.png';
 import LogoDark from '../../../../assets/img/logo.png';
 import templateConfig from '../../../../templateConfig';
 
@@ -34,7 +34,7 @@ class SidebarHeader extends Component {
                     <img src={Logo} alt="logo" className="width-100-per" />
                   )}
                 </div>
-                <span className="text align-middle">Beebox</span>
+                <span className="text align-middle">Melx</span>
               </NavLink>
 
               <span

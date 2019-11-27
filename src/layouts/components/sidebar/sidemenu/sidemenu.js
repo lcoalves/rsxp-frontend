@@ -1,7 +1,7 @@
 // import external modules
 import React from 'react';
 
-import { Home, Globe, Package, ChevronRight, Lock } from 'react-feather';
+import { Home, User } from 'react-feather';
 import { NavLink } from 'react-router-dom';
 
 import { useSelector } from 'react-redux';
@@ -25,6 +25,14 @@ export default function SideMenuContent({
             <Home size={18} />
           </i>
           <span className="menu-item-text">Início</span>
+        </NavLink>
+      </SideMenu.MenuSingleItem>
+      <SideMenu.MenuSingleItem>
+        <NavLink to="/mentoria" activeclassname="active">
+          <i className="menu-icon">
+            <User size={18} />
+          </i>
+          <span className="menu-item-text">Mentoria</span>
         </NavLink>
       </SideMenu.MenuSingleItem>
       {/* <SideMenu.MenuMultiItems

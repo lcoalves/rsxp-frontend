@@ -13,6 +13,7 @@ import types from './types';
 
 //UDF
 import signup from './signup';
+import course from './course';
 import login from './login';
 import profile from './profile';
 import address from './address';
@@ -48,6 +49,7 @@ export default combineReducers({
   todo,
   types,
   signup,
+  course,
   login,
   profile,
   address,
