@@ -15,12 +15,12 @@ export default function Result() {
   console.tron.log(total)
 
   return (
-    total > 5 ? (
-      <div className="bg-static-pages-result d-flex flex-column justify-content-end align-items-center">
+    parseInt(total) > 4 ? (
+      <div className="bg-static-pages-result-1 d-flex flex-column justify-content-end align-items-center">
         <Card className="bg-light mb-4">
           <CardBody className="d-flex flex-column align-items-center">
-            <Label className="black">Parabains!</Label>
-            <Label className="black">Voce tem o perfil do caramba</Label>
+            <Label className="black">PARABÉNS!</Label>
+            <Label className="black">Voce nasceu para ser um programador</Label>
           </CardBody>
         </Card>
         <Button color="success" className="btn-default btn-raised mb-4">
@@ -33,8 +33,8 @@ export default function Result() {
       <div className="bg-static-pages-result d-flex flex-column justify-content-end align-items-center">
         <Card className="bg-light mb-4">
           <CardBody className="d-flex flex-column align-items-center">
-            <Label className="black">Parabains!</Label>
-            <Label className="black">Voce tem o perfil do caramba</Label>
+            <Label className="black">Muito bom</Label>
+            <Label className="black">Saiba como a tecnologia pode te ajudar na sua futura profissão.</Label>
           </CardBody>
         </Card>
         <Button color="success" className="btn-default btn-raised mb-4">
