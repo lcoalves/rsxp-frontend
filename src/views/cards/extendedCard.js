@@ -26,6 +26,8 @@ import {
 
 import {Plus} from "react-feather";
 
+import cardImg01 from "../../assets/img/filipe.jpg";
+
 import cardImg01 from "../../assets/img/photos/01.jpg";
 import cardImg02 from "../../assets/img/photos/02.jpg";
 import cardImg03 from "../../assets/img/photos/03.jpg";

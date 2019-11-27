@@ -29,6 +29,7 @@ export default function Home() {
   return (
     data !== null && (
       <>
+        <h2 className="mb-2">ASSISTA AS LIÇÕES:</h2>
         <Row className="row-eq-height mt-4">
           {data.map((course, index) => (
             <Col sm="12" md="4">
