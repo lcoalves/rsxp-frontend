@@ -16,6 +16,8 @@ import ErrorLayoutRoute from '../layouts/routes/errorRoutes';
 const LazyUserProfile = lazy(() => import('../views/profile/index'));
 const LazyHome = lazy(() => import('../views/home/index'));
 
+const LazyQuiz1 = lazy(() => import('../views/quizzes/quiz1'));
+
 // Full Layout
 const LazyForgotPassword = lazy(() => import('../views/pages/forgotPassword'));
 const LazyResetPassword = lazy(() =>
@@ -37,7 +39,7 @@ class Router extends Component {
       // Set the directory path if you are deplying in sub-folder
       <ConnectedRouter history={history}>
         <Switch>
-          {/* <ProtectedLoginPage
+          <ProtectedLoginPage
             exact
             path="/"
             render={matchprops => (
@@ -45,7 +47,7 @@ class Router extends Component {
                 <LazyLoginChoicePF {...matchprops} />
               </Suspense>
             )}
-          /> */}
+          />
 
           <MainLayoutRoutes
             exact
@@ -53,6 +55,16 @@ class Router extends Component {
             render={matchprops => (
               <Suspense fallback={<Spinner />}>
                 <LazyHome {...matchprops} />
+              </Suspense>
+            )}
+          />
+
+          <ProtectedLoginPage
+            exact
+            path="/quiz/1"
+            render={matchprops => (
+              <Suspense fallback={<Spinner />}>
+                <LazyQuiz1 {...matchprops} />
               </Suspense>
             )}
           />

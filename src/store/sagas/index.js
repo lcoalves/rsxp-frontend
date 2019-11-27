@@ -8,7 +8,6 @@ import md5 from 'md5';
 
 import axios from 'axios';
 import api from '~/services/api';
-import apiPayu from '~/services/apiPayu';
 
 import {
   Creators as CustomizerActions,

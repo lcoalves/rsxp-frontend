@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart } from 'react-feather';
+import { ShoppingCart, Heart } from 'react-feather';
 
 import templateConfig from '../../../templateConfig';
 
@@ -20,15 +20,17 @@ const Footer = props => (
     )}
     <div className="container-fluid">
       <p className="text-center">
-        © 2019 Desenvolvido no <i className="ft-heart font-small-3" />
+        © 2019 Desenvolvido com amor no
         <a
           href="https://rocketseat.com.br/experience"
           rel="noopener noreferrer"
           target="_blank"
+          className="text-danger"
         >
           {' '}
-          RSXP / Hackaton Shawee
-        </a>
+          RSXP / Shawee Hackatons
+        </a>{' '}
+        <Heart size={16} />
       </p>
     </div>
   </footer>

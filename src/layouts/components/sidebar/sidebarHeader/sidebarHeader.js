@@ -26,14 +26,15 @@ class SidebarHeader extends Component {
                     this.props.sidebarBgColor === 'white' ? (
                       <img src={LogoDark} alt="logo" />
                     ) : (
-                      <img src={Logo} alt="logo" />
+                      <img src={Logo} alt="logo" className="width-100-per" />
                     )
                   ) : this.props.sidebarBgColor === 'white' ? (
                     <img src={LogoDark} alt="logo" />
                   ) : (
-                    <img src={Logo} alt="logo" />
+                    <img src={Logo} alt="logo" className="width-100-per" />
                   )}
                 </div>
+                <span className="text align-middle">Beebox</span>
               </NavLink>
 
               <span

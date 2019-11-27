@@ -75,7 +75,7 @@ export default function Login() {
   }
 
   return (
-    <div className="bg-static-pages-image d-flex flex-column flex-1 p-0 flex-lg-row">
+    <div className="gradient-passion-fruit d-flex flex-column flex-1 p-0 flex-lg-row">
       <div className="fit min-full-height-vh color-overlay" />
       <div
         className="d-none d-lg-flex flex-column flex-grow-0 text-white width-70-per p-2 p-lg-5"
@@ -131,7 +131,7 @@ export default function Login() {
                 {({ errors, touched, handleChange, values }) => (
                   <Form className="pt-2">
                     <FormGroup>
-                      <Label className="pl-2">Digite seu usuário</Label>
+                      <Label className="pl-2">Usuário</Label>
                       <Col md="12" className="has-icon-left">
                         <Field
                           type="text"
@@ -157,7 +157,7 @@ export default function Login() {
                       </Col>
                     </FormGroup>
                     <FormGroup>
-                      <Label className="pl-2">Digite sua senha</Label>
+                      <Label className="pl-2">Senha</Label>
                       <Col md="12" className="has-icon-left">
                         <Field
                           type="password"
@@ -246,19 +246,6 @@ export default function Login() {
                   </Form>
                 )}
               </Formik>
-              <Row className="justify-content-center">
-                <Label className="black">É uma empresa?</Label>
-              </Row>
-              {/* <Row className="justify-content-center">
-                <NavLink to="/cadastro" className="blue text-bold-400">
-                  <u>Criar uma conta</u>
-                </NavLink>
-              </Row> */}
-              <Row className="justify-content-center">
-                <NavLink to="/acesso-pj" className="blue text-bold-400">
-                  <u>Acesso Pessoa Jurídica</u>
-                </NavLink>
-              </Row>
             </CardBody>
           </Card>
         )}
